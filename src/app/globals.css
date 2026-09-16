@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f2f3f1;
+  --ink: #16211e;
+  --ink-soft: #4b5a55;
+  --accent: #1a56b0;
+  --accent-ink: #ffffff;
+  --accent-soft: #e4edf9;
+  --gold: #a97a2c;
+  --gold-soft: #f4e8d3;
+  --line: rgba(22, 33, 30, 0.14);
+  --good: #1e8e5a;
+  --good-soft: rgba(30, 142, 90, 0.14);
+  --warn: #a9720c;
+  --warn-soft: rgba(169, 114, 12, 0.14);
+  --critical: #b3412a;
+  --critical-soft: rgba(179, 65, 42, 0.14);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --color-line: var(--line);
+  --color-good: var(--good);
+  --color-good-soft: var(--good-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-critical: var(--critical);
+  --color-critical-soft: var(--critical-soft);
+  --font-sans: var(--font-plex-sans), system-ui, sans-serif;
+  --font-serif: var(--font-fraunces), Georgia, serif;
+  --font-mono: var(--font-plex-mono), monospace;
+}
+
+body {
+  background: var(--background);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  line-height: 1.55;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-serif);
+  text-wrap: balance;
+}
+
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
