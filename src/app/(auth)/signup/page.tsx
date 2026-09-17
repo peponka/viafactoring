@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import Link from "next/link";
 import { signUpAction, type AuthState } from "../actions";
 import { Button, Card, ErrorText, Field, Input } from "@/components/ui";
+import { PasswordInput } from "@/components/password-input";
 
 const initialState: AuthState = { error: null };
 
@@ -59,8 +60,7 @@ export default function SignupPage() {
             <Input type="email" name="email" required autoComplete="email" />
           </Field>
           <Field label="Contraseña">
-            <Input
-              type="password"
+            <PasswordInput
               name="password"
               required
               minLength={8}

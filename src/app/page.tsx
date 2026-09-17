@@ -2,8 +2,18 @@ import Link from "next/link";
 import { getUserAndProfile, homeForRole } from "@/lib/session";
 import { redirect } from "next/navigation";
 import { LinkButton } from "@/components/ui";
+import { createClient } from "@/lib/supabase/server";
 
-export default async function HomePage() {
+export default async function HomePage({ searchParams }: PageProps<"/">) {
+  // Supabase redirige acá (con ?code=...) después de que alguien confirma
+  // su email. Si viene ese código, lo canjeamos por una sesión antes de
+  // seguir, así la confirmación de cuenta queda completa.
+  const { code } = await searchParams;
+  if (typeof code === "string") {
+    const supabase = await createClient();
+    await supabase.auth.exchangeCodeForSession(code);
+  }
+
   const { user, profile } = await getUserAndProfile();
   if (user && profile) {
     redirect(homeForRole(profile.role));
