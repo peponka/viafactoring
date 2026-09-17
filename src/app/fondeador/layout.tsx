@@ -1,9 +1,13 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
 import { getUserAndProfile } from "@/lib/session";
 import { TopNav } from "@/components/top-nav";
-import { Badge } from "@/components/ui";
 
+// NOTA: la compra de créditos (fondeador_credits / /fondeador/creditos) ya
+// no es el mecanismo de pago — se reemplazó por el desbloqueo pago por
+// operación (ver supabase/migrations/0003_desbloqueo.sql). El código viejo
+// de créditos se dejó intacto por si se retoma más adelante, pero se sacó
+// de la navegación para no confundir: mostrar un saldo de créditos que ya
+// no se usa para nada sería engañoso.
 export default async function FondeadorLayout({
   children,
 }: {
@@ -13,24 +17,11 @@ export default async function FondeadorLayout({
   if (!user || !profile) redirect("/login");
   if (profile.role !== "fondeador") redirect("/");
 
-  const supabase = await createClient();
-  const { data: credit } = await supabase
-    .from("fondeador_credits")
-    .select("balance")
-    .eq("fondeador_id", profile.id)
-    .single();
-
   return (
     <div className="flex-1 flex flex-col">
       <TopNav
         nombre={profile.nombre}
-        links={[
-          { href: "/fondeador", label: "Marketplace" },
-          { href: "/fondeador/creditos", label: "Créditos" },
-        ]}
-        rightSlot={
-          <Badge tone="gold">{credit?.balance ?? 0} crédito(s)</Badge>
-        }
+        links={[{ href: "/fondeador", label: "Marketplace" }]}
       />
       <main className="wrap max-w-5xl mx-auto px-6 py-10 flex-1 w-full">
         {children}

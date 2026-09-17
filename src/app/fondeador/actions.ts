@@ -44,6 +44,26 @@ export async function revelarFacturaAction(
   return { invoice: data ?? undefined };
 }
 
+// Crea (o recupera, si ya existe una pendiente) la solicitud de pago para
+// desbloquear el expediente completo de una operación. El monto lo calcula
+// el RPC server-side (tabla escalonada por monto de la factura) — el
+// cliente nunca decide cuánto paga.
+export async function solicitarDesbloqueoAction(
+  invoiceId: string,
+): Promise<{ error: string | null }> {
+  const { supabase } = await requireFondeador();
+
+  const { error } = await supabase.rpc("solicitar_desbloqueo", {
+    p_invoice_id: invoiceId,
+  });
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/fondeador");
+  revalidatePath(`/fondeador/facturas/${invoiceId}`);
+  return { error: null };
+}
+
 // Genera una signed URL de corta duración para el documento de una
 // factura, solo si el fondeador ya la reveló (chequeado acá, server-side,
 // antes de tocar el service role).

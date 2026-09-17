@@ -45,7 +45,7 @@ export default async function AdminPagosPage() {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge tone={p.tipo === "comision" ? "gold" : "neutral"}>
+                  <Badge tone={p.tipo === "creditos" ? "neutral" : "gold"}>
                     {TIPO_PAGO_LABEL[p.tipo]}
                   </Badge>
                   <Badge tone={estadoTone[p.estado]}>{p.estado}</Badge>

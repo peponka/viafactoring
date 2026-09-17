@@ -9,8 +9,8 @@ import {
   RIESGO_LABEL,
   RUBRO_LABEL,
 } from "@/lib/format";
-import type { InvoiceTeaser, Offer } from "@/lib/database.types";
-import { RevealButton } from "./reveal-button";
+import type { InvoiceTeaser, Offer, PaymentRequest } from "@/lib/database.types";
+import { UnlockButton } from "./unlock-button";
 import { DocumentoLink } from "./documento";
 import { ContactadoButton } from "./contactado-button";
 import { OfferForm } from "./offer-form";
@@ -56,6 +56,7 @@ export default async function FacturaFondeadorPage({
   let reveal: { contactado: boolean } | null = null;
   let invoice: InvoiceDetalle | null = null;
   let oferta: Offer | null = null;
+  let pendingRequest: PaymentRequest | null = null;
 
   if (teaser.ya_revelada) {
     const { data: fullInvoice } = await supabase.rpc("reveal_invoice", {
@@ -79,6 +80,17 @@ export default async function FacturaFondeadorPage({
     ]);
     reveal = r;
     oferta = o ?? null;
+  } else {
+    const { data: req } = await supabase
+      .from("payment_requests")
+      .select("*")
+      .eq("invoice_id", id)
+      .eq("fondeador_id", profile!.id)
+      .eq("tipo", "desbloqueo")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle<PaymentRequest>();
+    pendingRequest = req ?? null;
   }
 
   return (
@@ -163,7 +175,7 @@ export default async function FacturaFondeadorPage({
       ) : (
         <>
           <h1 className="text-2xl font-semibold mb-1">
-            Factura {RUBRO_LABEL[teaser.rubro].toLowerCase()}
+            Operación {RUBRO_LABEL[teaser.rubro].toLowerCase()}
           </h1>
           {teaser.descripcion && (
             <p className="text-ink-soft mb-6">{teaser.descripcion}</p>
@@ -171,9 +183,11 @@ export default async function FacturaFondeadorPage({
           <Card className="mb-6 grid grid-cols-2 gap-4">
             <div>
               <p className="text-ink-soft text-xs uppercase tracking-wide">
-                Monto aprox.
+                Monto de la factura
               </p>
-              <p className="num text-lg font-medium">{teaser.monto_banda}</p>
+              <p className="num text-lg font-medium">
+                {formatMonto(teaser.monto, teaser.moneda)}
+              </p>
             </div>
             <div>
               <p className="text-ink-soft text-xs uppercase tracking-wide">
@@ -181,14 +195,45 @@ export default async function FacturaFondeadorPage({
               </p>
               <p className="num text-lg font-medium">{teaser.plazo_banda}</p>
             </div>
+            <div>
+              <p className="text-ink-soft text-xs uppercase tracking-wide">
+                Vencimiento
+              </p>
+              <p className="num text-lg font-medium">
+                {formatFecha(teaser.fecha_vencimiento)}
+              </p>
+            </div>
+            <div>
+              <p className="text-ink-soft text-xs uppercase tracking-wide">
+                Estado
+              </p>
+              <p className="font-medium capitalize">{teaser.estado}</p>
+            </div>
             <div className="col-span-2">
               <p className="text-ink-soft text-xs uppercase tracking-wide">
-                Deudor y documento
+                Deudor, contacto y documentación
               </p>
-              <p className="font-medium">🔒 se revelan al gastar 1 crédito</p>
+              <p className="font-medium">
+                🔒 se habilitan al desbloquear la operación
+              </p>
             </div>
           </Card>
-          <RevealButton invoiceId={id} />
+          <p className="text-sm text-ink-soft mb-4">
+            Información proporcionada por el operador. La documentación está
+            disponible en el expediente una vez desbloqueada la operación.
+          </p>
+          {teaser.estado === "disponible" ? (
+            <UnlockButton
+              invoiceId={id}
+              fee={teaser.unlock_fee}
+              moneda={teaser.moneda}
+              pendingRequest={pendingRequest}
+            />
+          ) : (
+            <p className="text-sm text-ink-soft">
+              Esta operación ya no está disponible.
+            </p>
+          )}
         </>
       )}
     </div>

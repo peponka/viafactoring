@@ -19,7 +19,7 @@ export type TipoTransaccion =
   | "ajuste_admin";
 export type EstadoPago = "pendiente" | "confirmado" | "cancelado";
 export type EstadoOferta = "pendiente" | "aceptada" | "rechazada";
-export type TipoPago = "creditos" | "comision";
+export type TipoPago = "creditos" | "comision" | "desbloqueo";
 
 export type Profile = {
   id: string;
@@ -52,12 +52,17 @@ export type Invoice = {
 export type InvoiceTeaser = {
   id: string;
   rubro: Rubro;
+  monto: number;
+  moneda: string;
+  plazo_dias: number;
+  fecha_vencimiento: string | null;
   monto_banda: string;
   plazo_banda: string;
   riesgo: Riesgo;
   descripcion: string | null;
   estado: EstadoFactura;
   created_at: string;
+  unlock_fee: number;
   ya_revelada: boolean;
 };
 
@@ -100,6 +105,7 @@ export type PaymentRequest = {
   external_reference: string | null;
   tipo: TipoPago;
   offer_id: string | null;
+  invoice_id: string | null;
   created_at: string;
   confirmed_at: string | null;
   confirmed_by: string | null;
@@ -227,6 +233,14 @@ export type Database = {
       deal_fee_for_monto: {
         Args: { p_monto: number };
         Returns: number;
+      };
+      unlock_fee_for_monto: {
+        Args: { p_monto: number };
+        Returns: number;
+      };
+      solicitar_desbloqueo: {
+        Args: { p_invoice_id: string };
+        Returns: PaymentRequest;
       };
     };
   };

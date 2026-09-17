@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Badge, Card } from "@/components/ui";
-import { RIESGO_LABEL, RUBRO_LABEL } from "@/lib/format";
+import { formatFecha, formatMonto, RIESGO_LABEL, RUBRO_LABEL } from "@/lib/format";
 import type { InvoiceTeaser } from "@/lib/database.types";
 
 function riesgoTone(riesgo: string) {
@@ -20,15 +20,16 @@ export default async function FondeadorMarketplacePage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold mb-1">Marketplace de facturas</h1>
+      <h1 className="text-2xl font-semibold mb-1">Marketplace de operaciones</h1>
       <p className="text-ink-soft text-sm mb-8">
-        Navegá gratis. Gastá 1 crédito para ver el deudor, el contacto del
-        operador y el documento de una factura que te interese.
+        Explorá gratis el monto, el plazo y el riesgo de cada operación.
+        Para ver el deudor, el contacto del operador y la documentación,
+        desbloqueá la operación que te interese.
       </p>
 
       {!teasers || teasers.length === 0 ? (
         <Card className="text-center py-16">
-          <p className="font-serif text-xl mb-2">Todavía no hay facturas cargadas</p>
+          <p className="font-serif text-xl mb-2">Todavía no hay operaciones cargadas</p>
           <p className="text-ink-soft">
             Apenas un operador cargue una factura disponible, la vas a ver acá.
           </p>
@@ -44,7 +45,7 @@ export default async function FondeadorMarketplacePage() {
                     <Badge tone={riesgoTone(t.riesgo)}>
                       {RIESGO_LABEL[t.riesgo]}
                     </Badge>
-                    {t.ya_revelada && <Badge tone="good">Ya revelada</Badge>}
+                    {t.ya_revelada && <Badge tone="good">Desbloqueada</Badge>}
                     {t.estado !== "disponible" && !t.ya_revelada && (
                       <Badge tone="neutral">{t.estado}</Badge>
                     )}
@@ -58,17 +59,26 @@ export default async function FondeadorMarketplacePage() {
                 <div className="grid grid-cols-2 gap-3 text-sm mt-2">
                   <div>
                     <p className="text-ink-soft text-xs uppercase tracking-wide">
-                      Monto aprox.
+                      Monto
                     </p>
-                    <p className="num font-medium">{t.monto_banda}</p>
+                    <p className="num font-medium">
+                      {formatMonto(t.monto, t.moneda)}
+                    </p>
                   </div>
                   <div>
                     <p className="text-ink-soft text-xs uppercase tracking-wide">
-                      Plazo
+                      Vencimiento
                     </p>
-                    <p className="num font-medium">{t.plazo_banda}</p>
+                    <p className="num font-medium">
+                      {formatFecha(t.fecha_vencimiento)}
+                    </p>
                   </div>
                 </div>
+                {!t.ya_revelada && (
+                  <p className="text-xs text-ink-soft mt-3">
+                    Desbloquear: {formatMonto(t.unlock_fee, t.moneda)}
+                  </p>
+                )}
               </Card>
             </Link>
           ))}

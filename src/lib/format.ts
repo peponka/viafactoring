@@ -39,4 +39,5 @@ export const ESTADO_OFERTA_LABEL: Record<string, string> = {
 export const TIPO_PAGO_LABEL: Record<string, string> = {
   creditos: "Compra de créditos",
   comision: "Comisión de cierre",
+  desbloqueo: "Desbloqueo de operación",
 };
