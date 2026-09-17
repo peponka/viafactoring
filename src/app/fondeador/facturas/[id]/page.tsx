@@ -2,15 +2,28 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getUserAndProfile } from "@/lib/session";
 import { Badge, Card } from "@/components/ui";
-import { formatFecha, formatMonto, RIESGO_LABEL, RUBRO_LABEL } from "@/lib/format";
-import type { InvoiceTeaser } from "@/lib/database.types";
+import {
+  ESTADO_OFERTA_LABEL,
+  formatFecha,
+  formatMonto,
+  RIESGO_LABEL,
+  RUBRO_LABEL,
+} from "@/lib/format";
+import type { InvoiceTeaser, Offer } from "@/lib/database.types";
 import { RevealButton } from "./reveal-button";
 import { DocumentoLink } from "./documento";
 import { ContactadoButton } from "./contactado-button";
+import { OfferForm } from "./offer-form";
 
 function riesgoTone(riesgo: string) {
   if (riesgo === "bajo") return "good" as const;
   if (riesgo === "alto") return "critical" as const;
+  return "warn" as const;
+}
+
+function ofertaTone(estado: string) {
+  if (estado === "aceptada") return "good" as const;
+  if (estado === "rechazada") return "critical" as const;
   return "warn" as const;
 }
 
@@ -42,6 +55,7 @@ export default async function FacturaFondeadorPage({
 
   let reveal: { contactado: boolean } | null = null;
   let invoice: InvoiceDetalle | null = null;
+  let oferta: Offer | null = null;
 
   if (teaser.ya_revelada) {
     const { data: fullInvoice } = await supabase.rpc("reveal_invoice", {
@@ -49,13 +63,22 @@ export default async function FacturaFondeadorPage({
     });
     invoice = (fullInvoice as InvoiceDetalle | null) ?? null;
 
-    const { data: r } = await supabase
-      .from("reveals")
-      .select("contactado")
-      .eq("invoice_id", id)
-      .eq("fondeador_id", profile!.id)
-      .maybeSingle();
+    const [{ data: r }, { data: o }] = await Promise.all([
+      supabase
+        .from("reveals")
+        .select("contactado")
+        .eq("invoice_id", id)
+        .eq("fondeador_id", profile!.id)
+        .maybeSingle(),
+      supabase
+        .from("offers")
+        .select("*")
+        .eq("invoice_id", id)
+        .eq("fondeador_id", profile!.id)
+        .maybeSingle<Offer>(),
+    ]);
     reveal = r;
+    oferta = o ?? null;
   }
 
   return (
@@ -99,10 +122,43 @@ export default async function FacturaFondeadorPage({
             )}
           </Card>
 
-          <div className="flex items-center gap-4 flex-wrap">
+          <div className="flex items-center gap-4 flex-wrap mb-8">
             {invoice.documento_url && <DocumentoLink invoiceId={id} />}
             <ContactadoButton invoiceId={id} yaContactado={!!reveal?.contactado} />
           </div>
+
+          <Card>
+            <p className="font-semibold mb-1">Hacer una oferta</p>
+            <p className="text-sm text-ink-soft mb-4">
+              Si el operador acepta tu oferta acá adentro, el trato queda
+              formalizado y te generamos el cobro de la comisión de cierre.
+              La transferencia de la factura la arreglás directo con el
+              operador — ViaFactoring nunca toca esa plata.
+            </p>
+            {oferta && (
+              <div className="flex items-center gap-2 mb-4">
+                <Badge tone={ofertaTone(oferta.estado)}>
+                  {ESTADO_OFERTA_LABEL[oferta.estado]}
+                </Badge>
+                <span className="text-sm text-ink-soft">
+                  tu oferta: {formatMonto(oferta.monto_ofrecido, invoice.moneda)}
+                </span>
+              </div>
+            )}
+            {teaser.estado === "disponible" ? (
+              <OfferForm
+                invoiceId={id}
+                montoFactura={invoice.monto}
+                ofertaExistente={oferta}
+              />
+            ) : (
+              !oferta && (
+                <p className="text-sm text-ink-soft">
+                  Esta factura ya no está disponible para ofertar.
+                </p>
+              )
+            )}
+          </Card>
         </>
       ) : (
         <>

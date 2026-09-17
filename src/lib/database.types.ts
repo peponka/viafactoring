@@ -18,6 +18,8 @@ export type TipoTransaccion =
   | "consumo"
   | "ajuste_admin";
 export type EstadoPago = "pendiente" | "confirmado" | "cancelado";
+export type EstadoOferta = "pendiente" | "aceptada" | "rechazada";
+export type TipoPago = "creditos" | "comision";
 
 export type Profile = {
   id: string;
@@ -96,9 +98,22 @@ export type PaymentRequest = {
   payment_link: string | null;
   metodo: string | null;
   external_reference: string | null;
+  tipo: TipoPago;
+  offer_id: string | null;
   created_at: string;
   confirmed_at: string | null;
   confirmed_by: string | null;
+};
+
+export type Offer = {
+  id: string;
+  invoice_id: string;
+  fondeador_id: string;
+  monto_ofrecido: number;
+  mensaje: string | null;
+  estado: EstadoOferta;
+  created_at: string;
+  respondida_at: string | null;
 };
 
 export type Reveal = {
@@ -164,6 +179,14 @@ export type Database = {
         Partial<PaymentRequest> & { fondeador_id: string; monto: number }
       >;
       reveals: TableDef<Reveal, Partial<Reveal> & { invoice_id: string }>;
+      offers: TableDef<
+        Offer,
+        Partial<Offer> & {
+          invoice_id: string;
+          fondeador_id: string;
+          monto_ofrecido: number;
+        }
+      >;
       app_config: TableDef<AppConfig, AppConfig>;
     };
     Views: {
@@ -188,6 +211,22 @@ export type Database = {
           p_nota: string | null;
         };
         Returns: undefined;
+      };
+      create_offer: {
+        Args: {
+          p_invoice_id: string;
+          p_monto_ofrecido: number;
+          p_mensaje: string | null;
+        };
+        Returns: Offer;
+      };
+      respond_offer: {
+        Args: { p_offer_id: string; p_accept: boolean };
+        Returns: Offer;
+      };
+      deal_fee_for_monto: {
+        Args: { p_monto: number };
+        Returns: number;
       };
     };
   };

@@ -93,3 +93,21 @@ export async function retirarFacturaAction(invoiceId: string) {
     .eq("id", invoiceId);
   revalidatePath("/operador");
 }
+
+// Acepta o rechaza una oferta de un fondeador. Aceptar cierra la factura y
+// dispara automáticamente (vía el RPC) la comisión de cierre para el
+// fondeador — ViaFactoring no toca la plata de la factura en sí.
+export async function responderOfertaAction(
+  offerId: string,
+  invoiceId: string,
+  aceptar: boolean,
+): Promise<{ error: string | null }> {
+  const { supabase } = await requireOperador();
+  const { error } = await supabase.rpc("respond_offer", {
+    p_offer_id: offerId,
+    p_accept: aceptar,
+  });
+  revalidatePath("/operador");
+  revalidatePath(`/operador/facturas/${invoiceId}`);
+  return { error: error?.message ?? null };
+}

@@ -29,3 +29,14 @@ export const ESTADO_FACTURA_LABEL: Record<string, string> = {
   cerrada: "Cerrada",
   retirada: "Retirada",
 };
+
+export const ESTADO_OFERTA_LABEL: Record<string, string> = {
+  pendiente: "Pendiente",
+  aceptada: "Aceptada",
+  rechazada: "Rechazada",
+};
+
+export const TIPO_PAGO_LABEL: Record<string, string> = {
+  creditos: "Compra de créditos",
+  comision: "Comisión de cierre",
+};

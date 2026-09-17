@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { Badge, Card } from "@/components/ui";
-import { formatFecha, formatMonto } from "@/lib/format";
+import { formatFecha, formatMonto, TIPO_PAGO_LABEL } from "@/lib/format";
 import type { PaymentRequest, Profile } from "@/lib/database.types";
 import { PagoRow } from "./pago-row";
 
@@ -44,7 +44,12 @@ export default async function AdminPagosPage() {
                     {formatFecha(p.created_at)}
                   </p>
                 </div>
-                <Badge tone={estadoTone[p.estado]}>{p.estado}</Badge>
+                <div className="flex items-center gap-2">
+                  <Badge tone={p.tipo === "comision" ? "gold" : "neutral"}>
+                    {TIPO_PAGO_LABEL[p.tipo]}
+                  </Badge>
+                  <Badge tone={estadoTone[p.estado]}>{p.estado}</Badge>
+                </div>
               </div>
               <PagoRow pago={p} />
             </Card>

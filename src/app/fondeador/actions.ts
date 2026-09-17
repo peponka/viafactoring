@@ -87,6 +87,34 @@ export async function marcarContactadoAction(invoiceId: string) {
   revalidatePath(`/fondeador/facturas/${invoiceId}`);
 }
 
+// Crea o actualiza la oferta del fondeador sobre una factura ya destrabada.
+// Si el operador ya la aceptó, el RPC rechaza el cambio.
+export async function hacerOfertaAction(
+  _prev: { error: string | null; ok?: boolean },
+  formData: FormData,
+): Promise<{ error: string | null; ok?: boolean }> {
+  const { supabase } = await requireFondeador();
+  const invoiceId = String(formData.get("invoice_id") || "");
+  const monto = Number(formData.get("monto_ofrecido"));
+  const mensaje = String(formData.get("mensaje") || "").trim() || null;
+
+  if (!invoiceId) return { error: "Falta la factura." };
+  if (!Number.isFinite(monto) || monto <= 0) {
+    return { error: "El monto ofrecido tiene que ser un número mayor a 0." };
+  }
+
+  const { error } = await supabase.rpc("create_offer", {
+    p_invoice_id: invoiceId,
+    p_monto_ofrecido: monto,
+    p_mensaje: mensaje,
+  });
+
+  if (error) return { error: error.message };
+
+  revalidatePath(`/fondeador/facturas/${invoiceId}`);
+  return { error: null, ok: true };
+}
+
 export async function solicitarPackAction(
   _prev: { error: string | null; ok?: boolean },
   formData: FormData,
