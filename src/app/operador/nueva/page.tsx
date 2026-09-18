@@ -14,25 +14,18 @@ import {
 
 const initialState: FormState = { error: null };
 
-function montoBanda(monto: number) {
-  if (!monto) return "A confirmar";
-  if (monto < 2000) return "0 – 2.000";
-  if (monto < 5000) return "2.000 – 5.000";
-  if (monto < 10000) return "5.000 – 10.000";
-  if (monto < 25000) return "10.000 – 25.000";
-  if (monto < 50000) return "25.000 – 50.000";
-  if (monto < 100000) return "50.000 – 100.000";
-  return "100.000+";
-}
-
-function plazoBanda(dias: number) {
-  if (!dias && dias !== 0) return "A confirmar";
-  if (dias < 15) return "0 – 15 días";
-  if (dias < 30) return "15 – 30 días";
-  if (dias < 60) return "30 – 60 días";
-  if (dias < 90) return "60 – 90 días";
-  if (dias < 120) return "90 – 120 días";
-  return "120+ días";
+// Mismo criterio que unlock_fee_for_monto() en la base de datos — se
+// duplica acá solo para la vista previa en vivo mientras el operador
+// completa el formulario. El cálculo real (el que efectivamente se cobra)
+// siempre lo hace el servidor.
+function unlockFeePreview(monto: number) {
+  if (!monto) return null;
+  if (monto <= 10000) return 100;
+  if (monto <= 25000) return 200;
+  if (monto <= 50000) return 300;
+  if (monto <= 100000) return 450;
+  if (monto <= 250000) return 650;
+  return 900;
 }
 
 export default function NuevaFacturaPage() {
@@ -48,10 +41,9 @@ export default function NuevaFacturaPage() {
 
   const teaserPreview = useMemo(
     () => ({
-      monto: montoBanda(Number(monto)),
-      plazo: plazoBanda(Number(plazo)),
+      unlockFee: unlockFeePreview(Number(monto)),
     }),
-    [monto, plazo],
+    [monto],
   );
 
   return (
@@ -59,8 +51,9 @@ export default function NuevaFacturaPage() {
       <div>
         <h1 className="text-2xl font-semibold mb-1">Cargar factura</h1>
         <p className="text-ink-soft text-sm mb-6">
-          Es gratis, siempre. Los fondeadores solo ven un rango hasta que
-          alguno gasta un crédito para ver el detalle completo.
+          Es gratis, siempre. Los fondeadores ven el monto y el vencimiento
+          exactos sin pagar nada — recién pagan una tarifa para ver el
+          deudor, tu contacto y la documentación.
         </p>
         <Card>
           <form action={formAction} className="flex flex-col gap-4" encType="multipart/form-data">
@@ -142,7 +135,7 @@ export default function NuevaFacturaPage() {
             </div>
 
             <Field label="Tu contacto para este flete (opcional)">
-              <Input type="text" name="operador_contacto" placeholder="Teléfono o email — se muestra recién cuando un fondeador gasta un crédito" />
+              <Input type="text" name="operador_contacto" placeholder="Teléfono o email — se muestra recién cuando el fondeador paga la tarifa de desbloqueo" />
             </Field>
 
             <Field label="Descripción (opcional)">
@@ -163,7 +156,7 @@ export default function NuevaFacturaPage() {
 
       <div>
         <p className="text-sm font-semibold text-ink-soft mb-3">
-          Así la van a ver los fondeadores antes de gastar un crédito
+          Así la van a ver los fondeadores antes de pagar nada
         </p>
         <Card className="bg-surface-2 border-dashed">
           <div className="flex items-center gap-2 mb-3 flex-wrap">
@@ -177,15 +170,24 @@ export default function NuevaFacturaPage() {
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div>
               <p className="text-ink-soft text-xs uppercase tracking-wide">Monto</p>
-              <p className="num font-medium">{moneda} {teaserPreview.monto}</p>
+              <p className="num font-medium">
+                {monto ? `${moneda} ${monto}` : "A confirmar"}
+              </p>
             </div>
             <div>
               <p className="text-ink-soft text-xs uppercase tracking-wide">Plazo</p>
-              <p className="num font-medium">{teaserPreview.plazo}</p>
+              <p className="num font-medium">
+                {plazo ? `${plazo} días` : "A confirmar"}
+              </p>
             </div>
             <div className="col-span-2">
               <p className="text-ink-soft text-xs uppercase tracking-wide">Deudor</p>
-              <p className="font-medium">🔒 con 1 crédito</p>
+              <p className="font-medium">
+                🔒 se habilita al pagar la tarifa de desbloqueo
+                {teaserPreview.unlockFee
+                  ? ` (${moneda} ${teaserPreview.unlockFee})`
+                  : ""}
+              </p>
             </div>
           </div>
         </Card>
