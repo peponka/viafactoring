@@ -53,18 +53,18 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
         <section className="py-16 md:py-24 grid md:grid-cols-2 gap-10 items-center">
           <div>
             <p className="uppercase tracking-widest text-[.72rem] font-semibold text-accent mb-3">
-              Factoring de fletes · Paraguay
+              Factoring de facturas · Paraguay
             </p>
             <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">
-              Cobrá tu flete cuando lo hacés, no 60 días después
+              Cobrá tu factura cuando la emitís, no 60 días después
             </h1>
             <p className="text-ink-soft text-lg mt-5 max-w-[48ch]">
-              ViaFactoring conecta operadores de flete con financieras,
-              bancos, fondos e inversores dispuestos a adelantarles el cobro
-              de sus facturas.
+              ViaFactoring conecta a quienes tienen facturas por cobrar con
+              financieras, bancos, fondos e inversores dispuestos a
+              adelantarles ese cobro.
             </p>
             <div className="flex gap-3 mt-8 flex-wrap">
-              <LinkButton href="/signup">Sumar mi flete o mi capital</LinkButton>
+              <LinkButton href="/signup">Sumar mi factura o mi capital</LinkButton>
               <LinkButton href="/login" variant="ghost">
                 Ya tengo cuenta
               </LinkButton>
@@ -74,7 +74,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
           <div className="grid gap-4">
             <div className="bg-surface border border-line rounded-2xl p-6">
               <p className="font-serif font-semibold text-lg mb-1">
-                Para operadores de flete
+                Para quien tiene facturas por cobrar
               </p>
               <p className="text-ink-soft text-sm">
                 Cargás tus facturas pendientes, sin costo ni compromiso.
@@ -107,7 +107,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
           <div className="grid md:grid-cols-2 gap-8">
             <div>
               <p className="font-serif font-semibold text-lg mb-4">
-                Si tenés fletes por cobrar
+                Si tenés facturas por cobrar
               </p>
               <ol className="flex flex-col gap-4">
                 {[
@@ -205,16 +205,15 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
               Quiénes somos
             </p>
             <h2 className="text-2xl md:text-3xl font-semibold mb-5">
-              Un problema concreto del transporte de carga
+              Un problema concreto de capital de trabajo
             </h2>
             <p className="text-ink-soft text-base">
-              Los operadores de flete suelen cobrar sus fletes 30, 60 o
-              hasta 90 días después de hacerlos, mientras sus costos
-              (combustible, mantenimiento, sueldos) son inmediatos.
-              ViaFactoring los conecta con financieras, bancos, fondos e
-              inversores dispuestos a adelantarles ese cobro, evaluando
-              cada operación por su cuenta. Estamos en etapa piloto,
-              arrancando por el mercado paraguayo.
+              Muchas empresas y proveedores cobran sus facturas 30, 60 o
+              hasta 90 días después de emitirlas, mientras sus costos son
+              inmediatos. ViaFactoring los conecta con financieras, bancos,
+              fondos e inversores dispuestos a adelantarles ese cobro,
+              evaluando cada operación por su cuenta. Estamos en etapa
+              piloto, arrancando por el mercado paraguayo.
             </p>
           </div>
         </section>
@@ -279,7 +278,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
 
       <footer className="border-t border-line py-7 mt-8">
         <div className="wrap max-w-5xl mx-auto px-6 text-sm text-ink-soft flex justify-between flex-wrap gap-3">
-          <span>ViaFactoring — factoring de fletes en Paraguay</span>
+          <span>ViaFactoring — factoring de facturas en Paraguay</span>
           <div className="flex items-center gap-4 flex-wrap">
             <Link href="/terminos" className="hover:text-ink">
               Términos

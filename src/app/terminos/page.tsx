@@ -42,10 +42,10 @@ export default function TerminosPage() {
                 1. Qué es ViaFactoring
               </h2>
               <p>
-                ViaFactoring es un marketplace que conecta a operadores de
-                flete con fondeadores
-                (financieras, bancos, fondos e inversores) interesados en
-                adelantarles el cobro de sus facturas. ViaFactoring facilita
+                ViaFactoring es un marketplace que conecta a quienes tienen
+                facturas pendientes de cobro con fondeadores (financieras,
+                bancos, fondos e inversores) interesados en adelantarles ese
+                cobro. ViaFactoring facilita
                 el contacto entre ambas partes; no es parte del acuerdo de
                 adelanto que operador y fondeador negocian y cierran entre
                 sí, ni garantiza el resultado de esa negociación.
