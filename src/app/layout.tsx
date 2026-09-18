@@ -23,7 +23,7 @@ const plexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: "ViaFactoring",
   description:
-    "Marketplace de factoring de fletes fluviales y de camiones en la hidrovía Paraguay-Paraná.",
+    "Marketplace de factoring de fletes para operadores de carga en Paraguay.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

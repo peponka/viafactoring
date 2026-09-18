@@ -53,15 +53,15 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
         <section className="py-16 md:py-24 grid md:grid-cols-2 gap-10 items-center">
           <div>
             <p className="uppercase tracking-widest text-[.72rem] font-semibold text-accent mb-3">
-              Factoring de fletes · fluvial y camiones
+              Factoring de fletes · Paraguay
             </p>
             <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">
               Cobrá tu flete cuando lo hacés, no 60 días después
             </h1>
             <p className="text-ink-soft text-lg mt-5 max-w-[48ch]">
-              ViaFactoring conecta operadores de barcazas y camiones con
-              financieras, bancos, fondos e inversores dispuestos a
-              adelantarles el cobro de sus facturas.
+              ViaFactoring conecta operadores de flete con financieras,
+              bancos, fondos e inversores dispuestos a adelantarles el cobro
+              de sus facturas.
             </p>
             <div className="flex gap-3 mt-8 flex-wrap">
               <LinkButton href="/signup">Sumar mi flete o mi capital</LinkButton>
@@ -191,8 +191,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
                   Etapa piloto en Paraguay
                 </p>
                 <p className="text-ink-soft text-sm">
-                  Estamos arrancando con fletes fluviales y de camiones en
-                  el mercado paraguayo.
+                  Estamos arrancando en el mercado paraguayo.
                 </p>
               </div>
             </div>
@@ -209,14 +208,13 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
               Un problema concreto del transporte de carga
             </h2>
             <p className="text-ink-soft text-base">
-              Los operadores de flete —barcazas, remolcadores, camiones—
-              suelen cobrar sus fletes 30, 60 o hasta 90 días después de
-              hacerlos, mientras sus costos (combustible, mantenimiento,
-              sueldos) son inmediatos. ViaFactoring los conecta con
-              financieras, bancos, fondos e inversores dispuestos a
-              adelantarles ese cobro, evaluando cada operación por su
-              cuenta. Estamos en etapa piloto, arrancando por el mercado
-              paraguayo.
+              Los operadores de flete suelen cobrar sus fletes 30, 60 o
+              hasta 90 días después de hacerlos, mientras sus costos
+              (combustible, mantenimiento, sueldos) son inmediatos.
+              ViaFactoring los conecta con financieras, bancos, fondos e
+              inversores dispuestos a adelantarles ese cobro, evaluando
+              cada operación por su cuenta. Estamos en etapa piloto,
+              arrancando por el mercado paraguayo.
             </p>
           </div>
         </section>
@@ -281,7 +279,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
 
       <footer className="border-t border-line py-7 mt-8">
         <div className="wrap max-w-5xl mx-auto px-6 text-sm text-ink-soft flex justify-between flex-wrap gap-3">
-          <span>ViaFactoring — hidrovía Paraguay-Paraná y rutas de camiones</span>
+          <span>ViaFactoring — factoring de fletes en Paraguay</span>
           <div className="flex items-center gap-4 flex-wrap">
             <Link href="/terminos" className="hover:text-ink">
               Términos

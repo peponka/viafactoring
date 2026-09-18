@@ -43,7 +43,7 @@ export default function TerminosPage() {
               </h2>
               <p>
                 ViaFactoring es un marketplace que conecta a operadores de
-                flete (barcazas, remolcadores y camiones) con fondeadores
+                flete con fondeadores
                 (financieras, bancos, fondos e inversores) interesados en
                 adelantarles el cobro de sus facturas. ViaFactoring facilita
                 el contacto entre ambas partes; no es parte del acuerdo de
