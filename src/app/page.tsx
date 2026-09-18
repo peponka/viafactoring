@@ -73,9 +73,10 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
                 Para fondeadores
               </p>
               <p className="text-ink-soft text-sm">
-                Navegás la cartera gratis, viendo rangos de monto, plazo y
-                riesgo. Gastás 1 crédito para ver el detalle completo de una
-                factura que te interese.
+                Navegás la cartera gratis, viendo el monto y el vencimiento
+                exactos de cada operación. Pagás una tarifa de desbloqueo
+                solo por la factura que te interese, para ver el deudor, el
+                contacto y la documentación.
               </p>
             </div>
           </div>
