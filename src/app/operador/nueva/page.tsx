@@ -113,15 +113,27 @@ export default function NuevaFacturaPage() {
             </Field>
 
             {documento && (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
                 <Button
                   type="button"
                   variant="ghost"
                   disabled={ocrLoading}
                   onClick={handleExtraer}
                 >
-                  {ocrLoading ? "Leyendo documento…" : "Completar datos con IA"}
+                  {ocrLoading ? (
+                    <>
+                      <span className="h-4 w-4 rounded-full border-2 border-ink/30 border-t-ink animate-spin" />
+                      Leyendo documento…
+                    </>
+                  ) : (
+                    "Completar datos con IA"
+                  )}
                 </Button>
+                {ocrLoading && (
+                  <span className="text-xs text-ink-soft">
+                    Puede tardar unos segundos, no cierres la página…
+                  </span>
+                )}
                 {ocrError && <ErrorText>{ocrError}</ErrorText>}
               </div>
             )}
