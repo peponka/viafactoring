@@ -2,6 +2,7 @@
 
 import { useActionState, useMemo, useState } from "react";
 import { crearFacturaAction, type FormState } from "../actions";
+import { extraerDatosFacturaAction } from "../ocr";
 import {
   Button,
   Card,
@@ -33,11 +34,21 @@ export default function NuevaFacturaPage() {
     crearFacturaAction,
     initialState,
   );
+  const [numero, setNumero] = useState("");
+  const [deudorNombre, setDeudorNombre] = useState("");
+  const [deudorContacto, setDeudorContacto] = useState("");
   const [monto, setMonto] = useState("");
   const [plazo, setPlazo] = useState("");
   const [moneda, setMoneda] = useState("USD");
   const [rubro, setRubro] = useState("");
   const [riesgo, setRiesgo] = useState("medio");
+  const [fechaVencimiento, setFechaVencimiento] = useState("");
+  const [descripcion, setDescripcion] = useState("");
+
+  const [documento, setDocumento] = useState<File | null>(null);
+  const [ocrLoading, setOcrLoading] = useState(false);
+  const [ocrError, setOcrError] = useState<string | null>(null);
+  const [ocrApplied, setOcrApplied] = useState(false);
 
   const teaserPreview = useMemo(
     () => ({
@@ -45,6 +56,37 @@ export default function NuevaFacturaPage() {
     }),
     [monto],
   );
+
+  async function handleExtraer() {
+    if (!documento) return;
+    setOcrLoading(true);
+    setOcrError(null);
+    const fd = new FormData();
+    fd.set("documento", documento);
+    const result = await extraerDatosFacturaAction(fd);
+    setOcrLoading(false);
+
+    if (!result.data) {
+      setOcrError(result.error ?? "No se pudo leer el documento.");
+      return;
+    }
+
+    const d = result.data;
+    if (d.deudor_nombre) setDeudorNombre(d.deudor_nombre);
+    if (d.deudor_contacto) setDeudorContacto(d.deudor_contacto);
+    if (d.monto) setMonto(d.monto);
+    if (d.moneda) setMoneda(d.moneda);
+    if (d.numero) setNumero(d.numero);
+    if (d.descripcion) setDescripcion(d.descripcion);
+    if (d.fecha_vencimiento) {
+      setFechaVencimiento(d.fecha_vencimiento);
+      const dias = Math.round(
+        (new Date(d.fecha_vencimiento).getTime() - Date.now()) / 86400000,
+      );
+      if (Number.isFinite(dias)) setPlazo(String(Math.max(0, dias)));
+    }
+    setOcrApplied(true);
+  }
 
   return (
     <div className="grid md:grid-cols-[1.4fr_1fr] gap-8">
@@ -57,6 +99,42 @@ export default function NuevaFacturaPage() {
         </p>
         <Card>
           <form action={formAction} className="flex flex-col gap-4" encType="multipart/form-data">
+            <Field label="Documento de la factura (foto o PDF, opcional)">
+              <Input
+                type="file"
+                name="documento"
+                accept="image/*,application/pdf"
+                onChange={(e) => {
+                  setDocumento(e.target.files?.[0] ?? null);
+                  setOcrError(null);
+                  setOcrApplied(false);
+                }}
+              />
+            </Field>
+
+            {documento && (
+              <div className="flex items-center gap-3">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  disabled={ocrLoading}
+                  onClick={handleExtraer}
+                >
+                  {ocrLoading ? "Leyendo documento…" : "Completar datos con IA"}
+                </Button>
+                {ocrError && <ErrorText>{ocrError}</ErrorText>}
+              </div>
+            )}
+
+            {ocrApplied && (
+              <div className="bg-warn-soft border border-warn rounded-xl px-4 py-3 text-sm text-ink">
+                ⚠️ Estos campos se completaron automáticamente a partir del
+                documento. Revisalos con atención antes de guardar — una foto
+                borrosa o un formato poco común pueden hacer que la lectura
+                venga incompleta o equivocada.
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-4">
               <Field label="Rubro">
                 <Input
@@ -78,16 +156,32 @@ export default function NuevaFacturaPage() {
                 </datalist>
               </Field>
               <Field label="Nº de factura (opcional)">
-                <Input type="text" name="numero" />
+                <Input
+                  type="text"
+                  name="numero"
+                  value={numero}
+                  onChange={(e) => setNumero(e.target.value)}
+                />
               </Field>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <Field label="Nombre del deudor">
-                <Input type="text" name="deudor_nombre" required />
+                <Input
+                  type="text"
+                  name="deudor_nombre"
+                  required
+                  value={deudorNombre}
+                  onChange={(e) => setDeudorNombre(e.target.value)}
+                />
               </Field>
               <Field label="Contacto del deudor (opcional)">
-                <Input type="text" name="deudor_contacto" />
+                <Input
+                  type="text"
+                  name="deudor_contacto"
+                  value={deudorContacto}
+                  onChange={(e) => setDeudorContacto(e.target.value)}
+                />
               </Field>
             </div>
 
@@ -128,7 +222,12 @@ export default function NuevaFacturaPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <Field label="Fecha de vencimiento (opcional)">
-                <Input type="date" name="fecha_vencimiento" />
+                <Input
+                  type="date"
+                  name="fecha_vencimiento"
+                  value={fechaVencimiento}
+                  onChange={(e) => setFechaVencimiento(e.target.value)}
+                />
               </Field>
               <Field label="Riesgo (autoevaluado)">
                 <Select
@@ -148,11 +247,13 @@ export default function NuevaFacturaPage() {
             </Field>
 
             <Field label="Descripción (opcional)">
-              <Textarea name="descripcion" rows={3} placeholder="Ruta, tipo de carga, lo que ayude a evaluar la operación" />
-            </Field>
-
-            <Field label="Documento de la factura (foto o PDF, opcional)">
-              <Input type="file" name="documento" accept="image/*,application/pdf" />
+              <Textarea
+                name="descripcion"
+                rows={3}
+                placeholder="Ruta, tipo de carga, lo que ayude a evaluar la operación"
+                value={descripcion}
+                onChange={(e) => setDescripcion(e.target.value)}
+              />
             </Field>
 
             <ErrorText>{state.error}</ErrorText>
