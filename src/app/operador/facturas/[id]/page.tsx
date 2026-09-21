@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getUserAndProfile } from "@/lib/session";
 import { Badge, Card } from "@/components/ui";
-import { formatFecha, formatMonto, RIESGO_LABEL, RUBRO_LABEL } from "@/lib/format";
+import { formatFecha, formatMonto, RIESGO_LABEL, rubroLabel } from "@/lib/format";
 import type { Invoice } from "@/lib/database.types";
 import { RetirarButton } from "./retirar-button";
 import { CerrarButton } from "./cerrar-button";
@@ -31,7 +31,7 @@ export default async function FacturaDetallePage({
   return (
     <div className="max-w-2xl">
       <div className="flex items-center gap-2 mb-4 flex-wrap">
-        <Badge>{RUBRO_LABEL[factura.rubro]}</Badge>
+        <Badge>{rubroLabel(factura.rubro)}</Badge>
         <Badge>{RIESGO_LABEL[factura.riesgo]}</Badge>
         <Badge tone={factura.estado === "disponible" ? "good" : "neutral"}>
           {factura.estado}

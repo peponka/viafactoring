@@ -9,7 +9,7 @@
 // on internally (silently collapsing every query result to `never`).
 
 export type Rol = "operador" | "fondeador" | "admin";
-export type Rubro = "fluvial" | "camiones";
+export type Rubro = string;
 export type Riesgo = "bajo" | "medio" | "alto";
 export type EstadoFactura = "disponible" | "cerrada" | "retirada";
 export type TipoTransaccion =

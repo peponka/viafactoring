@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Badge, Card } from "@/components/ui";
-import { formatFecha, formatMonto, RIESGO_LABEL, RUBRO_LABEL } from "@/lib/format";
+import { formatFecha, formatMonto, RIESGO_LABEL, rubroLabel } from "@/lib/format";
 import type { InvoiceTeaser } from "@/lib/database.types";
 
 function riesgoTone(riesgo: string) {
@@ -41,7 +41,7 @@ export default async function FondeadorMarketplacePage() {
               <Card className="hover:border-accent transition h-full flex flex-col justify-between">
                 <div>
                   <div className="flex items-center gap-2 mb-3 flex-wrap">
-                    <Badge>{RUBRO_LABEL[t.rubro]}</Badge>
+                    <Badge>{rubroLabel(t.rubro)}</Badge>
                     <Badge tone={riesgoTone(t.riesgo)}>
                       {RIESGO_LABEL[t.riesgo]}
                     </Badge>

@@ -36,7 +36,7 @@ export default function NuevaFacturaPage() {
   const [monto, setMonto] = useState("");
   const [plazo, setPlazo] = useState("");
   const [moneda, setMoneda] = useState("USD");
-  const [rubro, setRubro] = useState("fluvial");
+  const [rubro, setRubro] = useState("");
   const [riesgo, setRiesgo] = useState("medio");
 
   const teaserPreview = useMemo(
@@ -59,14 +59,23 @@ export default function NuevaFacturaPage() {
           <form action={formAction} className="flex flex-col gap-4" encType="multipart/form-data">
             <div className="grid grid-cols-2 gap-4">
               <Field label="Rubro">
-                <Select
+                <Input
+                  type="text"
                   name="rubro"
+                  list="rubro-sugerencias"
+                  placeholder="Ej: fluvial, camiones, comercio, servicios..."
+                  required
                   value={rubro}
                   onChange={(e) => setRubro(e.target.value)}
-                >
-                  <option value="fluvial">Fluvial (barcaza/remolcador)</option>
-                  <option value="camiones">Camiones</option>
-                </Select>
+                />
+                <datalist id="rubro-sugerencias">
+                  <option value="Fluvial (barcaza/remolcador)" />
+                  <option value="Camiones" />
+                  <option value="Comercio" />
+                  <option value="Servicios" />
+                  <option value="Construcción" />
+                  <option value="Industria" />
+                </datalist>
               </Field>
               <Field label="Nº de factura (opcional)">
                 <Input type="text" name="numero" />
@@ -134,7 +143,7 @@ export default function NuevaFacturaPage() {
               </Field>
             </div>
 
-            <Field label="Tu contacto para este flete (opcional)">
+            <Field label="Tu contacto para esta operación (opcional)">
               <Input type="text" name="operador_contacto" placeholder="Teléfono o email — se muestra recién cuando el fondeador paga la tarifa de desbloqueo" />
             </Field>
 
@@ -161,7 +170,7 @@ export default function NuevaFacturaPage() {
         <Card className="bg-surface-2 border-dashed">
           <div className="flex items-center gap-2 mb-3 flex-wrap">
             <span className="inline-block text-[.72rem] font-semibold px-2.5 py-1 rounded-full bg-surface text-ink-soft">
-              {rubro === "fluvial" ? "Fluvial" : "Camiones"}
+              {rubro || "Rubro"}
             </span>
             <span className="inline-block text-[.72rem] font-semibold px-2.5 py-1 rounded-full bg-surface text-ink-soft">
               {riesgo}

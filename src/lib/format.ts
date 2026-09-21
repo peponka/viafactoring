@@ -24,6 +24,13 @@ export const RUBRO_LABEL: Record<string, string> = {
   camiones: "Camiones",
 };
 
+// Muchos rubros ahora son texto libre cargado por el operador, así que no
+// todos están en RUBRO_LABEL. Si no hay traducción, mostramos el valor tal
+// cual lo escribieron.
+export function rubroLabel(rubro: string) {
+  return RUBRO_LABEL[rubro] ?? rubro;
+}
+
 export const ESTADO_FACTURA_LABEL: Record<string, string> = {
   disponible: "Disponible",
   cerrada: "Cerrada",

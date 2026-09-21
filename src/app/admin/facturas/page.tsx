@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Badge, Card } from "@/components/ui";
 import {
   ESTADO_FACTURA_LABEL,
-  RUBRO_LABEL,
+  rubroLabel,
   formatFecha,
   formatMonto,
 } from "@/lib/format";
@@ -41,7 +41,7 @@ export default async function AdminFacturasPage() {
             <Card key={f.id} className="flex items-center justify-between gap-4 flex-wrap">
               <div>
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
-                  <Badge>{RUBRO_LABEL[f.rubro]}</Badge>
+                  <Badge>{rubroLabel(f.rubro)}</Badge>
                   <Badge tone={f.estado === "disponible" ? "good" : "neutral"}>
                     {ESTADO_FACTURA_LABEL[f.estado]}
                   </Badge>

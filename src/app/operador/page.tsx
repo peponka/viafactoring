@@ -4,7 +4,7 @@ import { getUserAndProfile } from "@/lib/session";
 import { Badge, Card, LinkButton } from "@/components/ui";
 import {
   ESTADO_FACTURA_LABEL,
-  RUBRO_LABEL,
+  rubroLabel,
   formatFecha,
   formatMonto,
 } from "@/lib/format";
@@ -72,7 +72,7 @@ export default async function OperadorPage() {
                     <Badge tone={estadoTone(f.estado)}>
                       {ESTADO_FACTURA_LABEL[f.estado]}
                     </Badge>
-                    <Badge>{RUBRO_LABEL[f.rubro]}</Badge>
+                    <Badge>{rubroLabel(f.rubro)}</Badge>
                     <Badge tone={riesgoTone(f.riesgo)}>{f.riesgo}</Badge>
                   </div>
                   <p className="font-serif text-lg font-medium">

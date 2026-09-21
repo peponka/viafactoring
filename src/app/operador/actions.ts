@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import type { Riesgo, Rubro } from "@/lib/database.types";
+import type { Riesgo } from "@/lib/database.types";
 
 export type FormState = { error: string | null };
 
@@ -40,15 +40,14 @@ export async function crearFacturaAction(
     return { error: "El monto tiene que ser un número mayor a 0." };
   if (!Number.isFinite(plazo_dias) || plazo_dias < 0)
     return { error: "El plazo en días no es válido." };
-  if (rubro !== "fluvial" && rubro !== "camiones")
-    return { error: "Elegí el rubro." };
+  if (!rubro.trim()) return { error: "Elegí o escribí el rubro." };
 
   const { data: invoice, error } = await supabase
     .from("invoices")
     .insert({
       operador_id: userId,
       numero: String(formData.get("numero") || "") || null,
-      rubro: rubro as Rubro,
+      rubro,
       deudor_nombre,
       deudor_contacto: String(formData.get("deudor_contacto") || "") || null,
       monto,
