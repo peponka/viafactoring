@@ -22,7 +22,7 @@ export async function signUpAction(
     return { error: "Completá email, contraseña y nombre." };
   }
   if (role !== "operador" && role !== "fondeador") {
-    return { error: "Elegí si sos operador (tenés facturas) o fondeador." };
+    return { error: "Elegí si sos operador de facturas o fondeador." };
   }
   if (password.length < 8) {
     return { error: "La contraseña tiene que tener al menos 8 caracteres." };

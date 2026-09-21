@@ -117,7 +117,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
                   "Acordás el adelanto directo con él y marcás la factura como cerrada.",
                 ].map((paso, i) => (
                   <li key={i} className="flex gap-3">
-                    <span className="num shrink-0 w-7 h-7 rounded-full bg-accent-soft text-accent flex items-center justify-center text-sm font-semibold">
+                    <span className="num shrink-0 w-8 h-8 rounded-full bg-accent text-accent-ink flex items-center justify-center text-sm font-bold shadow-sm">
                       {i + 1}
                     </span>
                     <span className="text-ink-soft text-sm pt-0.5">{paso}</span>
@@ -138,7 +138,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
                   "Lo contactás directo y acuerdan la operación entre ustedes.",
                 ].map((paso, i) => (
                   <li key={i} className="flex gap-3">
-                    <span className="num shrink-0 w-7 h-7 rounded-full bg-accent-soft text-accent flex items-center justify-center text-sm font-semibold">
+                    <span className="num shrink-0 w-8 h-8 rounded-full bg-accent text-accent-ink flex items-center justify-center text-sm font-bold shadow-sm">
                       {i + 1}
                     </span>
                     <span className="text-ink-soft text-sm pt-0.5">{paso}</span>
@@ -150,7 +150,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
         </section>
 
         {/* Confianza / seguridad */}
-        <section className="py-14 border-t border-line">
+        <section className="py-14 border-t border-line bg-surface-2 -mx-6 px-6 md:rounded-3xl">
           <div className="grid md:grid-cols-2 gap-8 items-start">
             <div>
               <p className="uppercase tracking-widest text-[.72rem] font-semibold text-accent mb-3">
@@ -219,7 +219,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
         </section>
 
         {/* FAQ */}
-        <section className="py-14 border-t border-line">
+        <section className="py-14 border-t border-line bg-surface-2 -mx-6 px-6 md:rounded-3xl">
           <p className="uppercase tracking-widest text-[.72rem] font-semibold text-accent mb-3 text-center">
             Preguntas frecuentes
           </p>

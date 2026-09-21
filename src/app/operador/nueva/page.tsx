@@ -143,7 +143,7 @@ export default function NuevaFacturaPage() {
               </Field>
             </div>
 
-            <Field label="Tu contacto para esta operación (opcional)">
+            <Field label="Tu contacto para esta factura (opcional)">
               <Input type="text" name="operador_contacto" placeholder="Teléfono o email — se muestra recién cuando el fondeador paga la tarifa de desbloqueo" />
             </Field>
 

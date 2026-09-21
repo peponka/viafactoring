@@ -19,7 +19,7 @@ export default function SignupPage() {
     <main className="wrap max-w-md mx-auto py-20 flex-1 w-full px-6">
       <h1 className="text-3xl font-semibold mb-2">Crear cuenta</h1>
       <p className="text-ink-soft mb-8">
-        Sumate como operador (si tenés facturas por cobrar) o como fondeador.
+        Sumate como operador de facturas o como fondeador.
       </p>
       <Card>
         <form action={formAction} className="flex flex-col gap-4">
@@ -35,7 +35,7 @@ export default function SignupPage() {
                     : "text-ink-soft hover:text-ink"
                 }`}
               >
-                {r === "operador" ? "Operador" : "Fondeador"}
+                {r === "operador" ? "Operador de facturas" : "Fondeador"}
               </button>
             ))}
           </div>
