@@ -104,6 +104,59 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
           </div>
         </section>
 
+        {/* Qué es el factoring */}
+        <section className="py-14 border-t border-line">
+          <div className="grid md:grid-cols-2 gap-10 items-start">
+            <div>
+              <p className="uppercase tracking-widest text-[.72rem] font-semibold text-accent mb-3">
+                Factoring, en criollo
+              </p>
+              <h2 className="text-2xl md:text-3xl font-semibold mb-4">
+                ¿Qué es el factoring de facturas?
+              </h2>
+              <p className="text-ink-soft text-base">
+                Es vender una factura que todavía no cobraste a alguien
+                dispuesto a adelantarte ese dinero, a cambio de una
+                comisión. En vez de esperar 30, 60 o 90 días a que tu
+                cliente te pague, cobrás ahora — y quien te adelantó el
+                dinero cobra directamente cuando la factura vence.
+              </p>
+              <p className="text-ink-soft text-base mt-4">
+                No es un préstamo: no pedís plata prestada ni te endeudás.
+                Vendés un activo que ya es tuyo — tu factura — y listo.
+              </p>
+            </div>
+            <div className="grid gap-3">
+              {[
+                {
+                  t: "Liquidez inmediata",
+                  d: "Convertís una factura pendiente en dinero en tu cuenta en días, no en meses.",
+                },
+                {
+                  t: "No suma deuda",
+                  d: "Al no ser un préstamo, no afecta tu capacidad de endeudamiento ni pide garantías.",
+                },
+                {
+                  t: "Sin trámites bancarios",
+                  d: "No hace falta historial extenso ni papeleo de banco — cargás la factura y listo.",
+                },
+                {
+                  t: "Vos elegís qué factura vender",
+                  d: "Sin compromiso a largo plazo: factura por factura, cuándo y cuál te conviene.",
+                },
+              ].map((v) => (
+                <div
+                  key={v.t}
+                  className="bg-surface border border-line rounded-2xl p-5"
+                >
+                  <p className="font-semibold text-sm mb-1">{v.t}</p>
+                  <p className="text-ink-soft text-sm">{v.d}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* Cómo funciona */}
         <section className="py-14 border-t border-line">
           <p className="uppercase tracking-widest text-[.72rem] font-semibold text-accent mb-3 text-center">
