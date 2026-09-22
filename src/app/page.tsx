@@ -112,7 +112,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
                 Factoring, en criollo
               </p>
               <h2 className="text-2xl md:text-3xl font-semibold mb-4">
-                ¿Qué es el factoring de facturas?
+                ¿Qué es el factoring?
               </h2>
               <p className="text-ink-soft text-base">
                 Es vender una factura que todavía no cobraste a alguien
