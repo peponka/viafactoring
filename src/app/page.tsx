@@ -11,14 +11,23 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
   // su email. Si viene ese código, lo canjeamos por una sesión antes de
   // seguir, así la confirmación de cuenta queda completa.
   const { code } = await searchParams;
+  let justConfirmed = false;
   if (typeof code === "string") {
     const supabase = await createClient();
     await supabase.auth.exchangeCodeForSession(code);
+    justConfirmed = true;
   }
 
-  const { user, profile } = await getUserAndProfile();
-  if (user && profile) {
-    redirect(homeForRole(profile.role));
+  // Solo mandamos al panel automáticamente justo después de confirmar el
+  // email (ahí sí tiene sentido saltar la landing). El resto de las veces
+  // dejamos ver la página principal aunque ya esté logueado — si no, el
+  // logo "ViaFactoring" queda roto en la práctica: lo tocás y te devuelve
+  // al mismo panel en el que ya estabas, como si no hubiera pasado nada.
+  if (justConfirmed) {
+    const { user, profile } = await getUserAndProfile();
+    if (user && profile) {
+      redirect(homeForRole(profile.role));
+    }
   }
 
   return (
