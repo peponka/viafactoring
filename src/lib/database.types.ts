@@ -27,6 +27,7 @@ export type Profile = {
   nombre: string;
   empresa: string | null;
   telefono: string | null;
+  email: string | null;
   created_at: string;
 };
 

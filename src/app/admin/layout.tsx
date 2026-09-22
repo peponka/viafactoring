@@ -18,6 +18,7 @@ export default async function AdminLayout({
         links={[
           { href: "/admin", label: "Resumen" },
           { href: "/admin/pagos", label: "Pagos" },
+          { href: "/admin/operadores", label: "Operadores" },
           { href: "/admin/fondeadores", label: "Fondeadores" },
           { href: "/admin/facturas", label: "Facturas" },
           { href: "/admin/packs", label: "Packs" },

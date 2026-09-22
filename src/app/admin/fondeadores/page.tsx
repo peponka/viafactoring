@@ -38,6 +38,7 @@ export default async function AdminFondeadoresPage() {
               <div>
                 <p className="font-semibold">{f.nombre}</p>
                 <p className="text-sm text-ink-soft">
+                  {f.email ? `${f.email} · ` : ""}
                   {f.empresa ? `${f.empresa} · ` : ""}
                   {f.telefono ? `${f.telefono} · ` : ""}
                   desde {formatFecha(f.created_at)}
