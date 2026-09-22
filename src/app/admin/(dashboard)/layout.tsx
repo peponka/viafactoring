@@ -8,8 +8,7 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   const { user, profile } = await getUserAndProfile();
-  if (!user || !profile) redirect("/login");
-  if (profile.role !== "admin") redirect("/");
+  if (!user || !profile || profile.role !== "admin") redirect("/admin/login");
 
   return (
     <div className="flex-1 flex flex-col">

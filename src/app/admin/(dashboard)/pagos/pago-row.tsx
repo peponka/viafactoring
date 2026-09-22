@@ -6,7 +6,7 @@ import {
   cancelarPagoAction,
   confirmarPagoAction,
   guardarLinkPagoAction,
-} from "../actions";
+} from "../../actions";
 import { Button, ErrorText, Input } from "@/components/ui";
 import type { PaymentRequest } from "@/lib/database.types";
 

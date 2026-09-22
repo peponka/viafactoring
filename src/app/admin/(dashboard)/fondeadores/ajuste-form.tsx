@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ajustarCreditoAction } from "../actions";
+import { ajustarCreditoAction } from "../../actions";
 import { Button, ErrorText, Input } from "@/components/ui";
 
 export function AjusteForm({ fondeadorId }: { fondeadorId: string }) {

@@ -2,16 +2,10 @@
 
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { togglePackAction } from "../actions";
+import { cerrarFacturaAction } from "../../actions";
 import { Button } from "@/components/ui";
 
-export function ToggleButton({
-  packId,
-  activo,
-}: {
-  packId: string;
-  activo: boolean;
-}) {
+export function CerrarButton({ invoiceId }: { invoiceId: string }) {
   const [pending, startTransition] = useTransition();
   const router = useRouter();
 
@@ -21,12 +15,12 @@ export function ToggleButton({
       disabled={pending}
       onClick={() =>
         startTransition(async () => {
-          await togglePackAction(packId, !activo);
+          await cerrarFacturaAction(invoiceId);
           router.refresh();
         })
       }
     >
-      {activo ? "Desactivar" : "Activar"}
+      {pending ? "…" : "Marcar cerrada"}
     </Button>
   );
 }

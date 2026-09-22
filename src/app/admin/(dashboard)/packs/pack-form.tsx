@@ -2,7 +2,7 @@
 
 import { useRef, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { crearPackAction } from "../actions";
+import { crearPackAction } from "../../actions";
 import { Button, Field, Input, Select } from "@/components/ui";
 
 export function PackForm() {
