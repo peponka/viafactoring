@@ -45,10 +45,12 @@ export default function TerminosPage() {
                 ViaFactoring es un marketplace que conecta a quienes tienen
                 facturas pendientes de cobro con fondeadores (financieras,
                 bancos, fondos e inversores) interesados en adelantarles ese
-                cobro. ViaFactoring facilita
-                el contacto entre ambas partes; no es parte del acuerdo de
-                adelanto que operador y fondeador negocian y cierran entre
-                sí, ni garantiza el resultado de esa negociación.
+                cobro. ViaFactoring facilita el contacto y la negociación
+                entre ambas partes a través de un Deal Room por operación.
+                No es parte del acuerdo de adelanto que operador y fondeador
+                cierran entre sí, no recibe ni administra el dinero del
+                anticipo —que el fondeador transfiere directamente al
+                operador— ni garantiza el resultado de esa negociación.
               </p>
             </section>
 
@@ -82,18 +84,34 @@ export default function TerminosPage() {
               </h2>
               <p>
                 Los fondeadores pueden ver el monto y el vencimiento de cada
-                factura sin costo. Para acceder al deudor, el contacto del
-                operador y la documentación, el fondeador paga una tarifa de
-                desbloqueo cuyo valor depende del monto de la factura y se
-                muestra antes de confirmar el pago. Esta tarifa no es
-                reembolsable una vez confirmado el acceso, incluso si el
-                adelanto finalmente no se concreta entre las partes.
+                factura sin costo. Para acceder al deudor, la documentación
+                y el Deal Room de la operación (chat y ofertas), el
+                fondeador paga una tarifa de desbloqueo cuyo valor depende
+                del monto de la factura y se muestra antes de confirmar el
+                pago. Esta tarifa no es reembolsable una vez confirmado el
+                acceso, incluso si el adelanto finalmente no se concreta
+                entre las partes.
               </p>
             </section>
 
             <section>
               <h2 className="font-serif font-semibold text-ink text-lg mb-2">
-                5. Responsabilidad
+                5. Comisión de cierre y contacto directo
+              </h2>
+              <p>
+                Cuando el operador acepta una oferta, el fondeador paga a
+                ViaFactoring una comisión de cierre fija, cuyo valor depende
+                del monto de la factura y se informa antes de pagarla. Al
+                confirmarse ese pago se habilitan los datos de contacto
+                directo de las partes para formalizar la operación. Las
+                partes se comprometen a no usar la información obtenida en
+                la plataforma para cerrar la operación por fuera de ella.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="font-serif font-semibold text-ink text-lg mb-2">
+                6. Responsabilidad
               </h2>
               <p>
                 ViaFactoring no evalúa el riesgo crediticio de los deudores
@@ -105,7 +123,7 @@ export default function TerminosPage() {
 
             <section>
               <h2 className="font-serif font-semibold text-ink text-lg mb-2">
-                6. Cambios en el servicio
+                7. Cambios en el servicio
               </h2>
               <p>
                 ViaFactoring está en etapa piloto y puede modificar estas
@@ -116,7 +134,7 @@ export default function TerminosPage() {
 
             <section>
               <h2 className="font-serif font-semibold text-ink text-lg mb-2">
-                7. Contacto
+                8. Contacto
               </h2>
               <p>
                 Consultas sobre estos términos:{" "}

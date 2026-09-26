@@ -97,8 +97,8 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
               <p className="text-ink-soft text-sm">
                 Navegás la cartera gratis, viendo el monto y el vencimiento
                 exactos de cada operación. Pagás una tarifa de desbloqueo
-                solo por la factura que te interese, para ver el deudor, el
-                contacto y la documentación.
+                solo por la factura que te interese y entrás a su Deal Room:
+                deudor, documentación, chat con la empresa y ofertas.
               </p>
             </div>
           </div>
@@ -175,8 +175,8 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
                 {[
                   "Cargás tu factura pendiente — es gratis, siempre.",
                   "Los fondeadores ven el monto y el vencimiento exactos, sin saber todavía quién sos.",
-                  "Cuando uno paga la tarifa de desbloqueo, accede a tu contacto y te escribe.",
-                  "Acordás el adelanto directo con él y marcás la factura como cerrada.",
+                  "Cuando uno la desbloquea, se abre un Deal Room: conversan por chat, le compartís documentos y te hace su oferta.",
+                  "Comparás ofertas y aceptás la que te conviene. Al confirmarse el cierre se habilita el contacto directo y el fondeador te transfiere el anticipo a vos.",
                 ].map((paso, i) => (
                   <li key={i} className="flex gap-3">
                     <span className="num shrink-0 w-8 h-8 rounded-full bg-accent text-accent-ink flex items-center justify-center text-sm font-bold shadow-sm">
@@ -194,10 +194,10 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
               </p>
               <ol className="flex flex-col gap-4">
                 {[
-                  "Navegás la cartera de facturas disponibles, gratis y sin registrarte para mirar.",
+                  "Te registrás gratis y navegás la cartera de facturas disponibles.",
                   "Elegís la que te interesa y pagás la tarifa de desbloqueo según su monto.",
-                  "Confirmamos el pago y te habilitamos el deudor, el contacto del operador y la documentación.",
-                  "Lo contactás directo y acuerdan la operación entre ustedes.",
+                  "Confirmamos el pago y entrás al Deal Room: deudor, empresa, documentación y chat.",
+                  "Hacés tu oferta y negocian ahí mismo. Si la aceptan, pagás la comisión de cierre y se habilita el contacto directo para formalizar.",
                 ].map((paso, i) => (
                   <li key={i} className="flex gap-3">
                     <span className="num shrink-0 w-8 h-8 rounded-full bg-accent text-accent-ink flex items-center justify-center text-sm font-bold shadow-sm">
@@ -222,10 +222,11 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
                 Nada se expone antes de tiempo
               </h2>
               <p className="text-ink-soft text-sm max-w-[52ch]">
-                El deudor, el contacto del operador y la documentación de
-                cada factura quedan ocultos hasta que confirmamos el pago de
-                la tarifa de desbloqueo. Recién ahí se habilitan, y solo
-                para quien pagó.
+                La información se abre por etapas. Antes de desbloquear, el
+                fondeador ve solo los datos generales de la operación. Al
+                desbloquear accede al deudor, la documentación y el chat con
+                la empresa. Teléfonos y emails se habilitan recién cuando se
+                cierra el acuerdo.
               </p>
             </div>
             <div className="grid gap-3">
@@ -234,18 +235,27 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
                   Confirmación manual de cada pago
                 </p>
                 <p className="text-ink-soft text-sm">
-                  Cada tarifa de desbloqueo la confirmamos a mano antes de
-                  dar acceso, para evitar errores o accesos indebidos.
+                  Cada tarifa de desbloqueo y cada comisión la confirmamos a
+                  mano antes de dar acceso, para evitar errores o accesos
+                  indebidos.
                 </p>
               </div>
               <div className="bg-surface border border-line rounded-2xl p-5">
                 <p className="font-semibold text-sm mb-1">
-                  Cero intermediación forzosa
+                  El dinero va directo
                 </p>
                 <p className="text-ink-soft text-sm">
-                  ViaFactoring conecta a las partes. El acuerdo de adelanto
-                  lo cierran directamente el operador y el fondeador, en
-                  los términos que negocien entre ellos.
+                  ViaFactoring nunca recibe ni mueve el dinero del anticipo:
+                  el fondeador se lo transfiere directo a la empresa.
+                </p>
+              </div>
+              <div className="bg-surface border border-line rounded-2xl p-5">
+                <p className="font-semibold text-sm mb-1">
+                  Documentos con marca de agua
+                </p>
+                <p className="text-ink-soft text-sm">
+                  Cada descarga queda registrada y el archivo lleva el nombre
+                  de quien lo descargó.
                 </p>
               </div>
               <div className="bg-surface border border-line rounded-2xl p-5">
@@ -296,15 +306,19 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
               },
               {
                 q: "¿Cuánto paga un fondeador?",
-                a: "Una tarifa de desbloqueo que depende del monto de la factura. Se ve antes de pagar, sin costos ocultos.",
+                a: "Una tarifa de desbloqueo por la factura que le interesa y, solo si cierra el acuerdo, una comisión de cierre. Las dos son fijas, dependen del monto de la factura y se ven antes de pagar.",
               },
               {
                 q: "¿Cómo se paga hoy?",
-                a: "Por transferencia bancaria. Confirmamos el pago manualmente y ahí habilitamos el acceso. Estamos trabajando en sumar pagos automáticos.",
+                a: "Por transferencia bancaria. Confirmamos cada pago manualmente y ahí habilitamos el acceso. Estamos trabajando en sumar pagos automáticos.",
               },
               {
-                q: "¿ViaFactoring participa en la negociación del adelanto?",
-                a: "No. Conectamos a las partes; el acuerdo lo cierran directamente el operador y el fondeador.",
+                q: "¿ViaFactoring toca el dinero del anticipo?",
+                a: "No. La negociación ocurre en el Deal Room, pero el anticipo lo transfiere el fondeador directo a la empresa. ViaFactoring no recibe, retiene ni mueve ese dinero, y no es parte del acuerdo entre ellos.",
+              },
+              {
+                q: "¿Por qué el contacto directo se habilita al final?",
+                a: "Para que toda la negociación quede ordenada y registrada en un solo lugar: chat, documentos, ofertas y contraofertas. Cuando se confirma el cierre, las dos partes reciben los datos de contacto para formalizar la operación.",
               },
               {
                 q: "¿Qué pasa si nadie desbloquea mi factura?",

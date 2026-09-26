@@ -94,8 +94,9 @@ export default function NuevaFacturaPage() {
         <h1 className="text-2xl font-semibold mb-1">Cargar factura</h1>
         <p className="text-ink-soft text-sm mb-6">
           Es gratis, siempre. Los fondeadores ven el monto y el vencimiento
-          exactos sin pagar nada — recién pagan una tarifa para ver el
-          deudor, tu contacto y la documentación.
+          exactos sin pagar nada; para ver el deudor y la documentación y
+          negociar con vos pagan una tarifa de desbloqueo. Tu contacto se
+          comparte recién cuando se cierra el acuerdo.
         </p>
         <Card>
           <form action={formAction} className="flex flex-col gap-4" encType="multipart/form-data">
@@ -255,7 +256,7 @@ export default function NuevaFacturaPage() {
             </div>
 
             <Field label="Tu contacto para esta factura (opcional)">
-              <Input type="text" name="operador_contacto" placeholder="Teléfono o email — se muestra recién cuando el fondeador paga la tarifa de desbloqueo" />
+              <Input type="text" name="operador_contacto" placeholder="Teléfono o email — se comparte recién cuando se cierra el acuerdo" />
             </Field>
 
             <Field label="Descripción (opcional)">

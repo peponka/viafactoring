@@ -42,9 +42,11 @@ export default function PrivacidadPage() {
               <p>
                 Datos de la cuenta (nombre, email, rol), los datos de cada
                 factura que un operador publica (monto, vencimiento, deudor,
-                contacto y, si corresponde, el documento adjunto), y los
-                registros de pagos de tarifas de desbloqueo que hace un
-                fondeador.
+                contacto y, si corresponde, el documento adjunto), los
+                mensajes, ofertas y documentos que se comparten en cada Deal
+                Room, los registros de pagos de tarifas y comisiones, y un
+                registro de actividad (por ejemplo, quién vio o descargó
+                cada documento).
               </p>
             </section>
 
@@ -54,8 +56,9 @@ export default function PrivacidadPage() {
               </h2>
               <p>
                 Para mostrar la cartera de facturas disponibles, habilitar
-                el detalle completo de una factura al fondeador que confirmó
-                su pago, y para gestionar las cuentas y comunicarnos con los
+                el Deal Room de una factura al fondeador que confirmó su
+                pago, llevar la trazabilidad de cada negociación, y para
+                gestionar las cuentas y comunicarnos con los
                 usuarios sobre su uso de la plataforma.
               </p>
             </section>
@@ -65,11 +68,14 @@ export default function PrivacidadPage() {
                 3. Qué queda oculto hasta el pago
               </h2>
               <p>
-                El nombre del deudor, el contacto del operador y la
-                documentación de la factura no se muestran a los
-                fondeadores hasta que confirmamos el pago de la tarifa de
-                desbloqueo correspondiente a esa factura. Antes de eso, solo
-                se ve el monto, el plazo y datos generales de la operación.
+                Antes del desbloqueo, un fondeador solo ve el monto, el
+                plazo y datos generales de la operación. El nombre del
+                deudor y la documentación se muestran recién cuando
+                confirmamos el pago de la tarifa de desbloqueo de esa
+                factura. Los teléfonos y emails de las partes se habilitan
+                solo cuando se confirma la comisión de cierre. Los
+                documentos descargados llevan una marca de agua con el
+                nombre de quien los descargó.
               </p>
             </section>
 
@@ -80,7 +86,8 @@ export default function PrivacidadPage() {
               <p>
                 No vendemos datos de usuarios a terceros. Los datos de una
                 factura se comparten únicamente con el fondeador que pagó
-                la tarifa de desbloqueo de esa factura en particular.
+                la tarifa de desbloqueo de esa factura en particular, y los
+                datos de contacto solo cuando se cierra el acuerdo.
               </p>
             </section>
 
