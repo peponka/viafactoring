@@ -96,7 +96,7 @@ export default async function DealRoomPage({ params }: PageProps<"/deal-room/[id
             {inv.ubicacion ? ` · ${inv.ubicacion}` : ""}
           </p>
           <p className="text-sm mt-1">
-            {d.rol === "operador" ? "Fondeador" : "PyME"}:{" "}
+            {d.rol === "fondeador" ? "PyME" : "Fondeador"}:{" "}
             <span className="font-medium">
               {d.contraparte.empresa || d.contraparte.nombre || "—"}
             </span>

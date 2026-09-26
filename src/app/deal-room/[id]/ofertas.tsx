@@ -150,9 +150,12 @@ export function Ofertas({ d }: { d: DealRoomDetail }) {
   const meToca = pendiente && rol !== "admin" && pendiente.autor_rol !== rol;
   const historial = [...d.ofertas].reverse();
 
+  const [confirmando, setConfirmando] = useState(false);
+
   function responder(aceptar: boolean) {
     if (!pendiente) return;
     setError(null);
+    setConfirmando(false);
     startTransition(async () => {
       const res = await responderOfertaAction(d.reveal_id, pendiente.id, aceptar);
       if (res.error) setError(res.error);
@@ -173,8 +176,8 @@ export function Ofertas({ d }: { d: DealRoomDetail }) {
         <div className="rounded-xl border border-line p-4 mt-2">
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <span className="text-sm text-ink-soft">
-              {pendiente.parent_offer_id ? "Contraoferta" : "Oferta"} de{" "}
-              {pendiente.autor_rol === rol ? "vos" : pendiente.autor_rol === "fondeador" ? "el fondeador" : "la PyME"}
+              {pendiente.parent_offer_id ? "Contraoferta" : "Oferta"}{" "}
+              {pendiente.autor_rol === rol ? "tuya" : pendiente.autor_rol === "fondeador" ? "del fondeador" : "de la PyME"}
             </span>
             <Badge tone="warn">{meToca ? "Te toca responder" : "Esperando respuesta"}</Badge>
           </div>
@@ -184,9 +187,28 @@ export function Ofertas({ d }: { d: DealRoomDetail }) {
           <Condiciones o={pendiente} d={d} />
           {pendiente.mensaje && <p className="text-sm mt-2">“{pendiente.mensaje}”</p>}
 
-          {meToca && negociable && (
+          {meToca && negociable && confirmando && (
+            <div className="rounded-lg bg-surface-2 p-3 mt-4 text-sm">
+              <p className="font-medium">
+                ¿Aceptar {formatMonto(pendiente.monto_ofrecido, d.invoice.moneda)}?
+              </p>
+              <p className="text-ink-soft mt-1">
+                No se puede deshacer: la factura se cierra con este fondeador y se cierran los
+                Deal Rooms con los demás.
+              </p>
+              <div className="flex gap-2 flex-wrap mt-3">
+                <Button onClick={() => responder(true)} disabled={pending}>
+                  {pending ? "Aceptando…" : "Sí, aceptar"}
+                </Button>
+                <Button variant="ghost" onClick={() => setConfirmando(false)} disabled={pending}>
+                  Volver
+                </Button>
+              </div>
+            </div>
+          )}
+          {meToca && negociable && !confirmando && (
             <div className="flex gap-2 flex-wrap mt-4">
-              <Button onClick={() => responder(true)} disabled={pending}>
+              <Button onClick={() => setConfirmando(true)} disabled={pending}>
                 Aceptar
               </Button>
               <Button variant="ghost" onClick={() => setFormAbierto("contra")} disabled={pending}>
