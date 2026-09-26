@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getUserAndProfile } from "@/lib/session";
 import { TopNav } from "@/components/top-nav";
+import { Campana } from "@/components/campana";
 
 // El Deal Room es una ruta compartida por las dos partes. Quién puede ver
 // cada Deal Room lo decide la base (get_deal_room_detail + RLS), no esta
@@ -29,7 +30,11 @@ export default async function DealRoomLayout({
 
   return (
     <div className="flex-1 flex flex-col">
-      <TopNav nombre={profile.nombre} links={links} />
+      <TopNav
+        nombre={profile.nombre}
+        links={links}
+        rightSlot={profile.role === "admin" ? null : <Campana userId={user.id} />}
+      />
       <main className="wrap max-w-6xl mx-auto px-6 py-8 flex-1 w-full">{children}</main>
     </div>
   );

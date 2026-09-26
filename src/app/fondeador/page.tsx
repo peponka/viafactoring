@@ -120,7 +120,7 @@ export default async function FondeadorMarketplacePage({
                 </div>
                 {!t.ya_revelada && (
                   <p className="text-xs text-ink-soft mt-3">
-                    Desbloquear: {formatMonto(t.unlock_fee, t.moneda)}
+                    Desbloquear: {formatMonto(t.unlock_fee, "USD")}
                   </p>
                 )}
               </Card>

@@ -2,7 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
+import { iniciarPago, type ResultadoInicio } from "@/lib/pagos/servicio";
+import { enviarEmailsPendientes } from "@/lib/notificaciones/email";
 
 // Todas las acciones del Deal Room llaman a funciones de la base que
 // verifican pertenencia con auth.uid(). Nada de lo que llega del navegador
@@ -21,6 +24,9 @@ function refrescar(revealId: string) {
   revalidatePath(`/deal-room/${revealId}`);
   revalidatePath("/fondeador");
   revalidatePath("/operador");
+  // Los avisos importantes (ofertas, aceptación, desembolso) salen enseguida;
+  // los mensajes de chat esperan unos minutos para agruparse.
+  after(() => enviarEmailsPendientes());
 }
 
 export type Resultado = { error: string | null; ok?: boolean };
@@ -116,21 +122,6 @@ export async function responderOfertaAction(
   return { error: error?.message ?? null };
 }
 
-export async function checklistAction(
-  revealId: string,
-  key: string,
-  hecho: boolean,
-): Promise<Resultado> {
-  const { supabase } = await sesion();
-  const { error } = await supabase.rpc("actualizar_checklist", {
-    p_reveal_id: revealId,
-    p_key: key,
-    p_hecho: hecho,
-  });
-  refrescar(revealId);
-  return { error: error?.message ?? null };
-}
-
 export async function declararTransferenciaAction(
   revealId: string,
   offerId: string,
@@ -203,4 +194,18 @@ export async function subirDocumentoAction(_prev: Resultado, formData: FormData)
 
   refrescar(revealId);
   return { error: null, ok: true };
+}
+
+// Pago de la comisión desde el Deal Room. El monto lo calcula la base.
+export async function pagarComisionAction(revealId: string): Promise<ResultadoInicio> {
+  await sesion();
+  const r = await iniciarPago("comision", revealId);
+  refrescar(revealId);
+  return r;
+}
+
+export async function reportarProblemaAction(revealId: string, detalle: string): Promise<Resultado> {
+  const { supabase } = await sesion();
+  const { error } = await supabase.rpc("reportar_problema", { p_reveal_id: revealId, p_detalle: detalle });
+  return { error: error?.message ?? null, ok: !error };
 }

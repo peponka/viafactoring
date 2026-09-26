@@ -1,36 +1,60 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { solicitarDesbloqueoAction } from "../../actions";
+import { desbloquearAction } from "../../actions";
 import { Button, ErrorText } from "@/components/ui";
 import { formatMonto } from "@/lib/format";
-import type { PaymentRequest } from "@/lib/database.types";
 
+type EstadoPago = {
+  id: string;
+  estado: string;
+  monto_cobro: number | null;
+  moneda_cobro: string | null;
+  monto_usd: number | null;
+} | null;
+
+// Desbloquear = pagar en la pasarela. Al volver, la página espera la
+// confirmación de la pasarela (webhook) y entra sola al Deal Room.
 export function UnlockButton({
   invoiceId,
-  fee,
-  moneda,
-  pendingRequest,
+  feeUsd,
+  pago,
+  volviendo,
 }: {
   invoiceId: string;
-  fee: number;
-  moneda: string;
-  pendingRequest: PaymentRequest | null;
+  feeUsd: number;
+  pago: EstadoPago;
+  volviendo: boolean;
 }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const esperando = pago?.estado === "procesando" || (volviendo && pago?.estado === "pendiente");
+  const fallo = pago && ["fallido", "rechazado"].includes(pago.estado);
 
-  if (pendingRequest && pendingRequest.estado === "pendiente") {
+  useEffect(() => {
+    if (!esperando) return;
+    const t = setInterval(() => router.refresh(), 4000);
+    return () => clearInterval(t);
+  }, [esperando, router]);
+
+  function pagar() {
+    setError(null);
+    startTransition(async () => {
+      const r = await desbloquearAction(invoiceId);
+      if (!r.ok) return setError(r.error);
+      if ("url" in r && r.url) window.location.href = r.url;
+      else router.refresh();
+    });
+  }
+
+  if (esperando) {
     return (
-      <div className="rounded-lg border border-line bg-surface-soft p-4 text-sm">
-        <p className="font-medium mb-1">
-          Solicitud de desbloqueo enviada — {formatMonto(pendingRequest.monto, pendingRequest.moneda)}
-        </p>
-        <p className="text-ink-soft">
-          Transferí ese monto y esperá la confirmación. En cuanto se confirme
-          el pago, se abre el Deal Room de esta operación acá mismo.
+      <div className="rounded-xl border border-line bg-surface-2 p-4 text-sm" role="status">
+        <p className="font-medium">⏳ Estamos esperando la confirmación del pago.</p>
+        <p className="text-ink-soft mt-1">
+          En cuanto la pasarela lo confirme, se abre el Deal Room. No hace falta que hagas nada.
         </p>
       </div>
     );
@@ -38,23 +62,17 @@ export function UnlockButton({
 
   return (
     <div className="flex flex-col gap-2 items-start">
-      <Button
-        disabled={pending}
-        onClick={() =>
-          startTransition(async () => {
-            const result = await solicitarDesbloqueoAction(invoiceId);
-            if (result.error) {
-              setError(result.error);
-            } else {
-              router.refresh();
-            }
-          })
-        }
-      >
-        {pending
-          ? "Enviando…"
-          : `Me interesa esta operación — desbloquear por ${formatMonto(fee, moneda)}`}
+      {fallo && (
+        <p className="text-sm text-critical bg-critical-soft rounded-lg px-3.5 py-2.5">
+          El pago no pudo completarse. Podés intentarlo de nuevo.
+        </p>
+      )}
+      <Button disabled={pending} onClick={pagar}>
+        {pending ? "Abriendo el pago…" : `Desbloquear y negociar — ${formatMonto(feeUsd, "USD")}`}
       </Button>
+      <p className="text-xs text-ink-soft">
+        Se paga en guaraníes al tipo de cambio del día. Si no se concreta ningún acuerdo, no pagás nada más.
+      </p>
       <ErrorText>{error}</ErrorText>
     </div>
   );

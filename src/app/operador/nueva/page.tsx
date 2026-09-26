@@ -218,7 +218,6 @@ export default function NuevaFacturaPage() {
                 >
                   <option value="USD">USD</option>
                   <option value="PYG">PYG</option>
-                  <option value="ARS">ARS</option>
                 </Select>
               </Field>
               <Field label="Plazo (días hasta el vencimiento)">

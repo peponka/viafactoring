@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { pasarelaPorNombre } from "@/lib/pagos";
 
 async function requireAdmin() {
   const supabase = await createClient();
@@ -21,41 +22,99 @@ async function requireAdmin() {
   return { supabase };
 }
 
-export async function confirmarPagoAction(requestId: string, paymentLink?: string) {
+// Excepciones: lo único que el admin toca del flujo de pagos. Cada acción
+// exige un motivo y queda en audit_logs (lo registra la base).
+
+export async function resolverExcepcionAction(
+  id: string,
+  estado: "resuelta" | "descartada",
+  resolucion: string,
+) {
   const { supabase } = await requireAdmin();
-
-  if (paymentLink) {
-    await supabase
-      .from("payment_requests")
-      .update({ payment_link: paymentLink })
-      .eq("id", requestId);
-  }
-
-  const { error } = await supabase.rpc("confirm_payment_request", {
-    p_request_id: requestId,
+  const { error } = await supabase.rpc("admin_resolver_excepcion", {
+    p_id: id,
+    p_estado: estado,
+    p_resolucion: resolucion,
   });
-
-  revalidatePath("/admin/pagos");
-  revalidatePath("/admin/fondeadores");
+  revalidatePath("/admin/excepciones");
+  revalidatePath("/admin");
   return { error: error?.message ?? null };
 }
 
-export async function cancelarPagoAction(requestId: string) {
+// Para cuando la pasarela cobró y el aviso no llegó: se verifica el estado
+// consultando a la pasarela desde el servidor antes de aplicar nada.
+export async function aplicarPagoVerificadoAction(exceptionId: string, motivo: string) {
   const { supabase } = await requireAdmin();
-  await supabase
+  const { data: exc } = await supabase
+    .from("exceptions")
+    .select("payment_request_id")
+    .eq("id", exceptionId)
+    .single();
+  if (!exc?.payment_request_id) return { error: "Esta excepción no tiene un pago asociado." };
+
+  const { data: req } = await supabase
     .from("payment_requests")
-    .update({ estado: "cancelado" })
-    .eq("id", requestId);
-  revalidatePath("/admin/pagos");
+    .select("provider, provider_ref")
+    .eq("id", exc.payment_request_id)
+    .single();
+  const pasarela = req?.provider ? pasarelaPorNombre(req.provider) : null;
+  if (pasarela && req?.provider_ref) {
+    const consulta = await pasarela.consultarEstado(req.provider_ref).catch(() => null);
+    if (consulta && consulta.estado !== "confirmado") {
+      return { error: `La pasarela informa que el pago está "${consulta.estado}". No se aplicó.` };
+    }
+  }
+
+  const { error } = await supabase.rpc("admin_aplicar_pago_verificado", {
+    p_exception_id: exceptionId,
+    p_motivo: motivo,
+  });
+  revalidatePath("/admin/excepciones");
+  revalidatePath("/admin");
+  return { error: error?.message ?? null };
 }
 
-export async function guardarLinkPagoAction(requestId: string, paymentLink: string) {
+// Devolución: se pide a la pasarela desde el servidor y recién después se
+// marca el pago como devuelto.
+export async function devolverPagoAction(exceptionId: string, motivo: string) {
   const { supabase } = await requireAdmin();
-  await supabase
+  const { data: exc } = await supabase
+    .from("exceptions")
+    .select("payment_request_id")
+    .eq("id", exceptionId)
+    .single();
+  if (!exc?.payment_request_id) return { error: "Esta excepción no tiene un pago asociado." };
+  const { data: req } = await supabase
     .from("payment_requests")
-    .update({ payment_link: paymentLink })
-    .eq("id", requestId);
-  revalidatePath("/admin/pagos");
+    .select("provider, provider_ref, monto_cobro, monto")
+    .eq("id", exc.payment_request_id)
+    .single();
+  const pasarela = req?.provider ? pasarelaPorNombre(req.provider) : null;
+  if (!pasarela || !req?.provider_ref) {
+    return { error: "No hay una pasarela activa para ese pago. Hacé la devolución desde su portal y descartá la excepción con el detalle." };
+  }
+  const dev = await pasarela.devolver(req.provider_ref, Number(req.monto_cobro ?? req.monto));
+  if (!dev.ok) {
+    return { error: `La pasarela no aceptó la devolución (${dev.detalle}). Hacela desde su portal.` };
+  }
+  const { error } = await supabase.rpc("admin_marcar_devuelto", {
+    p_exception_id: exceptionId,
+    p_motivo: motivo,
+  });
+  revalidatePath("/admin/excepciones");
+  return { error: error?.message ?? null };
+}
+
+// Carga manual del tipo de cambio (solo si el BCP no respondió).
+export async function cargarTipoCambioAction(fecha: string, pyg: number) {
+  const { supabase } = await requireAdmin();
+  const { error } = await supabase.rpc("guardar_tipo_cambio", {
+    p_fecha: fecha,
+    p_pyg: pyg,
+    p_fuente: "manual_admin",
+  });
+  revalidatePath("/admin/excepciones");
+  return { error: error?.message ?? null };
 }
 
 export async function ajustarCreditoAction(

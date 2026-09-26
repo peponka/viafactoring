@@ -1,4 +1,4 @@
-// Hand-written types matching supabase/migrations/0001-0011.
+// Hand-written types matching supabase/migrations/0001-0012.
 // Once the Supabase project is live, you can regenerate the authoritative
 // version with:
 //   npx supabase gen types typescript --project-id <ref> > src/lib/database.types.ts
@@ -17,13 +17,22 @@ export type TipoTransaccion =
   | "compra"
   | "consumo"
   | "ajuste_admin";
-export type EstadoPago = "pendiente" | "confirmado" | "cancelado";
+export type EstadoPago =
+  | "pendiente"
+  | "procesando"
+  | "confirmado"
+  | "fallido"
+  | "rechazado"
+  | "vencido"
+  | "devuelto"
+  | "cancelado";
 export type EstadoOferta =
   | "pendiente"
   | "aceptada"
   | "rechazada"
   | "reemplazada"
-  | "cancelada";
+  | "cancelada"
+  | "expirada";
 export type EstadoDealRoom =
   | "open"
   | "negotiating"
@@ -145,6 +154,18 @@ export type PaymentRequest = {
   created_at: string;
   confirmed_at: string | null;
   confirmed_by: string | null;
+  provider: string | null;
+  provider_ref: string | null;
+  checkout_url: string | null;
+  expires_at: string | null;
+  paid_at: string | null;
+  reveal_id: string | null;
+  monto_usd: number | null;
+  moneda_cobro: string | null;
+  monto_cobro: number | null;
+  tipo_cambio: number | null;
+  tipo_cambio_fecha: string | null;
+  updated_at: string;
 };
 
 export type Offer = {
@@ -164,6 +185,7 @@ export type Offer = {
   fecha_pago_prevista: string | null;
   fondos_enviados_at: string | null;
   fondos_recibidos_at: string | null;
+  expira_at: string | null;
 };
 
 export type Reveal = {
@@ -179,6 +201,7 @@ export type Reveal = {
   cerrado_at: string | null;
   cancelado_motivo: string | null;
   ultima_actividad_at: string;
+  comision_vence_at: string | null;
 };
 
 export type ChecklistItem = {
@@ -203,8 +226,121 @@ export type Message = {
   solicitud_estado: "abierta" | "resuelta" | null;
   contacto_detectado: boolean;
   patrones: string[];
-  meta: Record<string, unknown>;
+  meta: MessageMeta;
   leido_at: string | null;
+  created_at: string;
+};
+
+// Tarjetas del chat: el mensaje del sistema dice qué representa y apunta al
+// registro real (la oferta o el pago siguen siendo la fuente de verdad).
+export type MessageMeta = {
+  kind?:
+    | "desbloqueo"
+    | "oferta"
+    | "oferta_aceptada"
+    | "oferta_rechazada"
+    | "oferta_vencida"
+    | "comision"
+    | "pago_fallido"
+    | "comision_vencida"
+    | "contacto"
+    | "desembolso"
+    | "fin"
+    | "cerrada"
+    | "reabierta";
+  offer_id?: string;
+  payment_request_id?: string;
+  autor_rol?: RolDealRoom;
+  lado?: "envio" | "recepcion";
+};
+
+export type Notification = {
+  id: string;
+  user_id: string;
+  reveal_id: string | null;
+  message_id: string | null;
+  tipo: string;
+  titulo: string;
+  cuerpo: string | null;
+  accion_label: string;
+  url: string;
+  cantidad: number;
+  leida_at: string | null;
+  email_estado: "pendiente" | "enviado" | "omitido" | "error";
+  created_at: string;
+  updated_at: string;
+};
+
+export type NotificationPrefs = {
+  user_id: string;
+  email: boolean;
+  whatsapp: boolean;
+  whatsapp_numero: string | null;
+  updated_at: string;
+};
+
+export type TipoExcepcion =
+  | "pago_inconsistente"
+  | "webhook_invalido"
+  | "orden_desconocida"
+  | "pago_sin_aviso"
+  | "pago_duplicado"
+  | "sin_tipo_cambio"
+  | "reclamo"
+  | "error_tecnico";
+
+export type ExceptionRow = {
+  id: string;
+  tipo: TipoExcepcion;
+  estado: "abierta" | "resuelta" | "descartada";
+  reveal_id: string | null;
+  invoice_id: string | null;
+  payment_request_id: string | null;
+  payment_event_id: string | null;
+  user_id: string | null;
+  detalle: string;
+  datos: Record<string, unknown>;
+  resolucion: string | null;
+  resuelta_por: string | null;
+  resuelta_at: string | null;
+  created_at: string;
+};
+
+export type PaymentEvent = {
+  id: string;
+  provider: string;
+  dedupe_key: string;
+  provider_ref: string | null;
+  estado_informado: string | null;
+  monto: number | null;
+  moneda: string | null;
+  firma_valida: boolean;
+  payload: Record<string, unknown>;
+  payment_request_id: string | null;
+  resultado: string | null;
+  error: string | null;
+  recibido_at: string;
+  procesado_at: string | null;
+};
+
+export type FxRate = {
+  fecha: string;
+  moneda: "USD";
+  pyg_por_unidad: number;
+  fuente: string;
+  created_at: string;
+};
+
+export type AuditLog = {
+  id: string;
+  actor_id: string | null;
+  actor_rol: string | null;
+  accion: string;
+  invoice_id: string | null;
+  reveal_id: string | null;
+  entidad: string | null;
+  entidad_id: string | null;
+  meta: Record<string, unknown>;
   created_at: string;
 };
 
@@ -280,14 +416,49 @@ export type DealRoomOferta = {
   notifica_deudor: boolean | null;
   fecha_pago_prevista: string | null;
   created_at: string;
+  expira_at: string | null;
   fondos_enviados_at: string | null;
   fondos_recibidos_at: string | null;
 };
+
+// "Ahora te toca a vos": lo calcula la base (turno_deal_room).
+export type Turno =
+  | { accion: "conversar" | "negociar" | "finalizada" | "cerrada"; actor: null }
+  | {
+      accion: "responder_oferta";
+      actor: RolDealRoom;
+      offer_id: string;
+      monto: number;
+      autor_rol: RolDealRoom;
+      expira_at: string | null;
+    }
+  | {
+      accion: "pagar_comision" | "reintentar_comision" | "esperando_pago";
+      actor: "fondeador";
+      offer_id: string;
+      payment_request_id: string | null;
+      monto_usd: number | null;
+      monto_cobro: number | null;
+      moneda_cobro: string | null;
+      vence_at: string | null;
+    }
+  | {
+      accion: "desembolso";
+      actor: RolDealRoom | "ambos" | null;
+      offer_id: string;
+      enviado: boolean;
+      recibido: boolean;
+    };
+
+export type EtapaVisible = "negociacion" | "oferta" | "cierre" | "finalizada" | "cerrada";
 
 export type DealRoomDetail = {
   reveal_id: string;
   rol: RolDealRoom | "admin";
   estado: EstadoDealRoom;
+  etapa: EtapaVisible;
+  turno: Turno;
+  industria: string | null;
   nivel: number;
   checklist: ChecklistItem[];
   revealed_at: string;
@@ -306,8 +477,10 @@ export type DealRoomDetail = {
     id: string;
     monto: number;
     moneda: string;
+    monto_usd: number | null;
+    monto_cobro: number | null;
+    moneda_cobro: string | null;
     estado: EstadoPago;
-    payment_link: string | null;
   } | null;
 };
 
@@ -377,6 +550,16 @@ export type Database = {
       messages: TableDef<Message, never>;
       documents: TableDef<DocumentRow, never>;
       industries: TableDef<Industry, Partial<Industry> & { slug: string; nombre: string }>;
+      notifications: TableDef<Notification, never, Pick<Notification, "leida_at">>;
+      notification_prefs: TableDef<
+        NotificationPrefs,
+        Pick<NotificationPrefs, "user_id" | "email">,
+        Pick<NotificationPrefs, "email">
+      >;
+      exceptions: TableDef<ExceptionRow, never>;
+      payment_events: TableDef<PaymentEvent, never, Partial<Pick<PaymentEvent, "resultado" | "procesado_at" | "error">>>;
+      fx_rates: TableDef<FxRate, never>;
+      audit_logs: TableDef<AuditLog, never>;
       industry_fields: TableDef<
         IndustryField,
         Partial<IndustryField> & { industry_id: string; key: string; label: string; tipo: IndustryField["tipo"] }
@@ -514,6 +697,112 @@ export type Database = {
       solicitar_desbloqueo: {
         Args: { p_invoice_id: string };
         Returns: PaymentRequest;
+      };
+      preparar_pago: {
+        Args: { p_tipo: "desbloqueo" | "comision"; p_ref: string };
+        Returns: PaymentRequest;
+      };
+      registrar_orden_proveedor: {
+        Args: { p_request_id: string; p_provider: string; p_provider_ref: string; p_checkout_url: string };
+        Returns: PaymentRequest;
+      };
+      registrar_evento_pago: {
+        Args: {
+          p_provider: string;
+          p_dedupe_key: string;
+          p_provider_ref: string | null;
+          p_estado: string | null;
+          p_monto: number | null;
+          p_moneda: string | null;
+          p_firma_valida: boolean;
+          p_payload: Record<string, unknown>;
+        };
+        Returns: { evento_id: string; nuevo: boolean; resultado: string | null }[];
+      };
+      aplicar_resultado_pago: {
+        Args: {
+          p_evento_id: string | null;
+          p_provider: string;
+          p_provider_ref: string;
+          p_estado: string;
+          p_monto: number | null;
+          p_moneda: string | null;
+        };
+        Returns: string;
+      };
+      abrir_excepcion: {
+        Args: {
+          p_tipo: string;
+          p_detalle: string;
+          p_reveal_id?: string | null;
+          p_invoice_id?: string | null;
+          p_payment_request_id?: string | null;
+          p_payment_event_id?: string | null;
+          p_user_id?: string | null;
+          p_datos?: Record<string, unknown>;
+        };
+        Returns: string;
+      };
+      guardar_tipo_cambio: {
+        Args: { p_fecha: string; p_pyg: number; p_fuente: string };
+        Returns: undefined;
+      };
+      tipo_cambio_vigente: {
+        Args: Record<string, never>;
+        Returns: FxRate | null;
+      };
+      estado_desbloqueo: {
+        Args: { p_invoice_id: string };
+        Returns: {
+          reveal_id: string | null;
+          pago: {
+            id: string;
+            estado: EstadoPago;
+            monto_cobro: number | null;
+            moneda_cobro: string | null;
+            monto_usd: number | null;
+          } | null;
+        };
+      };
+      vencer_y_recordar: {
+        Args: Record<string, never>;
+        Returns: Record<string, number>;
+      };
+      reportar_problema: {
+        Args: { p_reveal_id: string; p_detalle: string };
+        Returns: string;
+      };
+      admin_resolver_excepcion: {
+        Args: { p_id: string; p_estado: "resuelta" | "descartada"; p_resolucion: string };
+        Returns: undefined;
+      };
+      admin_aplicar_pago_verificado: {
+        Args: { p_exception_id: string; p_motivo: string };
+        Returns: string;
+      };
+      admin_marcar_devuelto: {
+        Args: { p_exception_id: string; p_motivo: string };
+        Returns: undefined;
+      };
+      notificaciones_para_email: {
+        Args: { p_limite?: number };
+        Returns: {
+          id: string;
+          email: string | null;
+          nombre: string | null;
+          titulo: string;
+          cuerpo: string | null;
+          accion_label: string;
+          url: string;
+        }[];
+      };
+      marcar_email_notificacion: {
+        Args: { p_id: string; p_estado: "enviado" | "omitido" | "error" };
+        Returns: undefined;
+      };
+      ordenes_para_conciliar: {
+        Args: Record<string, never>;
+        Returns: PaymentRequest[];
       };
     };
   };

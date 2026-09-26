@@ -8,7 +8,6 @@ import type {
   InvoiceTeaser,
   Message,
   Offer,
-  PaymentRequest,
   Reveal,
 } from "@/lib/database.types";
 
@@ -43,7 +42,7 @@ export async function getMisDealRooms(rol: "fondeador" | "operador"): Promise<Ro
   const invoiceIds = [...new Set(reveals.map((r) => r.invoice_id))];
   const otroRol = rol === "fondeador" ? "operador" : "fondeador";
 
-  const [{ data: offers }, { data: mensajes }, { data: comisiones }] = await Promise.all([
+  const [{ data: offers }, { data: mensajes }] = await Promise.all([
     supabase
       .from("offers")
       .select("*")
@@ -51,18 +50,10 @@ export async function getMisDealRooms(rol: "fondeador" | "operador"): Promise<Ro
       .returns<Offer[]>(),
     supabase
       .from("messages")
-      .select("id, reveal_id, autor_rol, tipo, solicitud_estado, leido_at")
+      .select("id, reveal_id, autor_rol, leido_at")
       .in("reveal_id", revealIds)
       .eq("autor_rol", otroRol)
-      .returns<Pick<Message, "id" | "reveal_id" | "autor_rol" | "tipo" | "solicitud_estado" | "leido_at">[]>(),
-    rol === "fondeador"
-      ? supabase
-          .from("payment_requests")
-          .select("*")
-          .eq("tipo", "comision")
-          .eq("estado", "pendiente")
-          .returns<PaymentRequest[]>()
-      : Promise.resolve({ data: [] as PaymentRequest[] }),
+      .returns<Pick<Message, "id" | "reveal_id" | "autor_rol" | "leido_at">[]>(),
   ]);
 
   // Datos de la factura: la PyME lee su tabla; el fondeador, la vista pública
@@ -134,21 +125,14 @@ export async function getMisDealRooms(rol: "fondeador" | "operador"): Promise<Ro
           pendiente.parent_offer_id ? "Responder la contraoferta" : "Responder la oferta",
         );
       }
-      if (msgs.some((m) => m.tipo === "solicitud" && m.solicitud_estado === "abierta")) {
-        pendientes.push("Hay una solicitud abierta");
-      }
-      if (
-        rol === "fondeador" &&
-        aceptada &&
-        (comisiones ?? []).some((c) => c.offer_id === aceptada.id)
-      ) {
+      if (rol === "fondeador" && r.estado === "offer_accepted") {
         pendientes.push("Pagar la comisión de cierre");
       }
       if (r.estado === "closing" && aceptada) {
         if (rol === "fondeador" && !aceptada.fondos_enviados_at) {
-          pendientes.push("Declarar la transferencia");
+          pendientes.push("Avisar que enviaste los fondos");
         }
-        if (rol === "operador" && aceptada.fondos_enviados_at && !aceptada.fondos_recibidos_at) {
+        if (rol === "operador" && !aceptada.fondos_recibidos_at) {
           pendientes.push("Confirmar que recibiste los fondos");
         }
       }

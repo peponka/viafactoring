@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { iniciarPago, type ResultadoInicio } from "@/lib/pagos/servicio";
 
 // Legacy (modelo de créditos). reveal_invoice ahora devuelve la info por niveles.
 export type ActionResult = { error?: string; invoice?: unknown };
@@ -44,24 +45,14 @@ export async function revelarFacturaAction(
   return { invoice: data ?? undefined };
 }
 
-// Crea (o recupera, si ya existe una pendiente) la solicitud de pago para
-// desbloquear el expediente completo de una operación. El monto lo calcula
-// el RPC server-side (tabla escalonada por monto de la factura) — el
-// cliente nunca decide cuánto paga.
-export async function solicitarDesbloqueoAction(
-  invoiceId: string,
-): Promise<{ error: string | null }> {
-  const { supabase } = await requireFondeador();
-
-  const { error } = await supabase.rpc("solicitar_desbloqueo", {
-    p_invoice_id: invoiceId,
-  });
-
-  if (error) return { error: error.message };
-
-  revalidatePath("/fondeador");
+// Inicia el pago del desbloqueo. El monto (tramo en USD → guaraníes) lo
+// calcula la base; el Deal Room se abre solo cuando la pasarela confirma el
+// pago por webhook, nunca porque el usuario vuelva de la pasarela.
+export async function desbloquearAction(invoiceId: string): Promise<ResultadoInicio> {
+  await requireFondeador();
+  const r = await iniciarPago("desbloqueo", invoiceId);
   revalidatePath(`/fondeador/facturas/${invoiceId}`);
-  return { error: null };
+  return r;
 }
 
 // Los documentos se sirven por /api/documentos/[id] (con marca de agua y

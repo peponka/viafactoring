@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getUserAndProfile } from "@/lib/session";
 import { TopNav } from "@/components/top-nav";
+import { Campana } from "@/components/campana";
 
 // NOTA: la compra de créditos (fondeador_credits / /fondeador/creditos) ya
 // no es el mecanismo de pago — se reemplazó por el desbloqueo pago por
@@ -21,6 +22,7 @@ export default async function FondeadorLayout({
     <div className="flex-1 flex flex-col">
       <TopNav
         nombre={profile.nombre}
+        rightSlot={<Campana userId={user.id} />}
         links={[
           { href: "/fondeador", label: "Marketplace" },
           { href: "/fondeador/deal-rooms", label: "Mis Deal Rooms" },

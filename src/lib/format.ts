@@ -58,12 +58,12 @@ export const TIPO_PAGO_LABEL: Record<string, string> = {
 };
 
 export const ESTADO_DEAL_ROOM_LABEL: Record<string, string> = {
-  open: "Abierto",
-  negotiating: "En negociación",
-  offer_accepted: "Oferta aceptada",
-  closing: "Formalizando",
-  closed: "Cerrado",
-  cancelled: "Cancelado",
+  open: "Negociación",
+  negotiating: "Negociación",
+  offer_accepted: "Cierre",
+  closing: "Cierre",
+  closed: "Finalizada",
+  cancelled: "Cerrada",
 };
 
 export function estadoDealRoomTone(estado: string) {
@@ -82,13 +82,18 @@ export const NIVEL_LABEL: Record<number, string> = {
 
 export function formatFechaHora(fecha: string | null) {
   if (!fecha) return "—";
-  return new Intl.DateTimeFormat("es-PY", {
+  // Armado a mano (24 h) para que el servidor y el navegador produzcan
+  // exactamente el mismo texto (Intl difiere en espacios de "a. m.").
+  const partes = new Intl.DateTimeFormat("en-GB", {
     day: "2-digit",
     month: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
+    hourCycle: "h23",
     timeZone: TZ,
-  }).format(new Date(fecha));
+  }).formatToParts(new Date(fecha));
+  const v = (t: string) => partes.find((p) => p.type === t)?.value ?? "";
+  return `${v("day")}/${v("month")} ${v("hour")}:${v("minute")}`;
 }
 
 // Descuento implícito de una oferta: lo que el fondeador "se queda" por

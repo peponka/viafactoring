@@ -27,7 +27,7 @@ export default async function AdminOverviewPage() {
       count(supabase, "invoices"),
       count(supabase, "invoices", { estado: "disponible" }),
       count(supabase, "reveals"),
-      count(supabase, "payment_requests", { estado: "pendiente" }),
+      count(supabase, "exceptions", { estado: "abierta" }),
     ]);
 
   const stats = [
@@ -55,9 +55,9 @@ export default async function AdminOverviewPage() {
       {pendientes > 0 && (
         <Card className="border-gold bg-gold-soft/30 flex items-center justify-between flex-wrap gap-4">
           <p className="font-medium">
-            Tenés {pendientes} pago(s) pendiente(s) de confirmar
+            Hay {pendientes} excepción(es) para revisar
           </p>
-          <LinkButton href="/admin/pagos">Ver pagos</LinkButton>
+          <LinkButton href="/admin/excepciones">Ver excepciones</LinkButton>
         </Card>
       )}
     </div>

@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getUserAndProfile } from "@/lib/session";
 import { Badge, Card } from "@/components/ui";
 import { formatFecha, formatMonto, RIESGO_LABEL, rubroLabel } from "@/lib/format";
-import type { InvoiceTeaser, PaymentRequest } from "@/lib/database.types";
+import type { InvoiceTeaser } from "@/lib/database.types";
 import { UnlockButton } from "./unlock-button";
 
 function riesgoTone(riesgo: string) {
@@ -16,9 +16,11 @@ function riesgoTone(riesgo: string) {
 // su Deal Room: información ampliada, chat, documentos y ofertas.
 export default async function FacturaFondeadorPage({
   params,
+  searchParams,
 }: PageProps<"/fondeador/facturas/[id]">) {
   const { id } = await params;
-  const { profile } = await getUserAndProfile();
+  const volviendo = !!(await searchParams).pago;
+  await getUserAndProfile();
   const supabase = await createClient();
 
   const { data: teaser } = await supabase
@@ -29,25 +31,9 @@ export default async function FacturaFondeadorPage({
 
   if (!teaser) notFound();
 
-  if (teaser.ya_revelada) {
-    const { data: room } = await supabase
-      .from("reveals")
-      .select("id")
-      .eq("invoice_id", id)
-      .eq("fondeador_id", profile!.id)
-      .maybeSingle<{ id: string }>();
-    if (room) redirect(`/deal-room/${room.id}`);
-  }
-
-  const { data: pendingRequest } = await supabase
-    .from("payment_requests")
-    .select("*")
-    .eq("invoice_id", id)
-    .eq("fondeador_id", profile!.id)
-    .eq("tipo", "desbloqueo")
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle<PaymentRequest>();
+  // Si el pago ya se confirmó, el Deal Room existe: se entra directo.
+  const { data: estado } = await supabase.rpc("estado_desbloqueo", { p_invoice_id: id });
+  if (estado?.reveal_id) redirect(`/deal-room/${estado.reveal_id}`);
 
   const datosSector = Object.entries(teaser.industry_data_publica ?? {});
 
@@ -91,9 +77,9 @@ export default async function FacturaFondeadorPage({
         <div className="col-span-2">
           <p className="text-ink-soft text-xs uppercase tracking-wide">Al desbloquear</p>
           <p className="text-sm">
-            Accedés al Deal Room de esta operación: deudor e identidad de la PyME, documentación,
-            chat para preguntar y la posibilidad de ofertar. El contacto directo se habilita al
-            cerrar el acuerdo.
+            Entrás a la sala de negociación con la PyME: ves el deudor, los documentos, podés
+            preguntar por chat y hacer tu oferta. El contacto directo se muestra al cerrar el
+            acuerdo.
           </p>
         </div>
       </Card>
@@ -101,9 +87,9 @@ export default async function FacturaFondeadorPage({
       {teaser.estado === "disponible" ? (
         <UnlockButton
           invoiceId={id}
-          fee={teaser.unlock_fee}
-          moneda={teaser.moneda}
-          pendingRequest={pendingRequest ?? null}
+          feeUsd={teaser.unlock_fee}
+          pago={estado?.pago ?? null}
+          volviendo={volviendo}
         />
       ) : (
         <p className="text-sm text-ink-soft">Esta operación ya no está disponible.</p>

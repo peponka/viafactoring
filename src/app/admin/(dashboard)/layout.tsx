@@ -16,6 +16,7 @@ export default async function AdminLayout({
         nombre={profile.nombre}
         links={[
           { href: "/admin", label: "Resumen" },
+          { href: "/admin/excepciones", label: "Excepciones" },
           { href: "/admin/pagos", label: "Pagos" },
           { href: "/admin/operadores", label: "Operadores" },
           { href: "/admin/fondeadores", label: "Fondeadores" },

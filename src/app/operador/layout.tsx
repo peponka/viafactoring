@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getUserAndProfile } from "@/lib/session";
 import { TopNav } from "@/components/top-nav";
+import { Campana } from "@/components/campana";
 
 export default async function OperadorLayout({
   children,
@@ -15,6 +16,7 @@ export default async function OperadorLayout({
     <div className="flex-1 flex flex-col">
       <TopNav
         nombre={profile.nombre}
+        rightSlot={<Campana userId={user.id} />}
         links={[
           { href: "/operador", label: "Mis facturas" },
           { href: "/operador/deal-rooms", label: "Deal Rooms" },
