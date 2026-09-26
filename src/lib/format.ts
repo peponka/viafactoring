@@ -4,12 +4,20 @@ export function formatMonto(monto: number, moneda: string) {
   }).format(monto)}`;
 }
 
+// Todas las fechas se muestran en hora de Paraguay, se rendericen en el
+// servidor (Vercel corre en UTC) o en el navegador.
+const TZ = "America/Asuncion";
+
 export function formatFecha(fecha: string | null) {
   if (!fecha) return "—";
+  // Una fecha sola ("2026-10-01") es un día del calendario, no un instante:
+  // se muestra tal cual, sin correrla por la zona horaria.
+  const soloFecha = /^\d{4}-\d{2}-\d{2}$/.test(fecha);
   return new Intl.DateTimeFormat("es-PY", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
+    timeZone: soloFecha ? "UTC" : TZ,
   }).format(new Date(fecha));
 }
 
@@ -79,6 +87,7 @@ export function formatFechaHora(fecha: string | null) {
     month: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: TZ,
   }).format(new Date(fecha));
 }
 
