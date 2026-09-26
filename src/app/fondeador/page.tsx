@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { Badge, Card } from "@/components/ui";
 import { formatFecha, formatMonto, RIESGO_LABEL, rubroLabel } from "@/lib/format";
 import type { InvoiceTeaser } from "@/lib/database.types";
+import { getMisDealRooms } from "@/lib/deal-rooms";
+import { TeTocaAVos } from "@/components/deal-room-list";
 
 function riesgoTone(riesgo: string) {
   if (riesgo === "bajo") return "good" as const;
@@ -10,22 +12,57 @@ function riesgoTone(riesgo: string) {
   return "warn" as const;
 }
 
-export default async function FondeadorMarketplacePage() {
+export default async function FondeadorMarketplacePage({
+  searchParams,
+}: PageProps<"/fondeador">) {
+  const { industria } = await searchParams;
+  const filtro = typeof industria === "string" ? industria : null;
   const supabase = await createClient();
-  const { data: teasers } = await supabase
-    .from("invoice_teasers")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .returns<InvoiceTeaser[]>();
+  const [{ data: todas }, rooms] = await Promise.all([
+    supabase
+      .from("invoice_teasers")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .returns<InvoiceTeaser[]>(),
+    getMisDealRooms("fondeador"),
+  ]);
+
+  // Industrias presentes en el marketplace (el filtro usa la industria padre
+  // cuando existe: "Transporte" incluye fluvial y terrestre).
+  const grupo = (t: InvoiceTeaser) => t.industria_padre_nombre ?? t.industria_nombre ?? "Otros";
+  const industrias = [...new Set((todas ?? []).map(grupo))].sort();
+  const teasers = filtro ? (todas ?? []).filter((t) => grupo(t) === filtro) : todas;
 
   return (
     <div>
       <h1 className="text-2xl font-semibold mb-1">Marketplace de operaciones</h1>
-      <p className="text-ink-soft text-sm mb-8">
-        Explorá gratis el monto, el plazo y el riesgo de cada operación.
-        Para ver el deudor, el contacto del operador y la documentación,
-        desbloqueá la operación que te interese.
+      <p className="text-ink-soft text-sm mb-6">
+        Explorá gratis el monto, el plazo y los datos del sector de cada
+        operación. Para ver el deudor, la documentación y negociar,
+        desbloqueá la operación y entrá a su Deal Room.
       </p>
+
+      <TeTocaAVos rooms={rooms} />
+
+      {industrias.length > 1 && (
+        <div className="flex items-center gap-2 flex-wrap mb-6 text-sm">
+          <Link
+            href="/fondeador"
+            className={`px-3 py-1.5 rounded-full border ${!filtro ? "border-accent text-accent font-semibold" : "border-line text-ink-soft"}`}
+          >
+            Todas
+          </Link>
+          {industrias.map((nombre) => (
+            <Link
+              key={nombre}
+              href={`/fondeador?industria=${encodeURIComponent(nombre)}`}
+              className={`px-3 py-1.5 rounded-full border ${filtro === nombre ? "border-accent text-accent font-semibold" : "border-line text-ink-soft"}`}
+            >
+              {nombre}
+            </Link>
+          ))}
+        </div>
+      )}
 
       {!teasers || teasers.length === 0 ? (
         <Card className="text-center py-16">
@@ -41,11 +78,11 @@ export default async function FondeadorMarketplacePage() {
               <Card className="hover:border-accent transition h-full flex flex-col justify-between">
                 <div>
                   <div className="flex items-center gap-2 mb-3 flex-wrap">
-                    <Badge>{rubroLabel(t.rubro)}</Badge>
+                    <Badge>{t.industria_nombre ?? rubroLabel(t.rubro)}</Badge>
                     <Badge tone={riesgoTone(t.riesgo)}>
                       {RIESGO_LABEL[t.riesgo]}
                     </Badge>
-                    {t.ya_revelada && <Badge tone="good">Desbloqueada</Badge>}
+                    {t.ya_revelada && <Badge tone="good">En tu Deal Room</Badge>}
                     {t.estado !== "disponible" && !t.ya_revelada && (
                       <Badge tone="neutral">{t.estado}</Badge>
                     )}
@@ -53,6 +90,13 @@ export default async function FondeadorMarketplacePage() {
                   {t.descripcion && (
                     <p className="text-sm text-ink-soft mb-3 line-clamp-2">
                       {t.descripcion}
+                    </p>
+                  )}
+                  {Object.keys(t.industry_data_publica ?? {}).length > 0 && (
+                    <p className="text-xs text-ink-soft mb-3">
+                      {Object.entries(t.industry_data_publica)
+                        .map(([k, v]) => `${k.replaceAll("_", " ")}: ${String(v)}`)
+                        .join(" · ")}
                     </p>
                   )}
                 </div>

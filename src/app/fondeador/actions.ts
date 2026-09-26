@@ -2,10 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
-import type { Invoice } from "@/lib/database.types";
+import { createClient } from "@/lib/supabase/server";
 
-export type ActionResult = { error?: string; invoice?: Invoice };
+// Legacy (modelo de créditos). reveal_invoice ahora devuelve la info por niveles.
+export type ActionResult = { error?: string; invoice?: unknown };
 
 async function requireFondeador() {
   const supabase = await createClient();
@@ -64,76 +64,8 @@ export async function solicitarDesbloqueoAction(
   return { error: null };
 }
 
-// Genera una signed URL de corta duración para el documento de una
-// factura, solo si el fondeador ya la reveló (chequeado acá, server-side,
-// antes de tocar el service role).
-export async function getDocumentoUrlAction(
-  invoiceId: string,
-): Promise<{ url: string | null }> {
-  const { supabase, userId } = await requireFondeador();
-
-  const { data: reveal } = await supabase
-    .from("reveals")
-    .select("id")
-    .eq("invoice_id", invoiceId)
-    .eq("fondeador_id", userId)
-    .maybeSingle();
-
-  if (!reveal) return { url: null };
-
-  const { data: invoice } = await supabase
-    .from("invoices")
-    .select("documento_url")
-    .eq("id", invoiceId)
-    .maybeSingle();
-
-  if (!invoice?.documento_url) return { url: null };
-
-  const admin = createServiceRoleClient();
-  const { data: signed } = await admin.storage
-    .from("facturas")
-    .createSignedUrl(invoice.documento_url, 60 * 10);
-
-  return { url: signed?.signedUrl ?? null };
-}
-
-export async function marcarContactadoAction(invoiceId: string) {
-  const { supabase, userId } = await requireFondeador();
-  await supabase
-    .from("reveals")
-    .update({ contactado: true })
-    .eq("invoice_id", invoiceId)
-    .eq("fondeador_id", userId);
-  revalidatePath(`/fondeador/facturas/${invoiceId}`);
-}
-
-// Crea o actualiza la oferta del fondeador sobre una factura ya destrabada.
-// Si el operador ya la aceptó, el RPC rechaza el cambio.
-export async function hacerOfertaAction(
-  _prev: { error: string | null; ok?: boolean },
-  formData: FormData,
-): Promise<{ error: string | null; ok?: boolean }> {
-  const { supabase } = await requireFondeador();
-  const invoiceId = String(formData.get("invoice_id") || "");
-  const monto = Number(formData.get("monto_ofrecido"));
-  const mensaje = String(formData.get("mensaje") || "").trim() || null;
-
-  if (!invoiceId) return { error: "Falta la factura." };
-  if (!Number.isFinite(monto) || monto <= 0) {
-    return { error: "El monto ofrecido tiene que ser un número mayor a 0." };
-  }
-
-  const { error } = await supabase.rpc("create_offer", {
-    p_invoice_id: invoiceId,
-    p_monto_ofrecido: monto,
-    p_mensaje: mensaje,
-  });
-
-  if (error) return { error: error.message };
-
-  revalidatePath(`/fondeador/facturas/${invoiceId}`);
-  return { error: null, ok: true };
-}
+// Los documentos se sirven por /api/documentos/[id] (con marca de agua y
+// registro de cada descarga) y las ofertas se hacen desde el Deal Room.
 
 export async function solicitarPackAction(
   _prev: { error: string | null; ok?: boolean },

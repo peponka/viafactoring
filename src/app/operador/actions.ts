@@ -93,36 +93,6 @@ export async function retirarFacturaAction(invoiceId: string) {
   revalidatePath("/operador");
 }
 
-// Marca la factura como cerrada (el trato se arregló, por la vía que haya
-// sido) para que desaparezca del marketplace de otros fondeadores. No
-// dispara ningún cobro — el único ingreso de ViaFactoring es la tarifa de
-// desbloqueo que ya se cobró antes. Reemplaza al viejo flujo de
-// oferta/aceptación como forma de cerrar una factura.
-export async function cerrarFacturaAction(invoiceId: string) {
-  const { supabase } = await requireOperador();
-  await supabase
-    .from("invoices")
-    .update({ estado: "cerrada" })
-    .eq("id", invoiceId)
-    .eq("estado", "disponible");
-  revalidatePath("/operador");
-  revalidatePath(`/operador/facturas/${invoiceId}`);
-}
-
-// Acepta o rechaza una oferta de un fondeador. Aceptar cierra la factura y
-// dispara automáticamente (vía el RPC) la comisión de cierre para el
-// fondeador — ViaFactoring no toca la plata de la factura en sí.
-export async function responderOfertaAction(
-  offerId: string,
-  invoiceId: string,
-  aceptar: boolean,
-): Promise<{ error: string | null }> {
-  const { supabase } = await requireOperador();
-  const { error } = await supabase.rpc("respond_offer", {
-    p_offer_id: offerId,
-    p_accept: aceptar,
-  });
-  revalidatePath("/operador");
-  revalidatePath(`/operador/facturas/${invoiceId}`);
-  return { error: error?.message ?? null };
-}
+// El cierre de una factura ocurre al aceptar una oferta en su Deal Room
+// (ver src/app/deal-room/actions.ts). El viejo "Marcar como cerrada" por
+// autoreporte se retiró: cerraba sin cobrar la comisión de cierre.

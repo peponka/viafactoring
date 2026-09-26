@@ -9,6 +9,8 @@ import {
   formatMonto,
 } from "@/lib/format";
 import type { Invoice } from "@/lib/database.types";
+import { getMisDealRooms } from "@/lib/deal-rooms";
+import { TeTocaAVos } from "@/components/deal-room-list";
 
 function estadoTone(estado: string) {
   if (estado === "disponible") return "good" as const;
@@ -33,6 +35,8 @@ export default async function OperadorPage() {
     .order("created_at", { ascending: false })
     .returns<Invoice[]>();
 
+  const rooms = await getMisDealRooms("operador");
+
   const { count: revelosCount } = await supabase
     .from("reveals")
     .select("id, invoices!inner(operador_id)", { count: "exact", head: true })
@@ -46,12 +50,14 @@ export default async function OperadorPage() {
           <p className="text-ink-soft text-sm mt-1">
             {facturas?.length ?? 0} factura(s) cargada(s)
             {typeof revelosCount === "number"
-              ? ` · ${revelosCount} vista(s) por fondeadores`
+              ? ` · ${revelosCount} desbloqueo(s) por fondeadores`
               : ""}
           </p>
         </div>
         <LinkButton href="/operador/nueva">+ Cargar factura</LinkButton>
       </div>
+
+      <TeTocaAVos rooms={rooms} />
 
       {!facturas || facturas.length === 0 ? (
         <Card className="text-center py-16">

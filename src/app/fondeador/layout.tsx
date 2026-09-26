@@ -21,7 +21,10 @@ export default async function FondeadorLayout({
     <div className="flex-1 flex flex-col">
       <TopNav
         nombre={profile.nombre}
-        links={[{ href: "/fondeador", label: "Marketplace" }]}
+        links={[
+          { href: "/fondeador", label: "Marketplace" },
+          { href: "/fondeador/deal-rooms", label: "Mis Deal Rooms" },
+        ]}
       />
       <main className="wrap max-w-5xl mx-auto px-6 py-10 flex-1 w-full">
         {children}

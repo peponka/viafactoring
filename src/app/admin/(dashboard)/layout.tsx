@@ -21,7 +21,7 @@ export default async function AdminLayout({
           { href: "/admin/fondeadores", label: "Fondeadores" },
           { href: "/admin/facturas", label: "Facturas" },
           { href: "/admin/packs", label: "Packs" },
-          { href: "/admin/matches", label: "Matches" },
+          { href: "/admin/matches", label: "Deal Rooms" },
         ]}
       />
       <main className="wrap max-w-6xl mx-auto px-6 py-10 flex-1 w-full">

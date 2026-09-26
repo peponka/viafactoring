@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { Badge, Card } from "@/components/ui";
-import { formatFecha } from "@/lib/format";
+import Link from "next/link";
+import { ESTADO_DEAL_ROOM_LABEL, estadoDealRoomTone, formatFecha } from "@/lib/format";
 import type { Invoice, Profile, Reveal } from "@/lib/database.types";
 
 export default async function AdminMatchesPage() {
@@ -28,11 +29,11 @@ export default async function AdminMatchesPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold mb-6">Matches</h1>
+      <h1 className="text-2xl font-semibold mb-6">Deal Rooms</h1>
       {!reveals || reveals.length === 0 ? (
         <Card>
           <p className="text-ink-soft text-sm">
-            Todavía nadie destrabó ninguna factura.
+            Todavía nadie desbloqueó ninguna factura.
           </p>
         </Card>
       ) : (
@@ -52,9 +53,14 @@ export default async function AdminMatchesPage() {
                     {r.bitacora ? ` · ${r.bitacora}` : ""}
                   </p>
                 </div>
-                <Badge tone={r.contactado ? "good" : "neutral"}>
-                  {r.contactado ? "Contactado" : "Sin contacto"}
-                </Badge>
+                <div className="flex items-center gap-3">
+                  <Badge tone={estadoDealRoomTone(r.estado)}>
+                    {ESTADO_DEAL_ROOM_LABEL[r.estado] ?? r.estado}
+                  </Badge>
+                  <Link href={`/deal-room/${r.id}`} className="text-accent text-sm font-medium">
+                    Ver →
+                  </Link>
+                </div>
               </Card>
             );
           })}

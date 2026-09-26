@@ -29,8 +29,8 @@ export function UnlockButton({
           Solicitud de desbloqueo enviada — {formatMonto(pendingRequest.monto, pendingRequest.moneda)}
         </p>
         <p className="text-ink-soft">
-          Transferí ese monto y esperá la confirmación del admin. En cuanto
-          se confirme el pago, se habilita el expediente completo acá mismo.
+          Transferí ese monto y esperá la confirmación. En cuanto se confirme
+          el pago, se abre el Deal Room de esta operación acá mismo.
         </p>
       </div>
     );

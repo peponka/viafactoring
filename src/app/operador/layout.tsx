@@ -17,6 +17,7 @@ export default async function OperadorLayout({
         nombre={profile.nombre}
         links={[
           { href: "/operador", label: "Mis facturas" },
+          { href: "/operador/deal-rooms", label: "Deal Rooms" },
           { href: "/operador/nueva", label: "Cargar factura" },
         ]}
       />
