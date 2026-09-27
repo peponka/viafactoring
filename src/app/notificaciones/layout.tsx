@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getUserAndProfile, homeForRole } from "@/lib/session";
 import { TopNav } from "@/components/top-nav";
 import { Campana } from "@/components/campana";
+import { PedirTelefono } from "@/components/pedir-telefono";
 
 export default async function NotificacionesLayout({ children }: { children: React.ReactNode }) {
   const { user, profile } = await getUserAndProfile();
@@ -23,6 +24,7 @@ export default async function NotificacionesLayout({ children }: { children: Rea
   return (
     <div className="flex-1 flex flex-col">
       <TopNav nombre={profile.nombre} links={links} rightSlot={<Campana userId={user.id} />} />
+      {!profile.telefono && <PedirTelefono />}
       <main className="wrap max-w-3xl mx-auto px-6 py-10 flex-1 w-full">{children}</main>
     </div>
   );

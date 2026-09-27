@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { homeForRole } from "@/lib/session";
+import { AYUDA_TELEFONO, normalizarTelefono } from "@/lib/telefono";
 import type { Rol } from "@/lib/database.types";
 
 export type AuthState = { error: string | null };
@@ -16,10 +17,16 @@ export async function signUpAction(
   const role = String(formData.get("role") || "") as Rol;
   const nombre = String(formData.get("nombre") || "").trim();
   const empresa = String(formData.get("empresa") || "").trim();
-  const telefono = String(formData.get("telefono") || "").trim();
+  const telefonoRaw = String(formData.get("telefono") || "");
 
   if (!email || !password || !nombre) {
     return { error: "Completá email, contraseña y nombre." };
+  }
+  // El teléfono es obligatorio: es lo que se comparte con la otra parte
+  // cuando se cierra un acuerdo.
+  const telefono = normalizarTelefono(telefonoRaw);
+  if (!telefono) {
+    return { error: `Ingresá un teléfono válido (${AYUDA_TELEFONO}).` };
   }
   if (role !== "operador" && role !== "fondeador") {
     return { error: "Elegí si sos operador de facturas o fondeador." };
@@ -33,7 +40,7 @@ export async function signUpAction(
     email,
     password,
     options: {
-      data: { role, nombre, empresa: empresa || null, telefono: telefono || null },
+      data: { role, nombre, empresa: empresa || null, telefono },
     },
   });
 

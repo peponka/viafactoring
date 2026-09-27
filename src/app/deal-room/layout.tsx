@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getUserAndProfile } from "@/lib/session";
 import { TopNav } from "@/components/top-nav";
 import { Campana } from "@/components/campana";
+import { PedirTelefono } from "@/components/pedir-telefono";
 
 // El Deal Room es una ruta compartida por las dos partes. Quién puede ver
 // cada Deal Room lo decide la base (get_deal_room_detail + RLS), no esta
@@ -35,6 +36,7 @@ export default async function DealRoomLayout({
         links={links}
         rightSlot={profile.role === "admin" ? null : <Campana userId={user.id} />}
       />
+      {profile.role !== "admin" && !profile.telefono && <PedirTelefono />}
       <main className="wrap max-w-6xl mx-auto px-6 py-8 flex-1 w-full">{children}</main>
     </div>
   );

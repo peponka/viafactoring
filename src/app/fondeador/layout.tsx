@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getUserAndProfile } from "@/lib/session";
 import { TopNav } from "@/components/top-nav";
 import { Campana } from "@/components/campana";
+import { PedirTelefono } from "@/components/pedir-telefono";
 
 // NOTA: la compra de créditos (fondeador_credits / /fondeador/creditos) ya
 // no es el mecanismo de pago — se reemplazó por el desbloqueo pago por
@@ -28,6 +29,7 @@ export default async function FondeadorLayout({
           { href: "/fondeador/deal-rooms", label: "Mis Deal Rooms" },
         ]}
       />
+      {!profile.telefono && <PedirTelefono />}
       <main className="wrap max-w-5xl mx-auto px-6 py-10 flex-1 w-full">
         {children}
       </main>

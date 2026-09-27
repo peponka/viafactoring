@@ -53,9 +53,18 @@ export default function SignupPage() {
           >
             <Input type="text" name="empresa" />
           </Field>
-          <Field label="Teléfono (opcional)">
-            <Input type="tel" name="telefono" />
+          <Field label="Teléfono">
+            <Input
+              type="tel"
+              name="telefono"
+              required
+              autoComplete="tel"
+              placeholder="0981 123 456"
+            />
           </Field>
+          <p className="text-xs text-ink-soft -mt-2">
+            Solo se comparte con la otra parte cuando cierran un acuerdo.
+          </p>
           <Field label="Email">
             <Input type="email" name="email" required autoComplete="email" />
           </Field>

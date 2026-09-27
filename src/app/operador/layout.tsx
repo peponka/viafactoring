@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getUserAndProfile } from "@/lib/session";
 import { TopNav } from "@/components/top-nav";
 import { Campana } from "@/components/campana";
+import { PedirTelefono } from "@/components/pedir-telefono";
 
 export default async function OperadorLayout({
   children,
@@ -23,6 +24,7 @@ export default async function OperadorLayout({
           { href: "/operador/nueva", label: "Cargar factura" },
         ]}
       />
+      {!profile.telefono && <PedirTelefono />}
       <main className="wrap max-w-5xl mx-auto px-6 py-10 flex-1 w-full">
         {children}
       </main>
