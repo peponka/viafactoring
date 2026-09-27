@@ -401,13 +401,16 @@ export function Sala({
     };
   }, [d.reveal_id, router]);
 
-  // Al entrar desde una notificación (#m-<id>) va a ese momento; si no, al final.
+  // Al entrar desde una notificación (#m-<id>) va a ese momento una sola vez
+  // y resalta el mensaje unos segundos; después, cada novedad baja al final.
   useEffect(() => {
     const hash = typeof window !== "undefined" ? window.location.hash : "";
     const destino = hash.startsWith("#m-") ? document.getElementById(hash.slice(1)) : null;
     if (destino) {
       destino.scrollIntoView({ block: "center" });
       destino.classList.add("ring-2", "ring-accent", "rounded-2xl");
+      setTimeout(() => destino.classList.remove("ring-2", "ring-accent", "rounded-2xl"), 3000);
+      window.history.replaceState(null, "", window.location.pathname + window.location.search);
     } else if (hiloRef.current) {
       hiloRef.current.scrollTop = hiloRef.current.scrollHeight;
     }
@@ -443,14 +446,17 @@ export function Sala({
         if (o) return <TarjetaOferta o={o} d={d} />;
       }
       if (kind === "comision") {
+        // La tarjeta queda en su lugar del hilo como "lo que faltaba"; su
+        // estado actual (pagada) se marca con una etiqueta, así el orden de
+        // los eventos (pago fallido → reintento → contacto) se lee bien.
         const pagada = d.comision?.estado === "confirmado" || !!d.contacto_liberado_at;
         return (
           <TarjetaSistema
             icono="💳"
-            titulo={pagada ? "Comisión pagada" : "Falta un último paso"}
+            titulo="Falta un último paso: la comisión de cierre"
             texto={
               pagada
-                ? null
+                ? "✓ Pagada."
                 : rol === "fondeador"
                   ? "Pagá la comisión de ViaFactoring para ver el contacto de la PyME y coordinar la transferencia."
                   : "El fondeador tiene que pagar la comisión de ViaFactoring. Después se muestra el contacto."
