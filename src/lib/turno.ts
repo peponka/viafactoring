@@ -131,7 +131,12 @@ export function franjaDeTurno(d: DealRoomDetail): Franja | null {
     }
 
     case "finalizada":
-      return { tono: "info", titulo: "Operación finalizada.", texto: null, accion: null };
+      return {
+        tono: "info",
+        titulo: "Operación finalizada.",
+        texto: "La conversación queda guardada acá por si necesitás consultarla.",
+        accion: null,
+      };
 
     case "cerrada":
       return { tono: "info", titulo: "Esta negociación está cerrada.", texto: null, accion: null };

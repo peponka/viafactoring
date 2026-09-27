@@ -484,7 +484,14 @@ export function Sala({
         );
       }
       if (kind === "fin") {
-        return <TarjetaSistema icono="✅" titulo="Operación finalizada" texto={m.cuerpo.replace(/^✅\s*/, "")} tono="good" />;
+        return (
+          <TarjetaSistema
+            icono="✅"
+            titulo="Operación finalizada"
+            texto="El anticipo se transfirió directo entre las partes. Gracias por usar ViaFactoring."
+            tono="good"
+          />
+        );
       }
       return <Pildora texto={m.cuerpo} fecha={m.created_at} />;
     }
