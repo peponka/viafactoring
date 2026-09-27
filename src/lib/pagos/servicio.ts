@@ -92,6 +92,11 @@ export async function iniciarPago(tipo: "desbloqueo" | "comision", ref: string):
   }
 }
 
+function unaFila<T>(data: T | T[] | null | undefined): T | null {
+  if (!data) return null;
+  return Array.isArray(data) ? (data[0] ?? null) : data;
+}
+
 export type RespuestaWebhook = { status: number; body: unknown };
 
 export async function procesarWebhook(nombre: string, rawBody: string, headers: Headers): Promise<RespuestaWebhook> {
@@ -112,8 +117,9 @@ export async function procesarWebhook(nombre: string, rawBody: string, headers: 
     p_firma_valida: v.valido,
     p_payload: v.payload,
   });
-  if (errReg || !reg?.[0]) return { status: 500, body: { error: "no se pudo registrar" } };
-  const evento = reg[0];
+  // Una función con parámetros OUT devuelve un objeto por PostgREST (no un array).
+  const evento = unaFila(reg);
+  if (errReg || !evento) return { status: 500, body: { error: "no se pudo registrar" } };
 
   if (!v.valido) return { status: 401, body: { error: "firma inválida" } };
   if (!evento.nuevo && evento.resultado) return { status: 200, body: v.respuesta ?? { ok: true, repetido: true } };
@@ -177,9 +183,10 @@ export async function conciliarOrdenes(): Promise<number> {
       p_firma_valida: true,
       p_payload: { origen: "consulta_de_estado" },
     });
-    if (!reg?.[0]?.nuevo) continue;
+    const ev = unaFila(reg);
+    if (!ev?.nuevo) continue;
     await admin.rpc("aplicar_resultado_pago", {
-      p_evento_id: reg[0].evento_id,
+      p_evento_id: ev.evento_id,
       p_provider: pasarela.nombre,
       p_provider_ref: o.provider_ref,
       p_estado: real.estado,

@@ -30,13 +30,21 @@ export function UnlockButton({
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const esperando = pago?.estado === "procesando" || (volviendo && pago?.estado === "pendiente");
+  // Al volver de la pasarela esperamos su aviso unos segundos; si no llega,
+  // se vuelve a ofrecer el botón (la orden abierta se reutiliza, no se duplica).
+  const [demorado, setDemorado] = useState(false);
+  const esperando =
+    pago?.estado === "procesando" || (volviendo && pago?.estado === "pendiente" && !demorado);
   const fallo = pago && ["fallido", "rechazado"].includes(pago.estado);
 
   useEffect(() => {
     if (!esperando) return;
     const t = setInterval(() => router.refresh(), 4000);
-    return () => clearInterval(t);
+    const limite = setTimeout(() => setDemorado(true), 30000);
+    return () => {
+      clearInterval(t);
+      clearTimeout(limite);
+    };
   }, [esperando, router]);
 
   function pagar() {
@@ -62,6 +70,11 @@ export function UnlockButton({
 
   return (
     <div className="flex flex-col gap-2 items-start">
+      {demorado && pago?.estado === "pendiente" && (
+        <p className="text-sm text-ink-soft bg-surface-2 rounded-lg px-3.5 py-2.5">
+          Todavía no recibimos la confirmación de la pasarela. Si no terminaste el pago, podés volver a intentarlo.
+        </p>
+      )}
       {fallo && (
         <p className="text-sm text-critical bg-critical-soft rounded-lg px-3.5 py-2.5">
           El pago no pudo completarse. Podés intentarlo de nuevo.

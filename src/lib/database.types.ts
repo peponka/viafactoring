@@ -717,7 +717,7 @@ export type Database = {
           p_firma_valida: boolean;
           p_payload: Record<string, unknown>;
         };
-        Returns: { evento_id: string; nuevo: boolean; resultado: string | null }[];
+        Returns: { evento_id: string; nuevo: boolean; resultado: string | null };
       };
       aplicar_resultado_pago: {
         Args: {
