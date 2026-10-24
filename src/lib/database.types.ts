@@ -86,6 +86,8 @@ export type Invoice = {
   industry_id: string | null;
   industry_data: Record<string, unknown>;
   ubicacion: string | null;
+  deudor_tipo: DeudorTipo;
+  deudor_ruc: string | null;
 };
 
 export type InvoiceTeaser = {
@@ -109,6 +111,39 @@ export type InvoiceTeaser = {
   industria_padre_nombre: string | null;
   industry_data_publica: Record<string, unknown>;
   ubicacion: string | null;
+  deudor_tipo: DeudorTipo;
+  monto_usd: number | null;
+  ya_pasada: boolean;
+  ofertas_activas: number;
+};
+
+export type DeudorTipo = "privado" | "estado";
+export type CategoriaFondeador = "individual" | "institucion";
+export type EstadoVerificacion = "incompleta" | "en_revision" | "aprobada" | "rechazada";
+
+export type FondeadorPerfil = {
+  fondeador_id: string;
+  categoria: CategoriaFondeador | null;
+  verificacion: EstadoVerificacion;
+  verificacion_nota: string | null;
+  documentos: string[];
+  verificado_at: string | null;
+  verificado_por: string | null;
+  monto_min_usd: number | null;
+  monto_max_usd: number | null;
+  plazo_max_dias: number | null;
+  riesgos: Riesgo[];
+  deudor_tipos: DeudorTipo[];
+  industrias: string[];
+  alertas: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type InvoicePasada = {
+  fondeador_id: string;
+  invoice_id: string;
+  created_at: string;
 };
 
 export type FondeadorCredit = {
@@ -560,6 +595,8 @@ export type Database = {
       payment_events: TableDef<PaymentEvent, never, Partial<Pick<PaymentEvent, "resultado" | "procesado_at" | "error">>>;
       fx_rates: TableDef<FxRate, never>;
       audit_logs: TableDef<AuditLog, never>;
+      fondeador_perfiles: TableDef<FondeadorPerfil, never>;
+      invoice_pasadas: TableDef<InvoicePasada, { fondeador_id: string; invoice_id: string }>;
       industry_fields: TableDef<
         IndustryField,
         Partial<IndustryField> & { industry_id: string; key: string; label: string; tipo: IndustryField["tipo"] }
@@ -572,6 +609,49 @@ export type Database = {
       };
     };
     Functions: {
+      rango_categoria: {
+        Args: { p_categoria: CategoriaFondeador };
+        Returns: { min_usd: number; max_usd: number | null }[];
+      };
+      enviar_verificacion: {
+        Args: { p_categoria: CategoriaFondeador; p_documentos: string[] };
+        Returns: FondeadorPerfil;
+      };
+      guardar_preferencias: {
+        Args: {
+          p_monto_min_usd: number;
+          p_monto_max_usd: number | null;
+          p_plazo_max_dias: number | null;
+          p_riesgos: Riesgo[];
+          p_deudor_tipos: DeudorTipo[];
+          p_industrias: string[];
+          p_alertas: boolean;
+        };
+        Returns: FondeadorPerfil;
+      };
+      admin_verificar_fondeador: {
+        Args: { p_fondeador_id: string; p_aprobar: boolean; p_nota?: string | null };
+        Returns: FondeadorPerfil;
+      };
+      alcance_factura: {
+        Args: {
+          p_monto: number;
+          p_moneda: string;
+          p_plazo_dias: number;
+          p_riesgo: Riesgo;
+          p_deudor_tipo: DeudorTipo;
+          p_rubro?: string | null;
+        };
+        Returns: { instituciones: number; inversores: number }[];
+      };
+      marcar_interes: {
+        Args: { p_invoice_id: string };
+        Returns: string;
+      };
+      monto_en_usd: {
+        Args: { p_monto: number; p_moneda: string };
+        Returns: number | null;
+      };
       reveal_invoice: {
         Args: { p_invoice_id: string };
         Returns: DealRoomInvoice & { reveal_id: string; deal_room_estado: EstadoDealRoom };

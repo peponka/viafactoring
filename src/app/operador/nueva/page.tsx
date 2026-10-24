@@ -1,47 +1,36 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
-import { crearFacturaAction, type FormState } from "../actions";
+import { useActionState, useEffect, useState } from "react";
+import { crearFacturaAction, previsualizarAlcanceAction, type FormState } from "../actions";
 import { extraerDatosFacturaAction } from "../ocr";
-import {
-  Button,
-  Card,
-  ErrorText,
-  Field,
-  Input,
-  Select,
-  Textarea,
-} from "@/components/ui";
+import { Button, ErrorText, Field, Input, Select, Textarea } from "@/components/ui";
+import { MONTO_MINIMO_USD, usd } from "@/lib/categorias";
+import type { Riesgo } from "@/lib/database.types";
 
 const initialState: FormState = { error: null };
 
-// Mismo criterio que unlock_fee_for_monto() en la base de datos — se
-// duplica acá solo para la vista previa en vivo mientras el operador
-// completa el formulario. El cálculo real (el que efectivamente se cobra)
-// siempre lo hace el servidor.
-function unlockFeePreview(monto: number) {
-  if (!monto) return null;
-  if (monto <= 10000) return 100;
-  if (monto <= 25000) return 200;
-  if (monto <= 50000) return 300;
-  if (monto <= 100000) return 450;
-  if (monto <= 250000) return 650;
-  return 900;
+type Alcance = { montoUsd: number | null; instituciones: number; inversores: number };
+
+function Check() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M20 6 9 17l-5-5" />
+    </svg>
+  );
 }
 
 export default function NuevaFacturaPage() {
-  const [state, formAction, pending] = useActionState(
-    crearFacturaAction,
-    initialState,
-  );
+  const [state, formAction, pending] = useActionState(crearFacturaAction, initialState);
   const [numero, setNumero] = useState("");
   const [deudorNombre, setDeudorNombre] = useState("");
+  const [deudorRuc, setDeudorRuc] = useState("");
   const [deudorContacto, setDeudorContacto] = useState("");
+  const [deudorTipo, setDeudorTipo] = useState<"privado" | "estado">("privado");
   const [monto, setMonto] = useState("");
   const [plazo, setPlazo] = useState("");
   const [moneda, setMoneda] = useState("USD");
   const [rubro, setRubro] = useState("");
-  const [riesgo, setRiesgo] = useState("medio");
+  const [riesgo, setRiesgo] = useState<Riesgo>("medio");
   const [fechaVencimiento, setFechaVencimiento] = useState("");
   const [descripcion, setDescripcion] = useState("");
 
@@ -49,20 +38,40 @@ export default function NuevaFacturaPage() {
   const [ocrLoading, setOcrLoading] = useState(false);
   const [ocrError, setOcrError] = useState<string | null>(null);
   const [ocrApplied, setOcrApplied] = useState(false);
+  const [alcance, setAlcance] = useState<Alcance | null>(null);
 
-  const teaserPreview = useMemo(
-    () => ({
-      unlockFee: unlockFeePreview(Number(monto)),
-    }),
-    [monto],
-  );
+  // Vista previa del alcance (con una pausa para no consultar en cada tecla).
+  useEffect(() => {
+    const m = Number(monto);
+    if (!m || m <= 0) return;
+    let vigente = true;
+    const t = setTimeout(async () => {
+      const r = await previsualizarAlcanceAction({
+        monto: m,
+        moneda,
+        plazo_dias: Number(plazo) || 0,
+        riesgo,
+        deudor_tipo: deudorTipo,
+        rubro,
+      });
+      if (vigente) setAlcance(r);
+    }, 500);
+    return () => {
+      vigente = false;
+      clearTimeout(t);
+    };
+  }, [monto, moneda, plazo, riesgo, deudorTipo, rubro]);
 
-  async function handleExtraer() {
-    if (!documento) return;
+  const montoNum = Number(monto);
+  const montoUsd = !montoNum ? null : moneda === "USD" ? montoNum : alcance?.montoUsd ?? null;
+  const bajoMinimo = montoUsd != null && montoUsd < MONTO_MINIMO_USD;
+  const totalAlcance = alcance ? alcance.instituciones + alcance.inversores : null;
+
+  async function handleExtraer(file: File) {
     setOcrLoading(true);
     setOcrError(null);
     const fd = new FormData();
-    fd.set("documento", documento);
+    fd.set("documento", file);
     const result = await extraerDatosFacturaAction(fd);
     setOcrLoading(false);
 
@@ -75,86 +84,159 @@ export default function NuevaFacturaPage() {
     if (d.deudor_nombre) setDeudorNombre(d.deudor_nombre);
     if (d.deudor_contacto) setDeudorContacto(d.deudor_contacto);
     if (d.monto) setMonto(d.monto);
-    if (d.moneda) setMoneda(d.moneda);
+    if (d.moneda === "USD" || d.moneda === "PYG") setMoneda(d.moneda);
     if (d.numero) setNumero(d.numero);
     if (d.descripcion) setDescripcion(d.descripcion);
     if (d.fecha_vencimiento) {
       setFechaVencimiento(d.fecha_vencimiento);
-      const dias = Math.round(
-        (new Date(d.fecha_vencimiento).getTime() - Date.now()) / 86400000,
-      );
+      const dias = Math.round((new Date(d.fecha_vencimiento).getTime() - Date.now()) / 86400000);
       if (Number.isFinite(dias)) setPlazo(String(Math.max(0, dias)));
     }
     setOcrApplied(true);
   }
 
   return (
-    <div className="grid md:grid-cols-[1.4fr_1fr] gap-8">
+    <div className="grid lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] gap-8 items-start">
       <div>
-        <h1 className="text-2xl font-semibold mb-1">Cargar factura</h1>
-        <p className="text-ink-soft text-sm mb-6">
-          Es gratis, siempre. Los fondeadores ven el monto y el vencimiento
-          exactos sin pagar nada; para ver el deudor y la documentación y
-          negociar con vos pagan una tarifa de desbloqueo. Tu contacto se
-          comparte recién cuando se cierra el acuerdo.
+        <h1 className="text-[1.75rem] md:text-3xl font-bold leading-tight">Subir factura</h1>
+        <p className="text-ink-soft mt-1.5 mb-6">
+          Siempre gratis. Sacale una foto o subí el PDF y la IA completa los datos por vos.
         </p>
-        <Card>
-          <form action={formAction} className="flex flex-col gap-4" encType="multipart/form-data">
-            <Field label="Documento de la factura (foto o PDF, opcional)">
-              <Input
+
+        <form action={formAction} className="flex flex-col gap-4" encType="multipart/form-data">
+          <section className="bg-surface border border-line rounded-3xl p-5 flex flex-col gap-3">
+            <label
+              className={`rounded-2xl border-2 border-dashed transition px-4 py-6 flex flex-col items-center gap-2 cursor-pointer text-center ${
+                documento ? "border-accent bg-accent-soft/40" : "border-line-strong hover:border-accent"
+              }`}
+            >
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="text-accent">
+                <path d="M4 7h3l2-3h6l2 3h3v12H4z" />
+                <circle cx="12" cy="13" r="3.5" />
+              </svg>
+              <span className="font-semibold">{documento ? documento.name : "Foto o PDF de la factura"}</span>
+              <span className="text-xs text-ink-soft">
+                {documento ? "Tocá para cambiarla" : "La IA lee el deudor, el monto y el vencimiento"}
+              </span>
+              <input
                 type="file"
                 name="documento"
                 accept="image/*,application/pdf"
+                className="sr-only"
                 onChange={(e) => {
-                  setDocumento(e.target.files?.[0] ?? null);
+                  const f = e.target.files?.[0] ?? null;
+                  setDocumento(f);
                   setOcrError(null);
                   setOcrApplied(false);
+                  if (f) handleExtraer(f);
                 }}
               />
-            </Field>
-
-            {documento && (
-              <div className="flex items-center gap-3 flex-wrap">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  disabled={ocrLoading}
-                  onClick={handleExtraer}
-                >
-                  {ocrLoading ? (
-                    <>
-                      <span className="h-4 w-4 rounded-full border-2 border-ink/30 border-t-ink animate-spin" />
-                      Leyendo documento…
-                    </>
-                  ) : (
-                    "Completar datos con IA"
-                  )}
-                </Button>
-                {ocrLoading && (
-                  <span className="text-xs text-ink-soft">
-                    Puede tardar unos segundos, no cierres la página…
-                  </span>
-                )}
-                {ocrError && <ErrorText>{ocrError}</ErrorText>}
-              </div>
+            </label>
+            {ocrLoading && (
+              <p role="status" className="flex items-center gap-2.5 text-sm text-ink-soft">
+                <span className="h-4 w-4 rounded-full border-2 border-accent/30 border-t-accent animate-spin" />
+                Leyendo la factura… puede tardar unos segundos.
+              </p>
             )}
-
             {ocrApplied && (
-              <div className="bg-warn-soft border border-warn rounded-xl px-4 py-3 text-sm text-ink">
-                ⚠️ Estos campos se completaron automáticamente a partir del
-                documento. Revisalos con atención antes de guardar — una foto
-                borrosa o un formato poco común pueden hacer que la lectura
-                venga incompleta o equivocada.
-              </div>
+              <p className="flex items-center gap-2 text-sm font-semibold text-accent">
+                <Check /> Datos leídos automáticamente. Revisalos antes de publicar.
+              </p>
             )}
+            {ocrError && <ErrorText>{ocrError}</ErrorText>}
+          </section>
 
-            <div className="grid grid-cols-2 gap-4">
+          <section className="bg-surface border border-line rounded-3xl p-5 flex flex-col gap-4">
+            <Field label="Deudor (quién te debe)">
+              <Input type="text" name="deudor_nombre" required value={deudorNombre} onChange={(e) => setDeudorNombre(e.target.value)} />
+            </Field>
+            <div role="radiogroup" aria-label="Tipo de deudor" className="grid grid-cols-2 gap-1.5 bg-surface-3 rounded-2xl p-1.5">
+              {(["privado", "estado"] as const).map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  role="radio"
+                  aria-checked={deudorTipo === t}
+                  onClick={() => setDeudorTipo(t)}
+                  className={`min-h-11 rounded-xl text-sm font-semibold transition ${
+                    deudorTipo === t ? "bg-surface text-ink shadow-sm" : "text-ink-soft"
+                  }`}
+                >
+                  {t === "privado" ? "Empresa privada" : "Institución del Estado"}
+                </button>
+              ))}
+            </div>
+            <input type="hidden" name="deudor_tipo" value={deudorTipo} />
+            <div className="grid sm:grid-cols-2 gap-4">
+              <Field label="RUC del deudor (opcional)">
+                <Input type="text" name="deudor_ruc" placeholder="80012345-6" value={deudorRuc} onChange={(e) => setDeudorRuc(e.target.value)} />
+              </Field>
+              <Field label="N.º de factura (opcional)">
+                <Input type="text" name="numero" value={numero} onChange={(e) => setNumero(e.target.value)} />
+              </Field>
+            </div>
+            <Field label="Contacto del deudor (opcional)">
+              <Input type="text" name="deudor_contacto" value={deudorContacto} onChange={(e) => setDeudorContacto(e.target.value)} />
+            </Field>
+          </section>
+
+          <section className="bg-surface border border-line rounded-3xl p-5 flex flex-col gap-4">
+            <div className="grid grid-cols-[minmax(0,1fr)_110px] gap-3">
+              <Field label="Monto">
+                <Input
+                  type="number"
+                  name="monto"
+                  min="0"
+                  step="0.01"
+                  required
+                  value={monto}
+                  onChange={(e) => setMonto(e.target.value)}
+                  className={bajoMinimo ? "!border-critical" : ""}
+                  aria-invalid={bajoMinimo || undefined}
+                />
+              </Field>
+              <Field label="Moneda">
+                <Select name="moneda" value={moneda} onChange={(e) => setMoneda(e.target.value)}>
+                  <option value="USD">USD</option>
+                  <option value="PYG">PYG</option>
+                </Select>
+              </Field>
+            </div>
+            {montoUsd != null && (
+              <p className={`text-sm font-semibold flex items-center gap-2 -mt-1 ${bajoMinimo ? "text-critical" : "text-accent"}`}>
+                {bajoMinimo ? (
+                  `El mínimo para publicar es ${usd(MONTO_MINIMO_USD)}${moneda !== "USD" ? " o su equivalente" : ""}.`
+                ) : (
+                  <>
+                    <Check /> Supera el mínimo de la plataforma ({usd(MONTO_MINIMO_USD)})
+                  </>
+                )}
+              </p>
+            )}
+            <div className="grid sm:grid-cols-2 gap-4">
+              <Field label="Vencimiento">
+                <Input
+                  type="date"
+                  name="fecha_vencimiento"
+                  value={fechaVencimiento}
+                  onChange={(e) => {
+                    setFechaVencimiento(e.target.value);
+                    const dias = Math.round((new Date(e.target.value).getTime() - Date.now()) / 86400000);
+                    if (Number.isFinite(dias)) setPlazo(String(Math.max(0, dias)));
+                  }}
+                />
+              </Field>
+              <Field label="Días hasta el cobro">
+                <Input type="number" name="plazo_dias" min="0" required value={plazo} onChange={(e) => setPlazo(e.target.value)} />
+              </Field>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-4">
               <Field label="Rubro">
                 <Input
                   type="text"
                   name="rubro"
                   list="rubro-sugerencias"
-                  placeholder="Ej: fluvial, camiones, comercio, servicios..."
+                  placeholder="Ej: camiones, fluvial, comercio…"
                   required
                   value={rubro}
                   onChange={(e) => setRubro(e.target.value)}
@@ -168,152 +250,79 @@ export default function NuevaFacturaPage() {
                   <option value="Industria" />
                 </datalist>
               </Field>
-              <Field label="Nº de factura (opcional)">
-                <Input
-                  type="text"
-                  name="numero"
-                  value={numero}
-                  onChange={(e) => setNumero(e.target.value)}
-                />
-              </Field>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <Field label="Nombre del deudor">
-                <Input
-                  type="text"
-                  name="deudor_nombre"
-                  required
-                  value={deudorNombre}
-                  onChange={(e) => setDeudorNombre(e.target.value)}
-                />
-              </Field>
-              <Field label="Contacto del deudor (opcional)">
-                <Input
-                  type="text"
-                  name="deudor_contacto"
-                  value={deudorContacto}
-                  onChange={(e) => setDeudorContacto(e.target.value)}
-                />
-              </Field>
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
-              <Field label="Monto">
-                <Input
-                  type="number"
-                  name="monto"
-                  min="0"
-                  step="0.01"
-                  required
-                  value={monto}
-                  onChange={(e) => setMonto(e.target.value)}
-                />
-              </Field>
-              <Field label="Moneda">
-                <Select
-                  name="moneda"
-                  value={moneda}
-                  onChange={(e) => setMoneda(e.target.value)}
-                >
-                  <option value="USD">USD</option>
-                  <option value="PYG">PYG</option>
-                </Select>
-              </Field>
-              <Field label="Plazo (días hasta el vencimiento)">
-                <Input
-                  type="number"
-                  name="plazo_dias"
-                  min="0"
-                  required
-                  value={plazo}
-                  onChange={(e) => setPlazo(e.target.value)}
-                />
-              </Field>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <Field label="Fecha de vencimiento (opcional)">
-                <Input
-                  type="date"
-                  name="fecha_vencimiento"
-                  value={fechaVencimiento}
-                  onChange={(e) => setFechaVencimiento(e.target.value)}
-                />
-              </Field>
-              <Field label="Riesgo (autoevaluado)">
-                <Select
-                  name="riesgo"
-                  value={riesgo}
-                  onChange={(e) => setRiesgo(e.target.value)}
-                >
+              <Field label="Riesgo (tu evaluación)">
+                <Select name="riesgo" value={riesgo} onChange={(e) => setRiesgo(e.target.value as Riesgo)}>
                   <option value="bajo">Bajo</option>
                   <option value="medio">Medio</option>
                   <option value="alto">Alto</option>
                 </Select>
               </Field>
             </div>
-
-            <Field label="Tu contacto para esta factura (opcional)">
-              <Input type="text" name="operador_contacto" placeholder="Teléfono o email — se comparte recién cuando se cierra el acuerdo" />
-            </Field>
-
             <Field label="Descripción (opcional)">
               <Textarea
                 name="descripcion"
                 rows={3}
-                placeholder="Ruta, tipo de carga, lo que ayude a evaluar la operación"
+                placeholder="Qué servicio o producto se facturó. Sin teléfonos ni emails."
                 value={descripcion}
                 onChange={(e) => setDescripcion(e.target.value)}
               />
             </Field>
+            <Field label="Tu contacto para esta factura (opcional)" hint="Se comparte recién cuando se cierra el acuerdo.">
+              <Input type="text" name="operador_contacto" placeholder="Teléfono o email" />
+            </Field>
+          </section>
 
-            <ErrorText>{state.error}</ErrorText>
-            <Button type="submit" disabled={pending} className="w-full mt-2">
-              {pending ? "Guardando…" : "Cargar factura"}
-            </Button>
-          </form>
-        </Card>
+          <ErrorText>{state.error}</ErrorText>
+          <Button type="submit" disabled={pending || bajoMinimo} className="w-full !min-h-13 text-base">
+            {pending ? "Publicando…" : "Publicar factura"}
+          </Button>
+        </form>
       </div>
 
-      <div>
-        <p className="text-sm font-semibold text-ink-soft mb-3">
-          Así la van a ver los fondeadores antes de pagar nada
-        </p>
-        <Card className="bg-surface-2 border-dashed">
-          <div className="flex items-center gap-2 mb-3 flex-wrap">
-            <span className="inline-block text-[.72rem] font-semibold px-2.5 py-1 rounded-full bg-surface text-ink-soft">
-              {rubro || "Rubro"}
-            </span>
-            <span className="inline-block text-[.72rem] font-semibold px-2.5 py-1 rounded-full bg-surface text-ink-soft">
-              {riesgo}
-            </span>
-          </div>
-          <div className="grid grid-cols-2 gap-3 text-sm">
-            <div>
-              <p className="text-ink-soft text-xs uppercase tracking-wide">Monto</p>
-              <p className="num font-medium">
-                {monto ? `${moneda} ${monto}` : "A confirmar"}
-              </p>
+      <aside className="lg:sticky lg:top-24 flex flex-col gap-4">
+        <section className="rounded-3xl bg-ink text-white p-5 flex flex-col gap-4">
+          <p className="text-sm text-[#c9d2dd] font-medium">Tu factura encaja con</p>
+          <div className="grid grid-cols-2 gap-2.5">
+            <div className="rounded-2xl bg-white/10 px-4 py-3">
+              <p className="num text-3xl font-bold text-white">{alcance && montoNum ? alcance.instituciones : "—"}</p>
+              <p className="text-sm text-[#dce3eb]">instituciones</p>
             </div>
-            <div>
-              <p className="text-ink-soft text-xs uppercase tracking-wide">Plazo</p>
-              <p className="num font-medium">
-                {plazo ? `${plazo} días` : "A confirmar"}
-              </p>
-            </div>
-            <div className="col-span-2">
-              <p className="text-ink-soft text-xs uppercase tracking-wide">Deudor</p>
-              <p className="font-medium">
-                🔒 se habilita al pagar la tarifa de desbloqueo
-                {teaserPreview.unlockFee
-                  ? ` (${moneda} ${teaserPreview.unlockFee})`
-                  : ""}
-              </p>
+            <div className="rounded-2xl bg-white/10 px-4 py-3">
+              <p className="num text-3xl font-bold text-white">{alcance && montoNum ? alcance.inversores : "—"}</p>
+              <p className="text-sm text-[#dce3eb]">inversores</p>
             </div>
           </div>
-        </Card>
-      </div>
+          <p className="text-[13px] text-[#c9d2dd] leading-snug">
+            {!montoNum
+              ? "Completá el monto para ver cuántos fondeadores verificados buscan facturas como la tuya."
+              : totalAlcance === 0
+                ? "Hoy ningún fondeador busca exactamente esto, pero la factura queda publicada y les avisamos cuando cambien sus preferencias."
+                : "Les avisamos apenas publiques. Tu nombre y el del deudor solo los ve quien marque interés."}
+          </p>
+        </section>
+
+        <section className="bg-surface border border-line rounded-3xl p-5 flex flex-col gap-3">
+          <p className="font-bold">Así la ven los fondeadores</p>
+          <div className="flex gap-1.5 flex-wrap">
+            <span className="text-xs font-semibold bg-slate-soft text-slate-ink px-2.5 py-1 rounded-full">{rubro || "Rubro"}</span>
+            <span className="text-xs font-semibold bg-slate-soft text-slate-ink px-2.5 py-1 rounded-full">
+              {deudorTipo === "estado" ? "Deudor: Estado" : "Empresa privada"}
+            </span>
+          </div>
+          <p className="num text-2xl font-semibold">{montoNum ? `${moneda} ${montoNum.toLocaleString("es-PY")}` : "Monto"}</p>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="bg-surface-2 rounded-xl px-3 py-2">
+              <p className="text-[11px] text-ink-soft">Plazo</p>
+              <p className="text-sm font-semibold">{plazo ? `${plazo} días` : "—"}</p>
+            </div>
+            <div className="bg-surface-2 rounded-xl px-3 py-2">
+              <p className="text-[11px] text-ink-soft">Riesgo</p>
+              <p className="text-sm font-semibold capitalize">{riesgo}</p>
+            </div>
+          </div>
+          <p className="text-xs text-ink-soft">El nombre del deudor y el documento se muestran solo a quien marque «Me interesa».</p>
+        </section>
+      </aside>
     </div>
   );
 }

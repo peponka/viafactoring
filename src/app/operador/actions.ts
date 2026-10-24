@@ -57,11 +57,16 @@ export async function crearFacturaAction(
       riesgo: (String(formData.get("riesgo") || "medio")) as Riesgo,
       descripcion: String(formData.get("descripcion") || "") || null,
       operador_contacto: String(formData.get("operador_contacto") || "") || null,
+      deudor_tipo: formData.get("deudor_tipo") === "estado" ? "estado" : "privado",
+      deudor_ruc: String(formData.get("deudor_ruc") || "").trim() || null,
     })
     .select()
     .single();
 
   if (error || !invoice) {
+    if (error?.message?.startsWith("MONTO_MINIMO")) {
+      return { error: error.message.replace(/^MONTO_MINIMO:\s*/, "").replace(/^el/, "El") + "." };
+    }
     return { error: error?.message || "No se pudo guardar la factura." };
   }
 
@@ -96,3 +101,37 @@ export async function retirarFacturaAction(invoiceId: string) {
 // El cierre de una factura ocurre al aceptar una oferta en su Deal Room
 // (ver src/app/deal-room/actions.ts). El viejo "Marcar como cerrada" por
 // autoreporte se retiró: cerraba sin cobrar la comisión de cierre.
+
+// Vista previa mientras la PyME completa el formulario: monto en USD (para el
+// mínimo) y cuántos fondeadores aprobados encajan con la factura. Solo
+// devuelve conteos, nunca quiénes son.
+export async function previsualizarAlcanceAction(datos: {
+  monto: number;
+  moneda: string;
+  plazo_dias: number;
+  riesgo: Riesgo;
+  deudor_tipo: "privado" | "estado";
+  rubro: string;
+}): Promise<{ montoUsd: number | null; instituciones: number; inversores: number }> {
+  const { supabase } = await requireOperador();
+  if (!Number.isFinite(datos.monto) || datos.monto <= 0) {
+    return { montoUsd: null, instituciones: 0, inversores: 0 };
+  }
+  const [{ data: usd }, { data: alcance }] = await Promise.all([
+    supabase.rpc("monto_en_usd", { p_monto: datos.monto, p_moneda: datos.moneda }),
+    supabase.rpc("alcance_factura", {
+      p_monto: datos.monto,
+      p_moneda: datos.moneda,
+      p_plazo_dias: Math.max(0, Math.round(datos.plazo_dias || 0)),
+      p_riesgo: datos.riesgo,
+      p_deudor_tipo: datos.deudor_tipo,
+      p_rubro: datos.rubro || null,
+    }),
+  ]);
+  const fila = Array.isArray(alcance) ? alcance[0] : alcance;
+  return {
+    montoUsd: typeof usd === "number" ? usd : usd != null ? Number(usd) : null,
+    instituciones: fila?.instituciones ?? 0,
+    inversores: fila?.inversores ?? 0,
+  };
+}

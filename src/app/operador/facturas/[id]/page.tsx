@@ -74,18 +74,55 @@ export default async function FacturaDetallePage({
 
   const conOferta = filas.filter((f) => f.vigente);
 
+  const { data: alcanceFilas } = await supabase.rpc("alcance_factura", {
+    p_monto: factura.monto,
+    p_moneda: factura.moneda,
+    p_plazo_dias: factura.plazo_dias,
+    p_riesgo: factura.riesgo,
+    p_deudor_tipo: factura.deudor_tipo,
+    p_rubro: factura.rubro,
+  });
+  const alcance = Array.isArray(alcanceFilas) ? alcanceFilas[0] : null;
+
   return (
     <div className="max-w-4xl">
-      <div className="flex items-center gap-2 mb-4 flex-wrap">
-        <Badge>{rubroLabel(factura.rubro)}</Badge>
-        <Badge>{RIESGO_LABEL[factura.riesgo]}</Badge>
-        <Badge tone={factura.estado === "disponible" ? "good" : "neutral"}>{factura.estado}</Badge>
-      </div>
-      <h1 className="text-2xl font-semibold mb-1">{factura.deudor_nombre}</h1>
-      <p className="text-ink-soft mb-6">
-        {formatMonto(factura.monto, factura.moneda)} · vence {formatFecha(factura.fecha_vencimiento)} ·{" "}
-        {factura.plazo_dias} días
-      </p>
+      <section className="bg-surface border border-line rounded-3xl p-5 sm:p-6 mb-6 shadow-[var(--shadow-card)] flex flex-col gap-5">
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
+              <Badge>{rubroLabel(factura.rubro)}</Badge>
+              <Badge>{factura.deudor_tipo === "estado" ? "Deudor: Estado" : "Empresa privada"}</Badge>
+              <Badge>{RIESGO_LABEL[factura.riesgo]}</Badge>
+            </div>
+            <p className="text-sm text-ink-soft">
+              {factura.numero ? `Factura ${factura.numero}` : "Factura"} · {factura.deudor_nombre}
+            </p>
+            <h1 className="num text-[2rem] sm:text-[2.4rem] font-semibold leading-tight">
+              {formatMonto(factura.monto, factura.moneda)}
+            </h1>
+            <p className="text-ink-soft text-sm">
+              Vence {formatFecha(factura.fecha_vencimiento)} · {factura.plazo_dias} días
+            </p>
+          </div>
+          <Badge tone={factura.estado === "disponible" ? "good" : factura.estado === "cerrada" ? "gold" : "neutral"}>
+            {factura.estado === "disponible" ? "Publicada" : factura.estado === "cerrada" ? "Cerrada" : "Retirada"}
+          </Badge>
+        </div>
+        <div className="grid grid-cols-3 gap-2.5">
+          <div className="bg-surface-2 rounded-2xl px-3 py-3 text-center">
+            <p className="num text-2xl font-bold">{alcance ? alcance.instituciones + alcance.inversores : "—"}</p>
+            <p className="text-xs text-ink-soft">fondeadores encajan</p>
+          </div>
+          <div className="bg-surface-2 rounded-2xl px-3 py-3 text-center">
+            <p className="num text-2xl font-bold">{filas.length}</p>
+            <p className="text-xs text-ink-soft">{filas.length === 1 ? "interesado" : "interesados"}</p>
+          </div>
+          <div className={`rounded-2xl px-3 py-3 text-center ${conOferta.length > 0 ? "bg-accent-soft text-accent" : "bg-surface-2"}`}>
+            <p className="num text-2xl font-bold">{conOferta.length}</p>
+            <p className="text-xs font-medium">{conOferta.length === 1 ? "oferta" : "ofertas"}</p>
+          </div>
+        </div>
+      </section>
 
       {conOferta.length > 0 && (
         <Card className="mb-6 overflow-x-auto">
@@ -138,11 +175,11 @@ export default async function FacturaDetallePage({
 
       <Card className="mb-6">
         <p className="font-semibold mb-3">
-          {filas.length} fondeador(es) desbloquearon esta factura
+          {filas.length === 0 ? "Interesados" : `${filas.length} ${filas.length === 1 ? "fondeador se interesó" : "fondeadores se interesaron"}`}
         </p>
         {filas.length === 0 ? (
           <p className="text-sm text-ink-soft">
-            Todavía nadie la desbloqueó. Cuando un fondeador lo haga, se abre un Deal Room para
+            Todavía nadie marcó interés. Cuando un fondeador lo haga, se abre una negociación para
             conversar y recibir su oferta.
           </p>
         ) : (
@@ -151,11 +188,11 @@ export default async function FacturaDetallePage({
               <li key={f.room.id}>
                 <Link
                   href={`/deal-room/${f.room.id}`}
-                  className="flex items-center justify-between gap-3 rounded-lg px-3 py-2 hover:bg-surface-2 transition text-sm"
+                  className="flex items-center justify-between gap-3 rounded-2xl px-3.5 py-3 min-h-12 hover:bg-surface-2 transition text-sm"
                 >
                   <span>
                     <span className="font-medium">{f.fondeador}</span>
-                    <span className="text-ink-soft"> · desbloqueó el {formatFecha(f.room.revealed_at)}</span>
+                    <span className="text-ink-soft"> · desde el {formatFecha(f.room.revealed_at)}</span>
                   </span>
                   <Badge tone={estadoDealRoomTone(f.room.estado)}>
                     {ESTADO_DEAL_ROOM_LABEL[f.room.estado]}
@@ -171,7 +208,7 @@ export default async function FacturaDetallePage({
         <div className="flex flex-col gap-2">
           <p className="text-sm text-ink-soft">
             La factura se cierra aceptando una oferta en su Deal Room. Si ya no querés ofrecerla,
-            podés retirarla del marketplace.
+            podés retirarla.
           </p>
           <RetirarButton invoiceId={factura.id} />
         </div>

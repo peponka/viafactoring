@@ -9,16 +9,16 @@ export default async function OperadorDealRoomsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold mb-1">Deal Rooms</h1>
-      <p className="text-ink-soft text-sm mb-8">
+      <h1 className="text-[1.75rem] md:text-3xl font-bold mb-1.5">Negociaciones</h1>
+      <p className="text-ink-soft mb-8">
         Cada fondeador interesado en una de tus facturas abre una sala de negociación con vos.
         Podés recibir ofertas de varios a la vez y compararlas antes de aceptar.
       </p>
       <TeTocaAVos rooms={rooms} />
-      <DealRoomList rooms={activos} vacio="Todavía ningún fondeador desbloqueó tus facturas." />
+      <DealRoomList rooms={activos} vacio="Todavía ningún fondeador marcó interés en tus facturas." />
       {cerrados.length > 0 && (
         <>
-          <h2 className="font-semibold mt-8 mb-3">Finalizadas</h2>
+          <h2 className="text-lg font-bold mt-8 mb-3">Finalizadas</h2>
           <DealRoomList rooms={cerrados} vacio="" />
         </>
       )}

@@ -32,12 +32,20 @@ const ICONS: Record<string, React.ReactNode> = {
     </>
   ),
   shield: <path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z" />,
+  sliders: (
+    <>
+      <path d="M4 7h10M18 7h2M4 17h4M12 17h8" />
+      <circle cx="16" cy="7" r="2" />
+      <circle cx="10" cy="17" r="2" />
+    </>
+  ),
 };
 
 function iconFor(href: string) {
   if (href.includes("deal-rooms")) return ICONS.chat;
   if (href.endsWith("/nueva")) return ICONS.plus;
-  if (href.includes("preferencias") || href.includes("perfil")) return ICONS.user;
+  if (href.includes("preferencias")) return ICONS.sliders;
+  if (href.includes("perfil")) return ICONS.user;
   if (href.startsWith("/admin")) return ICONS.shield;
   if (href === "/operador") return ICONS.doc;
   return ICONS.feed;

@@ -17,10 +17,13 @@ export async function Campana({ userId }: { userId: string }) {
       <CampanaEnVivo userId={userId} />
       <Link
         href="/notificaciones"
-        className="relative inline-flex items-center justify-center w-9 h-9 rounded-full hover:bg-surface-2"
+        className="relative inline-flex items-center justify-center w-11 h-11 rounded-full border border-line bg-surface hover:border-line-strong"
         aria-label={n > 0 ? `${n} avisos sin leer` : "Avisos"}
       >
-        <span aria-hidden>🔔</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8" />
+          <path d="M10.3 20a1.9 1.9 0 0 0 3.4 0" />
+        </svg>
         {n > 0 && (
           <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-critical text-white text-[.65rem] font-semibold flex items-center justify-center num">
             {n > 99 ? "99+" : n}

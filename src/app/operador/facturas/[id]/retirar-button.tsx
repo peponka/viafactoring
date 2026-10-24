@@ -13,7 +13,7 @@ export function RetirarButton({ invoiceId }: { invoiceId: string }) {
   if (!confirmando) {
     return (
       <Button variant="ghost" className="w-fit" onClick={() => setConfirmando(true)}>
-        Retirar factura del marketplace
+        Retirar factura
       </Button>
     );
   }

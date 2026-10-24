@@ -75,7 +75,7 @@ export function estadoDealRoomTone(estado: string) {
 
 export const NIVEL_LABEL: Record<number, string> = {
   1: "Público",
-  2: "Desbloqueado",
+  2: "Con interés",
   3: "Negociación",
   4: "Cierre",
 };

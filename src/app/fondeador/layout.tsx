@@ -4,12 +4,8 @@ import { TopNav } from "@/components/top-nav";
 import { Campana } from "@/components/campana";
 import { PedirTelefono } from "@/components/pedir-telefono";
 
-// NOTA: la compra de créditos (fondeador_credits / /fondeador/creditos) ya
-// no es el mecanismo de pago — se reemplazó por el desbloqueo pago por
-// operación (ver supabase/migrations/0003_desbloqueo.sql). El código viejo
-// de créditos se dejó intacto por si se retoma más adelante, pero se sacó
-// de la navegación para no confundir: mostrar un saldo de créditos que ya
-// no se usa para nada sería engañoso.
+// Los créditos (0001) y el desbloqueo pago (0003) quedaron sin uso: desde la
+// 0014 «Me interesa» abre la negociación gratis y se cobra solo la comisión.
 export default async function FondeadorLayout({
   children,
 }: {
@@ -25,8 +21,9 @@ export default async function FondeadorLayout({
         nombre={profile.nombre}
         rightSlot={<Campana userId={user.id} />}
         links={[
-          { href: "/fondeador", label: "Marketplace" },
-          { href: "/fondeador/deal-rooms", label: "Mis Deal Rooms" },
+          { href: "/fondeador", label: "Facturas" },
+          { href: "/fondeador/deal-rooms", label: "Negociaciones" },
+          { href: "/fondeador/preferencias", label: "Preferencias" },
         ]}
       />
       {!profile.telefono && <PedirTelefono />}

@@ -161,3 +161,23 @@ export async function cerrarFacturaAction(invoiceId: string) {
   await supabase.from("invoices").update({ estado: "cerrada" }).eq("id", invoiceId);
   revalidatePath("/admin/facturas");
 }
+
+// Verificación de fondeadores: el admin revisa la documentación y aprueba o
+// pide cambios. La base valida que solo un admin pueda hacerlo y avisa al
+// fondeador.
+export async function verificarFondeadorAction(
+  fondeadorId: string,
+  aprobar: boolean,
+  nota: string,
+): Promise<{ error: string | null }> {
+  const { supabase } = await requireAdmin();
+  if (!aprobar && !nota.trim()) return { error: "Contale al fondeador qué tiene que corregir." };
+  const { error } = await supabase.rpc("admin_verificar_fondeador", {
+    p_fondeador_id: fondeadorId,
+    p_aprobar: aprobar,
+    p_nota: nota.trim() || null,
+  });
+  if (error) return { error: error.message };
+  revalidatePath("/admin/fondeadores");
+  return { error: null };
+}

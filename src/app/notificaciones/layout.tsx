@@ -12,13 +12,14 @@ export default async function NotificacionesLayout({ children }: { children: Rea
   const links =
     profile.role === "fondeador"
       ? [
-          { href: "/fondeador", label: "Marketplace" },
-          { href: "/fondeador/deal-rooms", label: "Mis Deal Rooms" },
+          { href: "/fondeador", label: "Facturas" },
+          { href: "/fondeador/deal-rooms", label: "Negociaciones" },
+          { href: "/fondeador/preferencias", label: "Preferencias" },
         ]
       : [
           { href: "/operador", label: "Mis facturas" },
-          { href: "/operador/deal-rooms", label: "Deal Rooms" },
-          { href: "/operador/nueva", label: "Cargar factura" },
+          { href: "/operador/nueva", label: "Subir factura" },
+          { href: "/operador/deal-rooms", label: "Negociaciones" },
         ];
 
   return (

@@ -25,3 +25,14 @@ export function homeForRole(role: Rol | null | undefined) {
   if (role === "admin") return "/admin";
   return "/";
 }
+
+/** Perfil de fondeador (categoría, verificación y preferencias), o null. */
+export async function getFondeadorPerfil(userId: string) {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("fondeador_perfiles")
+    .select("*")
+    .eq("fondeador_id", userId)
+    .maybeSingle<import("@/lib/database.types").FondeadorPerfil>();
+  return data ?? null;
+}

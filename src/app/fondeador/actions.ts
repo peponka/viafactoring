@@ -3,7 +3,6 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { iniciarPago, type ResultadoInicio } from "@/lib/pagos/servicio";
 
 // Legacy (modelo de créditos). reveal_invoice ahora devuelve la info por niveles.
 export type ActionResult = { error?: string; invoice?: unknown };
@@ -45,16 +44,6 @@ export async function revelarFacturaAction(
   return { invoice: data ?? undefined };
 }
 
-// Inicia el pago del desbloqueo. El monto (tramo en USD → guaraníes) lo
-// calcula la base; el Deal Room se abre solo cuando la pasarela confirma el
-// pago por webhook, nunca porque el usuario vuelva de la pasarela.
-export async function desbloquearAction(invoiceId: string): Promise<ResultadoInicio> {
-  await requireFondeador();
-  const r = await iniciarPago("desbloqueo", invoiceId);
-  revalidatePath(`/fondeador/facturas/${invoiceId}`);
-  return r;
-}
-
 // Los documentos se sirven por /api/documentos/[id] (con marca de agua y
 // registro de cada descarga) y las ofertas se hacen desde el Deal Room.
 
@@ -84,4 +73,87 @@ export async function solicitarPackAction(
 
   revalidatePath("/fondeador/creditos");
   return { error: null, ok: true };
+}
+
+// ---------------------------------------------------------------------------
+// Categoría, verificación y preferencias (0014)
+// ---------------------------------------------------------------------------
+
+function mensajeDeError(message: string | undefined, fallback: string) {
+  if (!message) return fallback;
+  // Los errores de las funciones de la base ya vienen en castellano y
+  // pensados para mostrarse; los técnicos se reemplazan por uno genérico.
+  if (/permission denied|violates|syntax|function .* does not exist/i.test(message)) return fallback;
+  return message;
+}
+
+export async function enviarVerificacionAction(
+  categoria: "individual" | "institucion",
+  documentos: string[],
+): Promise<{ error: string | null }> {
+  const { supabase } = await requireFondeador();
+  const { error } = await supabase.rpc("enviar_verificacion", {
+    p_categoria: categoria,
+    p_documentos: documentos,
+  });
+  if (error) return { error: mensajeDeError(error.message, "No pudimos enviar tu documentación. Probá de nuevo.") };
+  revalidatePath("/fondeador", "layout");
+  return { error: null };
+}
+
+export async function guardarPreferenciasAction(
+  _prev: { error: string | null; ok?: boolean },
+  formData: FormData,
+): Promise<{ error: string | null; ok?: boolean }> {
+  const { supabase } = await requireFondeador();
+  const num = (k: string) => {
+    const v = String(formData.get(k) ?? "").replace(/[^\d]/g, "");
+    return v ? Number(v) : null;
+  };
+  const min = num("monto_min_usd");
+  if (min == null) return { error: "Indicá desde qué monto querés ver facturas." };
+
+  const { error } = await supabase.rpc("guardar_preferencias", {
+    p_monto_min_usd: min,
+    p_monto_max_usd: num("monto_max_usd"),
+    p_plazo_max_dias: num("plazo_max_dias"),
+    p_riesgos: formData.getAll("riesgos").map(String) as ("bajo" | "medio" | "alto")[],
+    p_deudor_tipos: formData.getAll("deudor_tipos").map(String) as ("privado" | "estado")[],
+    p_industrias: formData.getAll("industrias").map(String),
+    p_alertas: formData.get("alertas") === "on",
+  });
+  if (error) return { error: mensajeDeError(error.message, "No pudimos guardar tus preferencias.") };
+  revalidatePath("/fondeador");
+  if (formData.get("volver") === "feed") redirect("/fondeador");
+  return { error: null, ok: true };
+}
+
+// ---------------------------------------------------------------------------
+// Feed: «Paso» y «Me interesa»
+// ---------------------------------------------------------------------------
+
+export async function pasarFacturaAction(invoiceId: string): Promise<{ error: string | null }> {
+  const { supabase, userId } = await requireFondeador();
+  const { error } = await supabase
+    .from("invoice_pasadas")
+    .upsert({ fondeador_id: userId, invoice_id: invoiceId }, { onConflict: "fondeador_id,invoice_id" });
+  return { error: error ? "No se pudo guardar. Probá de nuevo." : null };
+}
+
+export async function deshacerPasoAction(invoiceId: string): Promise<{ error: string | null }> {
+  const { supabase, userId } = await requireFondeador();
+  await supabase.from("invoice_pasadas").delete().eq("fondeador_id", userId).eq("invoice_id", invoiceId);
+  return { error: null };
+}
+
+export async function marcarInteresAction(
+  invoiceId: string,
+): Promise<{ error: string | null; dealRoomId?: string }> {
+  const { supabase } = await requireFondeador();
+  const { data, error } = await supabase.rpc("marcar_interes", { p_invoice_id: invoiceId });
+  if (error || !data) {
+    return { error: mensajeDeError(error?.message, "No pudimos abrir la negociación. Probá de nuevo.") };
+  }
+  revalidatePath("/fondeador/deal-rooms");
+  return { error: null, dealRoomId: data };
 }

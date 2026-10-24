@@ -4,7 +4,7 @@ import { getUserAndProfile } from "@/lib/session";
 import { Badge, Card } from "@/components/ui";
 import { formatFecha, formatMonto, RIESGO_LABEL, rubroLabel } from "@/lib/format";
 import type { InvoiceTeaser } from "@/lib/database.types";
-import { UnlockButton } from "./unlock-button";
+import { InteresButton } from "./interes-button";
 
 function riesgoTone(riesgo: string) {
   if (riesgo === "bajo") return "good" as const;
@@ -16,10 +16,8 @@ function riesgoTone(riesgo: string) {
 // su Deal Room: información ampliada, chat, documentos y ofertas.
 export default async function FacturaFondeadorPage({
   params,
-  searchParams,
 }: PageProps<"/fondeador/facturas/[id]">) {
   const { id } = await params;
-  const volviendo = !!(await searchParams).pago;
   await getUserAndProfile();
   const supabase = await createClient();
 
@@ -31,9 +29,15 @@ export default async function FacturaFondeadorPage({
 
   if (!teaser) notFound();
 
-  // Si el pago ya se confirmó, el Deal Room existe: se entra directo.
-  const { data: estado } = await supabase.rpc("estado_desbloqueo", { p_invoice_id: id });
-  if (estado?.reveal_id) redirect(`/deal-room/${estado.reveal_id}`);
+  // Si ya marcó interés, el Deal Room existe: se entra directo.
+  if (teaser.ya_revelada) {
+    const { data: room } = await supabase
+      .from("reveals")
+      .select("id")
+      .eq("invoice_id", id)
+      .maybeSingle<{ id: string }>();
+    if (room?.id) redirect(`/deal-room/${room.id}`);
+  }
 
   const datosSector = Object.entries(teaser.industry_data_publica ?? {});
 
@@ -44,12 +48,16 @@ export default async function FacturaFondeadorPage({
         <Badge tone={riesgoTone(teaser.riesgo)}>{RIESGO_LABEL[teaser.riesgo]}</Badge>
       </div>
 
-      <h1 className="text-2xl font-semibold mb-1">
+      <h1 className="text-[1.75rem] font-bold mb-1">
         Operación {(teaser.industria_nombre ?? rubroLabel(teaser.rubro)).toLowerCase()}
       </h1>
       {teaser.descripcion && <p className="text-ink-soft mb-6">{teaser.descripcion}</p>}
 
       <Card className="mb-6 grid grid-cols-2 gap-4">
+        <div>
+          <p className="text-ink-soft text-xs uppercase tracking-wide">Deudor</p>
+          <p className="font-medium">{teaser.deudor_tipo === "estado" ? "Estado" : "Empresa privada"}</p>
+        </div>
         <div>
           <p className="text-ink-soft text-xs uppercase tracking-wide">Monto de la factura</p>
           <p className="num text-lg font-medium">{formatMonto(teaser.monto, teaser.moneda)}</p>
@@ -75,22 +83,17 @@ export default async function FacturaFondeadorPage({
           </div>
         ))}
         <div className="col-span-2">
-          <p className="text-ink-soft text-xs uppercase tracking-wide">Al desbloquear</p>
+          <p className="text-ink-soft text-xs uppercase tracking-wide">Al tocar «Me interesa»</p>
           <p className="text-sm">
-            Entrás a la sala de negociación con la PyME: ves el deudor, los documentos, podés
-            preguntar por chat y hacer tu oferta. El contacto directo se muestra al cerrar el
-            acuerdo.
+            Entrás a la sala de negociación con la pyme: ves el deudor, la ficha de verificación y
+            los documentos, podés preguntar por chat y hacer tu oferta. El contacto directo se
+            muestra al cerrar el acuerdo.
           </p>
         </div>
       </Card>
 
       {teaser.estado === "disponible" ? (
-        <UnlockButton
-          invoiceId={id}
-          feeUsd={teaser.unlock_fee}
-          pago={estado?.pago ?? null}
-          volviendo={volviendo}
-        />
+        <InteresButton invoiceId={id} />
       ) : (
         <p className="text-sm text-ink-soft">Esta operación ya no está disponible.</p>
       )}

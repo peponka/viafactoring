@@ -63,14 +63,13 @@ export default function PrivacidadPage() {
 
             <section>
               <h2 className="font-serif font-semibold text-ink text-lg mb-2">
-                3. Qué queda oculto hasta el pago
+                3. Qué se muestra en cada etapa
               </h2>
               <p>
-                Antes del desbloqueo, un fondeador solo ve el monto, el
+                En el feed, un fondeador verificado solo ve el monto, el
                 plazo y datos generales de la operación. El nombre del
-                deudor y la documentación se muestran recién cuando
-                confirmamos el pago de la tarifa de desbloqueo de esa
-                factura. Los teléfonos y emails de las partes se habilitan
+                deudor y la documentación se muestran recién cuando marca
+                interés en esa factura. Los teléfonos y emails de las partes se habilitan
                 solo cuando se confirma la comisión de cierre. Los
                 documentos descargados llevan una marca de agua con el
                 nombre de quien los descargó.
@@ -83,9 +82,13 @@ export default function PrivacidadPage() {
               </h2>
               <p>
                 No vendemos datos de usuarios a terceros. Los datos de una
-                factura se comparten únicamente con el fondeador que pagó
-                la tarifa de desbloqueo de esa factura en particular, y los
-                datos de contacto solo cuando se cierra el acuerdo.
+                factura se comparten únicamente con fondeadores verificados
+                que marcaron interés en esa factura en particular, y los
+                datos de contacto solo cuando se cierra el acuerdo. Para
+                armar la ficha de verificación consultamos fuentes públicas
+                (por ejemplo, contrataciones públicas de la DNCP) y un
+                servicio de inteligencia artificial que procesa los datos de
+                la factura.
               </p>
             </section>
 

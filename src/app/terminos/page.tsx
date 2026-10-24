@@ -40,10 +40,12 @@ export default function TerminosPage() {
                 1. Qué es ViaFactoring
               </h2>
               <p>
-                ViaFactoring es un marketplace que conecta a quienes tienen
-                facturas pendientes de cobro con fondeadores (financieras,
-                bancos, fondos e inversores) interesados en adelantarles ese
-                cobro. ViaFactoring facilita el contacto y la negociación
+                ViaFactoring es una plataforma tecnológica que conecta a
+                quienes tienen facturas pendientes de cobro con fondeadores
+                (financieras, bancos, fondos e inversores) interesados en
+                adelantarles ese cobro. No es una entidad financiera, no capta
+                ni administra fondos de terceros y no brinda asesoramiento
+                financiero. ViaFactoring facilita el contacto y la negociación
                 entre ambas partes a través de un Deal Room por operación.
                 No es parte del acuerdo de adelanto que operador y fondeador
                 cierran entre sí, no recibe ni administra el dinero del
@@ -78,17 +80,16 @@ export default function TerminosPage() {
 
             <section>
               <h2 className="font-serif font-semibold text-ink text-lg mb-2">
-                4. Tarifa de desbloqueo
+                4. Fondeadores: categorías, verificación e interés
               </h2>
               <p>
-                Los fondeadores pueden ver el monto y el vencimiento de cada
-                factura sin costo. Para acceder al deudor, la documentación
-                y el Deal Room de la operación (chat y ofertas), el
-                fondeador paga una tarifa de desbloqueo cuyo valor depende
-                del monto de la factura y se muestra antes de confirmar el
-                pago. Esta tarifa no es reembolsable una vez confirmado el
-                acceso, incluso si el adelanto finalmente no se concreta
-                entre las partes.
+                Los fondeadores se registran como inversores individuales o
+                instituciones financieras y envían documentación que
+                ViaFactoring revisa antes de habilitar la cuenta. Cada
+                categoría tiene un rango de montos por factura. Marcar
+                interés en una factura no tiene costo: da acceso al deudor,
+                la documentación, la ficha de verificación y la sala de
+                negociación de esa operación.
               </p>
             </section>
 
@@ -112,10 +113,13 @@ export default function TerminosPage() {
                 6. Responsabilidad
               </h2>
               <p>
-                ViaFactoring no evalúa el riesgo crediticio de los deudores
-                ni garantiza el cobro de ninguna factura. Cada fondeador es
-                responsable de su propia evaluación antes de pagar la
-                tarifa de desbloqueo o de acordar un adelanto.
+                ViaFactoring no evalúa el riesgo crediticio de los deudores,
+                no recomienda operaciones ni garantiza el cobro de ninguna
+                factura. La ficha de verificación muestra datos recopilados
+                automáticamente, que pueden estar incompletos o desactualizados,
+                y no constituye una recomendación. Cada fondeador es
+                responsable de su propia evaluación antes de acordar un
+                adelanto.
               </p>
             </section>
 
