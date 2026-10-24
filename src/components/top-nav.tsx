@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { signOutAction } from "@/app/(auth)/actions";
+import { Logo } from "@/components/ui";
+import { DesktopNavLinks, MobileTabBar, type NavLink } from "@/components/nav-links";
 
 export function TopNav({
   nombre,
@@ -7,49 +9,61 @@ export function TopNav({
   rightSlot,
 }: {
   nombre: string;
-  links: { href: string; label: string }[];
+  links: NavLink[];
   rightSlot?: React.ReactNode;
 }) {
+  const inicial = nombre.trim().charAt(0).toUpperCase() || "?";
   return (
-    <header className="border-b border-line">
-      <div className="wrap max-w-6xl mx-auto px-6 py-4 flex items-center justify-between gap-6 flex-wrap">
-        <div className="flex items-center gap-8">
-          <Link
-            href="/"
-            className="flex items-center gap-2.5 font-serif font-semibold text-lg"
-          >
-            <span className="w-7 h-7 rounded-lg bg-accent text-accent-ink flex items-center justify-center font-mono text-xs">
-              Vf
+    <>
+      <header className="sticky top-0 z-40 bg-background/90 backdrop-blur border-b border-line">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-6 min-w-0">
+            <Link href="/" aria-label="ViaFactoring, inicio">
+              <Logo />
+            </Link>
+            <DesktopNavLinks links={links} />
+          </div>
+          <div className="flex items-center gap-2 sm:gap-3">
+            {rightSlot}
+            <span
+              aria-hidden="true"
+              className="hidden sm:flex w-9 h-9 rounded-full bg-ink text-white items-center justify-center text-sm font-semibold"
+            >
+              {inicial}
             </span>
-            ViaFactoring
-          </Link>
-          <nav className="flex items-center gap-5">
+            <span className="text-sm font-medium text-ink-soft hidden lg:inline max-w-[16ch] truncate">
+              {nombre}
+            </span>
+            <form action={signOutAction}>
+              <button
+                type="submit"
+                className="text-sm font-semibold text-ink-soft hover:text-critical min-h-11 px-2"
+              >
+                Salir
+              </button>
+            </form>
+          </div>
+        </div>
+      </header>
+      {links.length > 1 && links.length <= 5 && <MobileTabBar links={links} />}
+      {links.length > 5 && (
+        <nav
+          aria-label="Secciones"
+          className="md:hidden border-b border-line bg-background overflow-x-auto"
+        >
+          <div className="flex gap-1 px-4 py-2 w-max">
             {links.map((l) => (
               <Link
                 key={l.href}
                 href={l.href}
-                className="text-sm font-medium text-ink-soft hover:text-ink"
+                className="text-sm font-semibold text-ink-soft px-3 py-2 rounded-full whitespace-nowrap hover:bg-surface-2"
               >
                 {l.label}
               </Link>
             ))}
-          </nav>
-        </div>
-        <div className="flex items-center gap-4">
-          {rightSlot}
-          <span className="text-sm text-ink-soft hidden sm:inline">
-            {nombre}
-          </span>
-          <form action={signOutAction}>
-            <button
-              type="submit"
-              className="text-sm font-medium text-ink-soft hover:text-critical"
-            >
-              Salir
-            </button>
-          </form>
-        </div>
-      </div>
-    </header>
+          </div>
+        </nav>
+      )}
+    </>
   );
 }

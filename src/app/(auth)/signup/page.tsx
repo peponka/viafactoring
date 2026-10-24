@@ -16,26 +16,33 @@ export default function SignupPage() {
   const [role, setRole] = useState<"operador" | "fondeador">("operador");
 
   return (
-    <main className="wrap max-w-md mx-auto py-20 flex-1 w-full px-6">
-      <h1 className="text-3xl font-semibold mb-2">Crear cuenta</h1>
+    <main className="max-w-md mx-auto pt-10 pb-16 md:pt-16 flex-1 w-full px-4 sm:px-6">
+      <h1 className="text-3xl font-bold mb-2">Crear cuenta</h1>
       <p className="text-ink-soft mb-8">
-        Sumate como operador de facturas o como fondeador.
+        Gratis para pymes. Los fondeadores pagan solo si cierran.
       </p>
       <Card>
         <form action={formAction} className="flex flex-col gap-4">
-          <div className="grid grid-cols-2 gap-2 p-1 bg-surface-2 rounded-lg">
+          <div role="radiogroup" aria-label="Tipo de cuenta" className="grid grid-cols-2 gap-2.5">
             {(["operador", "fondeador"] as const).map((r) => (
               <button
                 key={r}
                 type="button"
+                role="radio"
+                aria-checked={role === r}
                 onClick={() => setRole(r)}
-                className={`py-2.5 rounded-md text-sm font-semibold transition ${
+                className={`text-left p-3.5 rounded-2xl border-2 transition flex flex-col gap-1 ${
                   role === r
-                    ? "bg-accent text-accent-ink"
-                    : "text-ink-soft hover:text-ink"
+                    ? "border-accent bg-accent-soft"
+                    : "border-line bg-surface hover:border-line-strong"
                 }`}
               >
-                {r === "operador" ? "Operador de facturas" : "Fondeador"}
+                <span className={`text-sm font-bold ${role === r ? "text-accent" : "text-ink"}`}>
+                  {r === "operador" ? "Tengo facturas" : "Tengo capital"}
+                </span>
+                <span className="text-xs text-ink-soft leading-snug">
+                  {r === "operador" ? "Pyme o empresa que quiere cobrar antes" : "Inversor o institución financiera"}
+                </span>
               </button>
             ))}
           </div>

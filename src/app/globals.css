@@ -1,46 +1,71 @@
 @import "tailwindcss";
 
+/*
+ * Sistema visual de ViaFactoring.
+ * Fondo cálido, tinta casi negra y un solo acento verde "plata".
+ * Los números grandes van en la tipografía de display (Space Grotesk)
+ * con cifras tabulares; el texto corrido en Inter.
+ */
 :root {
-  --background: #ffffff;
+  --background: #f5f4ef;
   --surface: #ffffff;
-  --surface-2: #f2f3f1;
-  --ink: #16211e;
-  --ink-soft: #4b5a55;
-  --accent: #1a56b0;
+  --surface-2: #f7f6f2;
+  --surface-3: #efede6;
+  --ink: #101828;
+  --ink-soft: #5b6472;
+  --accent: #0b6e4f;
+  --accent-strong: #08553d;
   --accent-ink: #ffffff;
-  --accent-soft: #e4edf9;
-  --gold: #a97a2c;
-  --gold-soft: #f4e8d3;
-  --line: rgba(22, 33, 30, 0.14);
-  --good: #1e8e5a;
-  --good-soft: rgba(30, 142, 90, 0.14);
-  --warn: #a9720c;
-  --warn-soft: rgba(169, 114, 12, 0.14);
-  --critical: #b3412a;
-  --critical-soft: rgba(179, 65, 42, 0.14);
+  --accent-soft: #e3f1ea;
+  --slate-soft: #eef2f6;
+  --slate-ink: #2a3646;
+  --gold: #7a4f00;
+  --gold-soft: #fbefd5;
+  --line: #e4e2da;
+  --line-strong: #d9d6cc;
+  --good: #0b6e4f;
+  --good-soft: #e3f1ea;
+  --warn: #7a4f00;
+  --warn-soft: #fbefd5;
+  --critical: #9a2f1b;
+  --critical-soft: #f9e3dd;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
   --color-ink: var(--ink);
   --color-ink-soft: var(--ink-soft);
   --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
   --color-accent-ink: var(--accent-ink);
   --color-accent-soft: var(--accent-soft);
+  --color-slate-soft: var(--slate-soft);
+  --color-slate-ink: var(--slate-ink);
   --color-gold: var(--gold);
   --color-gold-soft: var(--gold-soft);
   --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
   --color-good: var(--good);
   --color-good-soft: var(--good-soft);
   --color-warn: var(--warn);
   --color-warn-soft: var(--warn-soft);
   --color-critical: var(--critical);
   --color-critical-soft: var(--critical-soft);
-  --font-sans: var(--font-plex-sans), system-ui, sans-serif;
-  --font-serif: var(--font-fraunces), Georgia, serif;
-  --font-mono: var(--font-plex-mono), monospace;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  /* "serif" se mantiene como nombre para no tocar cada pantalla: ahora es la
+     tipografía de display (títulos y cifras destacadas). */
+  --font-serif: var(--font-display), system-ui, sans-serif;
+  --font-display: var(--font-display), system-ui, sans-serif;
+  --font-mono: var(--font-display), ui-monospace, monospace;
+  --shadow-card: 0 1px 2px rgb(16 24 40 / 0.04), 0 8px 24px rgb(16 24 40 / 0.05);
+  --shadow-lift: 0 10px 30px rgb(16 24 40 / 0.1);
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -50,12 +75,38 @@ body {
   line-height: 1.55;
 }
 
-h1, h2, h3 {
-  font-family: var(--font-serif);
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
   text-wrap: balance;
 }
 
 .num {
-  font-family: var(--font-mono);
+  font-family: var(--font-display);
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .anim-in {
+    animation: anim-in 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+}
+
+@keyframes anim-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }

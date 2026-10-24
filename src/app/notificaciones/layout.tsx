@@ -25,7 +25,7 @@ export default async function NotificacionesLayout({ children }: { children: Rea
     <div className="flex-1 flex flex-col">
       <TopNav nombre={profile.nombre} links={links} rightSlot={<Campana userId={user.id} />} />
       {!profile.telefono && <PedirTelefono />}
-      <main className="wrap max-w-3xl mx-auto px-6 py-10 flex-1 w-full">{children}</main>
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-7 pb-28 md:pt-10 md:pb-14 flex-1 w-full anim-in">{children}</main>
     </div>
   );
 }

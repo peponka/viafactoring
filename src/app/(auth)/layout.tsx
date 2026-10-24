@@ -1,50 +1,27 @@
 import Link from "next/link";
-import { createElement as h, Fragment } from "react";
+import { Logo } from "@/components/ui";
 
 export default function AuthLayout({
-    children,
+  children,
 }: {
-    children: React.ReactNode;
+  children: React.ReactNode;
 }) {
-    return h(
-          Fragment,
-          null,
-          h(
-                  "header",
-            { className: "border-b border-line" },
-                  h(
-                            "div",
-                    {
-                                className:
-                                              "wrap max-w-6xl mx-auto px-6 py-4 flex items-center justify-between",
-                    },
-                            h(
-                                        Link,
-                              {
-                                            href: "/",
-                                            className:
-                                                            "flex items-center gap-2.5 font-serif font-semibold text-lg",
-                              },
-                                        h(
-                                                      "span",
-                                          {
-                                                          className:
-                                                                            "w-7 h-7 rounded-lg bg-accent text-accent-ink flex items-center justify-center font-mono text-xs",
-                                          },
-                                                      "Vf",
-                                                    ),
-                                        " ViaFactoring",
-                                      ),
-                            h(
-                                        Link,
-                              {
-                                            href: "/",
-                                            className: "text-sm font-medium text-ink-soft hover:text-ink",
-                              },
-                                        "Volver al inicio",
-                                      ),
-                          ),
-                ),
-          children,
-        );
+  return (
+    <>
+      <header className="border-b border-line bg-background">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+          <Link href="/" aria-label="ViaFactoring, inicio">
+            <Logo />
+          </Link>
+          <Link
+            href="/"
+            className="text-sm font-semibold text-ink-soft hover:text-ink min-h-11 flex items-center"
+          >
+            Volver al inicio
+          </Link>
+        </div>
+      </header>
+      <div className="flex-1 anim-in">{children}</div>
+    </>
+  );
 }

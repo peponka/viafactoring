@@ -15,8 +15,8 @@ export default function LoginPage() {
   );
 
   return (
-    <main className="wrap max-w-md mx-auto py-20 flex-1 w-full px-6">
-      <h1 className="text-3xl font-semibold mb-2">Iniciar sesión</h1>
+    <main className="max-w-md mx-auto pt-10 pb-16 md:pt-16 flex-1 w-full px-4 sm:px-6">
+      <h1 className="text-3xl font-bold mb-2">Iniciar sesión</h1>
       <p className="text-ink-soft mb-8">
         Entrá a tu cuenta de ViaFactoring.
       </p>

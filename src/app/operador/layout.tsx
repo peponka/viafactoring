@@ -25,7 +25,7 @@ export default async function OperadorLayout({
         ]}
       />
       {!profile.telefono && <PedirTelefono />}
-      <main className="wrap max-w-5xl mx-auto px-6 py-10 flex-1 w-full">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-7 pb-28 md:pt-10 md:pb-14 flex-1 w-full anim-in">
         {children}
       </main>
     </div>

@@ -1,3 +1,4 @@
+import { Logo } from "@/components/ui";
 import Link from "next/link";
 
 export const metadata = {
@@ -11,12 +12,9 @@ export default function TerminosPage() {
         <nav className="flex items-center justify-between py-6">
           <Link
             href="/"
-            className="flex items-center gap-2.5 font-serif font-semibold text-xl"
+            className="flex items-center"
           >
-            <span className="w-8 h-8 rounded-lg bg-accent text-accent-ink flex items-center justify-center font-mono text-sm">
-              Vf
-            </span>
-            ViaFactoring
+            <Logo size="lg" />
           </Link>
           <Link
             href="/"

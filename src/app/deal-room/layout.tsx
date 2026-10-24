@@ -37,7 +37,7 @@ export default async function DealRoomLayout({
         rightSlot={profile.role === "admin" ? null : <Campana userId={user.id} />}
       />
       {profile.role !== "admin" && !profile.telefono && <PedirTelefono />}
-      <main className="wrap max-w-6xl mx-auto px-6 py-8 flex-1 w-full">{children}</main>
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-28 md:pt-8 md:pb-12 flex-1 w-full">{children}</main>
     </div>
   );
 }
