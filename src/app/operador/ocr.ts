@@ -53,7 +53,7 @@ export async function extraerDatosFacturaAction(
   if (!apiKey) {
     return {
       error:
-        "La lectura automática no está configurada todavía (falta ANTHROPIC_API_KEY en el servidor).",
+        "La lectura automática no está disponible por ahora. Completá los datos a mano.",
     };
   }
 

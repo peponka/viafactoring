@@ -57,7 +57,7 @@ export async function investigarEmpresas(datos: {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   const modelo = process.env.ANTHROPIC_MODEL_INVESTIGACION || "claude-haiku-5-5";
   if (!apiKey) {
-    return { estado: "error", error: "La investigación con IA no está configurada (falta ANTHROPIC_API_KEY)." };
+    return { estado: "error", error: "La investigación con IA no está disponible por ahora. Probá de nuevo más tarde." };
   }
 
   const pedido = [
