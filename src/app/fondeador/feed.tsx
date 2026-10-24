@@ -74,7 +74,7 @@ function Icono({ d, className = "" }: { d: React.ReactNode; className?: string }
 
 function Tarjeta({ f }: { f: FacturaFeed }) {
   return (
-    <div className="flex flex-col gap-4 h-full">
+    <div className="flex flex-col gap-3 sm:gap-4 h-full">
       <div className="flex items-center justify-between gap-2">
         <div className="flex gap-1.5 flex-wrap">
           <span className="text-xs font-semibold bg-slate-soft text-slate-ink px-2.5 py-1 rounded-full">{f.industria}</span>
@@ -87,7 +87,7 @@ function Tarjeta({ f }: { f: FacturaFeed }) {
 
       <div>
         <p className="text-sm text-ink-soft">Monto de la factura</p>
-        <p className="num text-[2.15rem] leading-tight font-semibold">{formatMonto(f.monto, f.moneda)}</p>
+        <p className="num text-[1.9rem] sm:text-[2.15rem] leading-tight font-semibold">{formatMonto(f.monto, f.moneda)}</p>
         {f.moneda !== "USD" && f.montoUsd != null && (
           <p className="text-sm text-ink-soft num">≈ {formatMonto(f.montoUsd, "USD")}</p>
         )}
@@ -114,7 +114,7 @@ function Tarjeta({ f }: { f: FacturaFeed }) {
 
       {(f.descripcion || f.datosSector.length > 0) && (
         <div className="text-sm text-ink-soft flex flex-col gap-1">
-          {f.descripcion && <p className="line-clamp-2">{f.descripcion}</p>}
+          {f.descripcion && <p className="line-clamp-1 sm:line-clamp-2">{f.descripcion}</p>}
           {f.datosSector.length > 0 && (
             <p className="text-xs">{f.datosSector.map(([k, v]) => `${k}: ${v}`).join(" · ")}</p>
           )}
@@ -149,11 +149,12 @@ function Tarjeta({ f }: { f: FacturaFeed }) {
         </span>
         <div>
           <p className="text-sm font-semibold">Deudor, investigación con IA y factura</p>
-          <p className="text-[13px] text-ink-soft leading-snug">Se ven al tocar «Me interesa», sin costo. El contacto directo se libera al cerrar el trato.</p>
+          <p className="hidden sm:block text-[13px] text-ink-soft leading-snug">Se ven al tocar «Me interesa», sin costo. El contacto directo se libera al cerrar el trato.</p>
+          <p className="sm:hidden text-[13px] text-ink-soft leading-snug">Se ven al tocar «Me interesa», sin costo.</p>
         </div>
       </div>
 
-      <p className="mt-auto text-[11.5px] text-ink-soft leading-snug">
+      <p className="hidden md:block mt-auto text-[11.5px] text-ink-soft leading-snug">
         El riesgo lo declara la empresa que publica. ViaFactoring conecta partes: no evalúa ni recomienda facturas.
       </p>
     </div>
@@ -270,7 +271,7 @@ export function Feed({
 
   return (
     <div className="grid md:grid-cols-[minmax(0,440px)_minmax(0,1fr)] gap-8 items-start">
-      <section aria-label="Facturas en tu rango" className="flex flex-col gap-5">
+      <section aria-label="Facturas en tu rango" className="flex flex-col gap-5 pb-28 md:pb-0">
         <div className="flex items-center justify-between gap-3">
           <div>
             <h1 className="text-[1.6rem] font-bold leading-tight">Facturas para vos</h1>
@@ -289,7 +290,7 @@ export function Feed({
 
         {actual ? (
           <>
-            <div className="relative min-h-[520px] select-none">
+            <div className="relative min-h-[420px] md:min-h-[520px] select-none">
               <div aria-hidden="true" className="absolute inset-x-5 top-4 -bottom-3.5 rounded-[28px] bg-surface-3" />
               <div aria-hidden="true" className="absolute inset-x-2.5 top-2 -bottom-1.5 rounded-[28px] bg-[#f0eee7] border border-line" />
               <article
@@ -299,7 +300,7 @@ export function Feed({
                 onPointerMove={onPointerMove}
                 onPointerUp={onPointerUp}
                 onPointerCancel={onPointerUp}
-                className="anim-in relative h-full min-h-[520px] bg-surface border border-line rounded-[28px] shadow-[var(--shadow-lift)] p-5 sm:p-6 touch-pan-y cursor-grab active:cursor-grabbing"
+                className="anim-in relative h-full min-h-[420px] md:min-h-[520px] bg-surface border border-line rounded-[28px] shadow-[var(--shadow-lift)] p-5 sm:p-6 touch-pan-y cursor-grab active:cursor-grabbing"
                 style={{
                   transform: `translateX(${x}px) rotate(${x / 22}deg)`,
                   transition: arrastrando ? "none" : "transform .23s cubic-bezier(.2,.8,.2,1)",
@@ -322,8 +323,11 @@ export function Feed({
                 <Tarjeta f={actual} />
               </article>
             </div>
+            <p className="md:hidden text-[11.5px] text-ink-soft leading-snug px-1">
+              El riesgo lo declara la empresa que publica. ViaFactoring conecta partes: no evalúa ni recomienda facturas.
+            </p>
 
-            <div className="flex items-center justify-center gap-8 pt-1">
+            <div className="fixed md:static inset-x-0 bottom-[74px] z-30 md:z-auto pt-8 pb-3 md:p-0 md:pt-1 bg-gradient-to-t from-background via-background/95 to-transparent md:bg-none flex items-center justify-center gap-8 pointer-events-none md:pointer-events-auto [&>*]:pointer-events-auto">
               <div className="flex flex-col items-center gap-1.5">
                 <button
                   type="button"
@@ -401,7 +405,7 @@ export function Feed({
               <path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z" />
               <path d="M9 12l2 2 4-4" />
             </svg>
-            {CATEGORIA_LABEL[perfil.categoria]} verificado
+            Cuenta verificada · {CATEGORIA_LABEL[perfil.categoria]}
           </p>
         </div>
 
@@ -433,7 +437,7 @@ export function Feed({
       {toast && (
         <div
           role="status"
-          className="anim-in fixed z-50 left-4 right-4 bottom-24 md:bottom-8 md:left-auto md:right-8 md:w-[380px] bg-ink text-white rounded-2xl p-4 shadow-[0_16px_40px_rgb(16_24_40_/_0.3)] flex items-center gap-3"
+          className="anim-in fixed z-50 left-4 right-4 top-20 md:top-auto md:bottom-8 md:left-auto md:right-8 md:w-[380px] bg-ink text-white rounded-2xl p-4 shadow-[0_16px_40px_rgb(16_24_40_/_0.3)] flex items-center gap-3"
         >
           {toast.tipo === "interes" && (
             <>

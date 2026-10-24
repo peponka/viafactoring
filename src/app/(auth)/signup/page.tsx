@@ -54,7 +54,7 @@ export default function SignupPage() {
           <Field
             label={
               role === "operador"
-                ? "Empresa / operador (opcional)"
+                ? "Empresa (opcional)"
                 : "Empresa / financiera (opcional)"
             }
           >
