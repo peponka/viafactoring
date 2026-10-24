@@ -2,6 +2,7 @@ import Link from "next/link";
 import { signOutAction } from "@/app/(auth)/actions";
 import { Logo } from "@/components/ui";
 import { DesktopNavLinks, MobileTabBar, type NavLink } from "@/components/nav-links";
+import { InstalarApp } from "@/components/pwa";
 
 export function TopNav({
   nombre,
@@ -46,6 +47,7 @@ export function TopNav({
         </div>
       </header>
       {links.length > 1 && links.length <= 5 && <MobileTabBar links={links} />}
+      {links.length > 1 && links.length <= 5 && <InstalarApp />}
       {links.length > 5 && (
         <nav
           aria-label="Secciones"

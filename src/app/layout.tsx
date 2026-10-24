@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
+import { RegistrarSW } from "@/components/pwa";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -18,10 +19,14 @@ export const metadata: Metadata = {
   title: "ViaFactoring",
   description:
     "Conectamos facturas por cobrar con fondeadores en Paraguay. Siempre gratis para pymes.",
+  applicationName: "ViaFactoring",
+  appleWebApp: { capable: true, title: "ViaFactoring", statusBarStyle: "default" },
+  formatDetection: { telephone: false },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0b6e4f",
+  themeColor: "#f5f4ef",
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -32,6 +37,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col bg-background text-ink">
         {children}
+        <RegistrarSW />
       </body>
     </html>
   );
