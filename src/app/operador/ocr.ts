@@ -11,6 +11,9 @@
 // como sugerencia editable.
 
 export type ExtraccionFactura = {
+  cdc?: string;
+  emisor_ruc?: string;
+  deudor_ruc?: string;
   deudor_nombre?: string;
   deudor_contacto?: string;
   monto?: string;
@@ -26,11 +29,14 @@ export type ExtraccionResult =
 
 const PROMPT = `Esta imagen o documento es una factura o comprobante de cobro. Extraé los datos que veas con confianza y devolvé ÚNICAMENTE un objeto JSON (sin texto antes ni después, sin bloques de código) con estas claves. Si un dato no aparece o no estás seguro, dejalo como "" — nunca inventes valores:
 {
+  "cdc": "CDC de la factura electrónica: el código de 44 dígitos que aparece debajo del código QR del KuDE (solo los dígitos, sin espacios). Vacío si no aparece",
+  "emisor_ruc": "RUC de quien emite la factura (el vendedor), con su dígito verificador, por ejemplo 80012345-6",
+  "deudor_ruc": "RUC o cédula del cliente que debe pagar (el comprador), con dígito verificador si aparece",
   "deudor_nombre": "nombre de la empresa o persona que debe pagar la factura",
   "deudor_contacto": "teléfono o email del deudor, si aparece",
   "monto": "monto total, solo el número, con punto como separador decimal, sin símbolo de moneda ni separador de miles",
   "moneda": "USD, PYG o ARS según corresponda, o vacío si no está claro",
-  "numero": "número de factura",
+  "numero": "número de factura con el formato 001-001-0000123 si es posible",
   "fecha_vencimiento": "fecha de vencimiento en formato YYYY-MM-DD, si aparece",
   "descripcion": "descripción breve de la operación (ruta, tipo de carga, servicio, etc.), si se puede inferir"
 }`;
@@ -65,7 +71,7 @@ export async function extraerDatosFacturaAction(
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-5",
+        model: process.env.ANTHROPIC_MODEL_OCR || "claude-sonnet-5-5",
         max_tokens: 1024,
         messages: [
           {

@@ -20,8 +20,26 @@ export type FacturaFeed = {
   descripcion: string | null;
   ofertas: number;
   creada: string;
+  verif: {
+    cdc_presente?: boolean;
+    cdc_dv_ok?: boolean | null;
+    ruc_coincide?: boolean | null;
+    numero_coincide?: boolean | null;
+    duplicada?: boolean | null;
+  };
   datosSector: [string, string][];
 };
+
+function chipsVerificacion(v: FacturaFeed["verif"]) {
+  const chips: { texto: string; tono: "ok" | "alerta" | "neutro" }[] = [];
+  if (!v.cdc_presente) return [{ texto: "Sin código de control", tono: "neutro" as const }];
+  chips.push(v.cdc_dv_ok ? { texto: "CDC válido", tono: "ok" } : { texto: "CDC inválido", tono: "alerta" });
+  if (v.ruc_coincide === true) chips.push({ texto: "RUC coincide", tono: "ok" });
+  if (v.ruc_coincide === false) chips.push({ texto: "RUC no coincide", tono: "alerta" });
+  if (v.numero_coincide === false) chips.push({ texto: "Número no coincide", tono: "alerta" });
+  chips.push(v.duplicada ? { texto: "Ya cargada antes", tono: "alerta" } : { texto: "Sin duplicados", tono: "ok" });
+  return chips;
+}
 
 type Toast =
   | { tipo: "interes"; dealRoomId: string }
@@ -103,6 +121,25 @@ function Tarjeta({ f }: { f: FacturaFeed }) {
         </div>
       )}
 
+      <div className="flex flex-wrap items-center gap-1.5">
+        <span className="text-xs font-semibold text-ink-soft mr-0.5">Verificación</span>
+        {chipsVerificacion(f.verif).map((c) => (
+          <span
+            key={c.texto}
+            className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full ${
+              c.tono === "ok" ? "bg-good-soft text-good" : c.tono === "alerta" ? "bg-critical-soft text-critical" : "bg-slate-soft text-slate-ink"
+            }`}
+          >
+            {c.tono === "ok" && (
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+            )}
+            {c.texto}
+          </span>
+        ))}
+      </div>
+
       <div className="border-[1.5px] border-dashed border-line-strong rounded-2xl p-3.5 flex gap-3 items-start">
         <span className="w-9 h-9 rounded-xl bg-accent-soft text-accent flex items-center justify-center shrink-0">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -111,7 +148,7 @@ function Tarjeta({ f }: { f: FacturaFeed }) {
           </svg>
         </span>
         <div>
-          <p className="text-sm font-semibold">Deudor, ficha de verificación y factura</p>
+          <p className="text-sm font-semibold">Deudor, investigación con IA y factura</p>
           <p className="text-[13px] text-ink-soft leading-snug">Se ven al tocar «Me interesa», sin costo. El contacto directo se libera al cerrar el trato.</p>
         </div>
       </div>

@@ -59,11 +59,16 @@ export async function crearFacturaAction(
       operador_contacto: String(formData.get("operador_contacto") || "") || null,
       deudor_tipo: formData.get("deudor_tipo") === "estado" ? "estado" : "privado",
       deudor_ruc: String(formData.get("deudor_ruc") || "").trim() || null,
+      cdc: String(formData.get("cdc") || "").replace(/\D/g, "") || null,
+      emisor_ruc: String(formData.get("emisor_ruc") || "").trim() || null,
     })
     .select()
     .single();
 
   if (error || !invoice) {
+    if (error?.code === "23505" || error?.message?.includes("invoices_cdc_activo_uidx")) {
+      return { error: "Esta factura ya está publicada en ViaFactoring (mismo código de control)." };
+    }
     if (error?.message?.startsWith("MONTO_MINIMO")) {
       return { error: error.message.replace(/^MONTO_MINIMO:\s*/, "").replace(/^el/, "El") + "." };
     }

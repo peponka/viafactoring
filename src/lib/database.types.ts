@@ -88,6 +88,48 @@ export type Invoice = {
   ubicacion: string | null;
   deudor_tipo: DeudorTipo;
   deudor_ruc: string | null;
+  cdc: string | null;
+  emisor_ruc: string | null;
+  verificacion: Verificacion;
+  investigacion: Investigacion | null;
+  investigacion_at: string | null;
+};
+
+export type Verificacion = {
+  cdc_presente?: boolean;
+  cdc_formato?: boolean;
+  cdc_dv_ok?: boolean;
+  es_factura?: boolean;
+  ruc_coincide?: boolean | null;
+  numero_coincide?: boolean | null;
+  fecha_emision?: string | null;
+  vencimiento_coherente?: boolean | null;
+  duplicada?: boolean;
+  calculado_at?: string;
+};
+
+export type Investigacion = {
+  estado: "en_curso" | "lista" | "error";
+  resumen?: string;
+  hallazgos?: { tipo: "ok" | "info" | "alerta"; texto: string }[];
+  contratos_estado?: string | null;
+  sitio_web?: string | null;
+  fuentes?: { titulo: string; url: string }[];
+  modelo?: string;
+  error?: string;
+};
+
+export type FichaVerificacion = {
+  invoice_id: string;
+  cdc: string | null;
+  emisor_ruc: string | null;
+  emisor_nombre: string | null;
+  deudor_nombre: string;
+  deudor_ruc: string | null;
+  deudor_tipo: DeudorTipo;
+  verificacion: Verificacion;
+  investigacion: Investigacion | null;
+  investigacion_at: string | null;
 };
 
 export type InvoiceTeaser = {
@@ -115,6 +157,7 @@ export type InvoiceTeaser = {
   monto_usd: number | null;
   ya_pasada: boolean;
   ofertas_activas: number;
+  verificacion: Pick<Verificacion, "cdc_presente" | "cdc_dv_ok" | "ruc_coincide" | "numero_coincide" | "duplicada">;
 };
 
 export type DeudorTipo = "privado" | "estado";
@@ -643,6 +686,14 @@ export type Database = {
           p_rubro?: string | null;
         };
         Returns: { instituciones: number; inversores: number }[];
+      };
+      ficha_verificacion: {
+        Args: { p_reveal_id: string };
+        Returns: FichaVerificacion;
+      };
+      reservar_investigacion: {
+        Args: { p_reveal_id: string };
+        Returns: "lista" | "en_curso" | "reservada";
       };
       marcar_interes: {
         Args: { p_invoice_id: string };

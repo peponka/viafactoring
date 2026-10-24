@@ -5,6 +5,7 @@ import { crearFacturaAction, previsualizarAlcanceAction, type FormState } from "
 import { extraerDatosFacturaAction } from "../ocr";
 import { Button, ErrorText, Field, Input, Select, Textarea } from "@/components/ui";
 import { MONTO_MINIMO_USD, usd } from "@/lib/categorias";
+import { CONSULTA_EKUATIA, leerCdc, normalizarCdc, rucBase } from "@/lib/cdc";
 import type { Riesgo } from "@/lib/database.types";
 
 const initialState: FormState = { error: null };
@@ -22,6 +23,8 @@ function Check() {
 export default function NuevaFacturaPage() {
   const [state, formAction, pending] = useActionState(crearFacturaAction, initialState);
   const [numero, setNumero] = useState("");
+  const [cdc, setCdc] = useState("");
+  const [emisorRuc, setEmisorRuc] = useState("");
   const [deudorNombre, setDeudorNombre] = useState("");
   const [deudorRuc, setDeudorRuc] = useState("");
   const [deudorContacto, setDeudorContacto] = useState("");
@@ -67,6 +70,16 @@ export default function NuevaFacturaPage() {
   const bajoMinimo = montoUsd != null && montoUsd < MONTO_MINIMO_USD;
   const totalAlcance = alcance ? alcance.instituciones + alcance.inversores : null;
 
+  // Controles del CDC en vivo (la base los vuelve a calcular al guardar).
+  const cdcLimpio = normalizarCdc(cdc);
+  const infoCdc = leerCdc(cdcLimpio);
+  const rucOk = infoCdc && rucBase(emisorRuc) ? rucBase(emisorRuc) === infoCdc.ruc : null;
+  const numeroOk =
+    infoCdc && /^\d+-\d+-\d+$/.test(numero.trim())
+      ? numero.trim().split("-").map((p) => p.replace(/^0+/, "")).join("-") ===
+        infoCdc.numero.split("-").map((p) => p.replace(/^0+/, "")).join("-")
+      : null;
+
   async function handleExtraer(file: File) {
     setOcrLoading(true);
     setOcrError(null);
@@ -81,6 +94,9 @@ export default function NuevaFacturaPage() {
     }
 
     const d = result.data;
+    if (d.cdc) setCdc(normalizarCdc(d.cdc));
+    if (d.emisor_ruc) setEmisorRuc(d.emisor_ruc);
+    if (d.deudor_ruc) setDeudorRuc(d.deudor_ruc);
     if (d.deudor_nombre) setDeudorNombre(d.deudor_nombre);
     if (d.deudor_contacto) setDeudorContacto(d.deudor_contacto);
     if (d.monto) setMonto(d.monto);
@@ -144,6 +160,51 @@ export default function NuevaFacturaPage() {
               </p>
             )}
             {ocrError && <ErrorText>{ocrError}</ErrorText>}
+          </section>
+
+          <section className="bg-surface border border-line rounded-3xl p-5 flex flex-col gap-4">
+            <div>
+              <p className="font-bold">Factura electrónica</p>
+              <p className="text-sm text-ink-soft">
+                El CDC son los 44 números debajo del QR. Con él los fondeadores verifican que la factura exista.
+              </p>
+            </div>
+            <Field label="CDC (código de control)">
+              <Input
+                type="text"
+                name="cdc"
+                inputMode="numeric"
+                autoComplete="off"
+                placeholder="0180 0695 6310 0100 1000 …"
+                value={cdc}
+                onChange={(e) => setCdc(e.target.value)}
+                className="num tracking-wide"
+                aria-invalid={(cdcLimpio.length === 44 && infoCdc && !infoCdc.valido) || undefined}
+              />
+            </Field>
+            {cdcLimpio.length > 0 && (
+              <ul className="flex flex-col gap-1.5 text-sm -mt-1">
+                {cdcLimpio.length !== 44 ? (
+                  <li className="text-ink-soft">{cdcLimpio.length} de 44 dígitos</li>
+                ) : infoCdc && infoCdc.valido ? (
+                  <>
+                    <li className="flex items-center gap-2 font-semibold text-accent"><Check /> Código válido{infoCdc.esFactura ? " · factura electrónica" : ""}</li>
+                    {rucOk === true && <li className="flex items-center gap-2 font-semibold text-accent"><Check /> Coincide con tu RUC</li>}
+                    {rucOk === false && <li className="font-semibold text-critical">El RUC del código ({infoCdc.ruc}) no coincide con el que pusiste como emisor.</li>}
+                    {numeroOk === true && <li className="flex items-center gap-2 font-semibold text-accent"><Check /> Coincide con el número de factura</li>}
+                    {numeroOk === false && <li className="font-semibold text-warn">El número de factura no coincide con el del código ({infoCdc.numero}).</li>}
+                  </>
+                ) : (
+                  <li className="font-semibold text-critical">El código no es válido. Revisá que esté bien copiado.</li>
+                )}
+              </ul>
+            )}
+            <Field label="RUC de tu empresa (quien emite la factura)">
+              <Input type="text" name="emisor_ruc" placeholder="80012345-6" value={emisorRuc} onChange={(e) => setEmisorRuc(e.target.value)} />
+            </Field>
+            <a href={CONSULTA_EKUATIA} target="_blank" rel="noreferrer" className="text-sm font-semibold self-start">
+              ¿Dónde encuentro el CDC? Consultalo en e-Kuatia →
+            </a>
           </section>
 
           <section className="bg-surface border border-line rounded-3xl p-5 flex flex-col gap-4">

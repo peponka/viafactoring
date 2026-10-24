@@ -15,10 +15,7 @@ import {
 } from "@/lib/format";
 import type { DealRoomDetail, Invoice, Offer, Reveal } from "@/lib/database.types";
 import { RetirarButton } from "./retirar-button";
-
-function siNo(v: boolean | null) {
-  return v === true ? "Sí" : v === false ? "No" : "—";
-}
+import { explicarOferta } from "@/lib/ofertas";
 
 // La factura de la PyME y sus Deal Rooms. La comparación de ofertas es la
 // razón concreta para negociar adentro: varios fondeadores en paralelo,
@@ -125,52 +122,78 @@ export default async function FacturaDetallePage({
       </section>
 
       {conOferta.length > 0 && (
-        <Card className="mb-6 overflow-x-auto">
-          <p className="font-semibold mb-3">Comparar ofertas</p>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-ink-soft text-xs uppercase tracking-wide">
-                <th className="py-2 pr-3">Fondeador</th>
-                <th className="py-2 pr-3">Anticipo</th>
-                <th className="py-2 pr-3">Descuento</th>
-                <th className="py-2 pr-3">Con recurso</th>
-                <th className="py-2 pr-3">Notifica deudor</th>
-                <th className="py-2 pr-3">Pago previsto</th>
-                <th className="py-2" />
-              </tr>
-            </thead>
-            <tbody>
-              {conOferta
-                .sort((a, b) => (b.vigente!.monto_ofrecido ?? 0) - (a.vigente!.monto_ofrecido ?? 0))
-                .map((f) => (
-                  <tr key={f.room.id} className="border-t border-line">
-                    <td className="py-2 pr-3 font-medium">{f.fondeador}</td>
-                    <td className="py-2 pr-3 num">{formatMonto(f.vigente!.monto_ofrecido, factura.moneda)}</td>
-                    <td className="py-2 pr-3 num">
-                      {formatPct(f.calc?.descuento)}
-                      {f.calc?.anual != null && (
-                        <span className="text-ink-soft"> (~{formatPct(f.calc.anual)} anual)</span>
-                      )}
-                    </td>
-                    <td className="py-2 pr-3">{siNo(f.vigente!.con_recurso)}</td>
-                    <td className="py-2 pr-3">{siNo(f.vigente!.notifica_deudor)}</td>
-                    <td className="py-2 pr-3 num">{formatFecha(f.vigente!.fecha_pago_prevista)}</td>
-                    <td className="py-2">
-                      <Link href={`/deal-room/${f.room.id}`} className="text-accent font-medium">
-                        {f.vigente!.estado === "pendiente" && f.vigente!.autor_rol === "fondeador"
-                          ? "Responder →"
-                          : "Abrir →"}
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
-          <p className="text-xs text-ink-soft mt-3">
-            El descuento es la diferencia entre el monto de la factura y el anticipo; el anual es una
-            referencia aritmética simple para comparar ofertas con distinto plazo.
+        <section className="mb-6 flex flex-col gap-3">
+          <div className="flex items-end justify-between gap-3 flex-wrap">
+            <h2 className="text-xl font-bold">Ofertas, explicadas en simple</h2>
+            <p className="text-xs text-ink-soft">Ordenadas por anticipo. Para vos es gratis aceptar.</p>
+          </div>
+          {conOferta
+            .sort((a, b) => (b.vigente!.monto_ofrecido ?? 0) - (a.vigente!.monto_ofrecido ?? 0))
+            .map((f, i) => {
+              const o = f.vigente!;
+              const exp = explicarOferta({
+                montoFactura: factura.monto,
+                anticipo: o.monto_ofrecido,
+                moneda: factura.moneda,
+                vencimiento: factura.fecha_vencimiento,
+                plazoDias: factura.plazo_dias,
+                conRecurso: o.con_recurso,
+                notificaDeudor: o.notifica_deudor,
+                fechaPago: o.fecha_pago_prevista,
+              });
+              const responder = o.estado === "pendiente" && o.autor_rol === "fondeador";
+              return (
+                <article
+                  key={f.room.id}
+                  className={`bg-surface rounded-3xl p-5 flex flex-col gap-4 shadow-[var(--shadow-card)] border ${i === 0 ? "border-2 border-accent" : "border-line"}`}
+                >
+                  <div className="flex items-start justify-between gap-3 flex-wrap">
+                    <div>
+                      <p className="font-bold">{f.fondeador}</p>
+                      <p className="text-xs text-ink-soft">
+                        {o.estado === "aceptada" ? "Oferta aceptada" : responder ? "Esperando tu respuesta" : "Oferta en curso"}
+                      </p>
+                    </div>
+                    {i === 0 && conOferta.length > 1 && (
+                      <span className="text-[11px] font-bold bg-surface-3 px-2.5 py-1 rounded-full">Mayor anticipo</span>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="bg-surface-2 rounded-2xl px-3 py-2.5">
+                      <p className="text-[11px] text-ink-soft">Te adelanta</p>
+                      <p className="num font-semibold">{formatMonto(o.monto_ofrecido, factura.moneda)}</p>
+                    </div>
+                    <div className="bg-surface-2 rounded-2xl px-3 py-2.5">
+                      <p className="text-[11px] text-ink-soft">Descuento</p>
+                      <p className="num font-semibold">{formatPct(exp.descuento)}</p>
+                    </div>
+                    <div className="bg-surface-2 rounded-2xl px-3 py-2.5">
+                      <p className="text-[11px] text-ink-soft">Anual aprox.</p>
+                      <p className="num font-semibold">{formatPct(exp.anual)}</p>
+                    </div>
+                  </div>
+                  <ul className="flex flex-col gap-1.5 text-sm">
+                    {exp.frases.map((t) => (
+                      <li key={t} className="flex gap-2">
+                        <span aria-hidden="true" className="text-accent font-bold">·</span>
+                        <span>{t}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link
+                    href={`/deal-room/${f.room.id}`}
+                    className={`min-h-12 rounded-full font-bold flex items-center justify-center ${responder ? "bg-accent text-white" : "border border-line-strong"}`}
+                  >
+                    {responder ? "Responder la oferta" : "Abrir la negociación"}
+                  </Link>
+                </article>
+              );
+            })}
+          <p className="text-xs text-ink-soft">
+            El descuento es la diferencia entre el monto de la factura y el anticipo. El anual es una referencia
+            aritmética para comparar ofertas con distinto plazo, no una tasa de mercado.
           </p>
-        </Card>
+        </section>
       )}
 
       <Card className="mb-6">

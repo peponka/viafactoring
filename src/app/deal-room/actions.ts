@@ -209,3 +209,57 @@ export async function reportarProblemaAction(revealId: string, detalle: string):
   const { error } = await supabase.rpc("reportar_problema", { p_reveal_id: revealId, p_detalle: detalle });
   return { error: error?.message ?? null, ok: !error };
 }
+
+// ---------------------------------------------------------------------------
+// Ficha de verificación: investigación con IA (una vez por factura)
+// ---------------------------------------------------------------------------
+
+export async function investigarAction(
+  revealId: string,
+): Promise<{ ficha: import("@/lib/database.types").FichaVerificacion | null; error: string | null }> {
+  const { supabase } = await sesion();
+
+  const { data: reserva, error: e1 } = await supabase.rpc("reservar_investigacion", { p_reveal_id: revealId });
+  if (e1) return { ficha: null, error: "No pudimos iniciar la verificación." };
+
+  const leerFicha = async () => {
+    const { data } = await supabase.rpc("ficha_verificacion", { p_reveal_id: revealId });
+    return (data as import("@/lib/database.types").FichaVerificacion | null) ?? null;
+  };
+
+  if (reserva !== "reservada") return { ficha: await leerFicha(), error: null };
+
+  const ficha = await leerFicha();
+  if (!ficha) return { ficha: null, error: "No pudimos leer la factura." };
+
+  const { investigarEmpresas } = await import("@/lib/ia/investigar");
+  const resultado = await investigarEmpresas({
+    pyme: { nombre: ficha.emisor_nombre, ruc: ficha.emisor_ruc },
+    deudor: { nombre: ficha.deudor_nombre, ruc: ficha.deudor_ruc },
+    deudorEsEstado: ficha.deudor_tipo === "estado",
+  });
+
+  // La investigación se guarda con la service role (los clientes no pueden
+  // escribirla). Si falló, se guarda el error para no reintentar en loop; la
+  // pantalla ofrece reintentar.
+  if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    const admin = createServiceRoleClient();
+    await admin
+      .from("invoices")
+      .update({ investigacion: resultado, investigacion_at: new Date().toISOString() })
+      .eq("id", ficha.invoice_id);
+  }
+  return { ficha: { ...ficha, investigacion: resultado, investigacion_at: new Date().toISOString() }, error: null };
+}
+
+export async function reintentarInvestigacionAction(revealId: string) {
+  const { supabase } = await sesion();
+  const { data } = await supabase.rpc("ficha_verificacion", { p_reveal_id: revealId });
+  const ficha = data as import("@/lib/database.types").FichaVerificacion | null;
+  if (!ficha || ficha.investigacion?.estado !== "error" || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return investigarAction(revealId);
+  }
+  const admin = createServiceRoleClient();
+  await admin.from("invoices").update({ investigacion: null, investigacion_at: null }).eq("id", ficha.invoice_id);
+  return investigarAction(revealId);
+}

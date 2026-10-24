@@ -49,6 +49,7 @@ export default async function FondeadorFeedPage() {
       descripcion: t.descripcion,
       ofertas: t.ofertas_activas,
       creada: t.created_at,
+      verif: t.verificacion ?? { cdc_presente: false },
       datosSector: Object.entries(t.industry_data_publica ?? {}).map(([k, v]) => [k.replaceAll("_", " "), String(v)] as [string, string]),
     }));
 

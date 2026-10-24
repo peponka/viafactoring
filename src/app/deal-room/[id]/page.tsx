@@ -3,10 +3,14 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatMonto } from "@/lib/format";
 import { ETAPAS, franjaDeTurno, nombreContraparte } from "@/lib/turno";
-import type { DealRoomDetail, DocumentRow, Message } from "@/lib/database.types";
+import type { DealRoomDetail, DocumentRow, FichaVerificacion as Ficha, Message } from "@/lib/database.types";
 import { Sala } from "./sala";
 import { Costado } from "./costado";
 import { Menu } from "./menu";
+import { FichaVerificacion } from "./ficha";
+
+// La investigación con IA puede tardar unos segundos (búsquedas web).
+export const maxDuration = 120;
 
 // El Deal Room es una sala de negociación: una línea arriba, la
 // conversación en el centro (con las ofertas, el pago y el contacto como
@@ -20,7 +24,7 @@ export default async function DealRoomPage({ params }: PageProps<"/deal-room/[id
   if (error || !data) notFound();
   const d = data as DealRoomDetail;
 
-  const [{ data: mensajes }, { data: docs }] = await Promise.all([
+  const [{ data: mensajes }, { data: docs }, { data: fichaData }] = await Promise.all([
     supabase
       .from("messages")
       .select("*")
@@ -33,7 +37,9 @@ export default async function DealRoomPage({ params }: PageProps<"/deal-room/[id
       .eq("invoice_id", d.invoice.id)
       .order("created_at", { ascending: true })
       .returns<DocumentRow[]>(),
+    supabase.rpc("ficha_verificacion", { p_reveal_id: id }),
   ]);
+  const ficha = (fichaData as Ficha | null) ?? null;
 
   const documentos = (docs ?? []).filter((doc) => !doc.reveal_id || doc.reveal_id === id);
   const inv = d.invoice;
@@ -70,14 +76,19 @@ export default async function DealRoomPage({ params }: PageProps<"/deal-room/[id
         {d.rol !== "admin" && <Menu revealId={id} puedeRetirarse={negociable} />}
       </div>
 
-      <div className="grid lg:grid-cols-[minmax(0,1fr)_300px] gap-5 items-start">
+      <div className="grid lg:grid-cols-[minmax(0,1fr)_340px] gap-5 items-start">
         <Sala
           d={d}
           mensajes={mensajes ?? []}
           documentos={documentos}
           franja={franjaDeTurno(d)}
         />
-        <Costado d={d} documentos={documentos} />
+        <div className="order-first lg:order-none flex flex-col gap-4">
+          {ficha && d.rol !== "operador" && (
+            <FichaVerificacion revealId={id} ficha={ficha} puedeInvestigar={d.rol === "fondeador"} />
+          )}
+          <Costado d={d} documentos={documentos} />
+        </div>
       </div>
     </div>
   );
