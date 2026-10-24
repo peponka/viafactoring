@@ -79,7 +79,8 @@ export default async function FacturaDetallePage({
     p_deudor_tipo: factura.deudor_tipo,
     p_rubro: factura.rubro,
   });
-  const alcance = Array.isArray(alcanceFilas) ? alcanceFilas[0] : null;
+  // Una función con parámetros OUT devuelve un objeto, no una lista.
+  const alcance = Array.isArray(alcanceFilas) ? alcanceFilas[0] : alcanceFilas ?? null;
 
   return (
     <div className="max-w-4xl">
