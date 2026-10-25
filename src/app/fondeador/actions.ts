@@ -146,6 +146,13 @@ export async function deshacerPasoAction(invoiceId: string): Promise<{ error: st
   return { error: null };
 }
 
+export async function restaurarPasadasAction(): Promise<{ error: string | null }> {
+  const { supabase, userId } = await requireFondeador();
+  const { error } = await supabase.from("invoice_pasadas").delete().eq("fondeador_id", userId);
+  revalidatePath("/fondeador");
+  return { error: error ? "No pudimos recuperar las facturas. Probá de nuevo." : null };
+}
+
 export async function marcarInteresAction(
   invoiceId: string,
 ): Promise<{ error: string | null; dealRoomId?: string }> {

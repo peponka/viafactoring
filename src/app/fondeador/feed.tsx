@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { marcarInteresAction, pasarFacturaAction, deshacerPasoAction } from "./actions";
+import { marcarInteresAction, pasarFacturaAction, deshacerPasoAction, restaurarPasadasAction } from "./actions";
 import { formatFecha, formatMonto } from "@/lib/format";
 import { CATEGORIA_LABEL, DEUDOR_TIPO_LABEL, rangoTexto } from "@/lib/categorias";
 import type { CategoriaFondeador, DeudorTipo, Riesgo } from "@/lib/database.types";
@@ -177,6 +177,9 @@ export function Feed({
   const [arrastrando, setArrastrando] = useState(false);
   const [toast, setToast] = useState<Toast | null>(null);
   const [interesadas, setInteresadas] = useState(0);
+  const [pasadasSesion, setPasadasSesion] = useState(0);
+  const [restaurando, setRestaurando] = useState(false);
+  const pasadasTotal = pasadas + pasadasSesion;
   const inicio = useRef<number | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const total = facturas.length;
@@ -185,7 +188,7 @@ export function Feed({
   const mostrarToast = useCallback((t: Toast) => {
     if (toastTimer.current) clearTimeout(toastTimer.current);
     setToast(t);
-    toastTimer.current = setTimeout(() => setToast(null), t.tipo === "interes" ? 7000 : 5000);
+    toastTimer.current = setTimeout(() => setToast(null), 8000);
   }, []);
 
   useEffect(() => () => {
@@ -207,6 +210,7 @@ export function Feed({
       const f = actual;
       if (dir === "izq") {
         animarYSacar("izq");
+        setPasadasSesion((n) => n + 1);
         mostrarToast({ tipo: "paso", id: f.id });
         const r = await pasarFacturaAction(f.id);
         if (r.error) mostrarToast({ tipo: "error", mensaje: r.error });
@@ -231,8 +235,20 @@ export function Feed({
     const f = facturas.find((x) => x.id === id);
     if (!f) return;
     setToast(null);
+    setPasadasSesion((n) => Math.max(0, n - 1));
     setCola((c) => [f, ...c.filter((x) => x.id !== id)]);
     await deshacerPasoAction(id);
+  }
+
+  async function restaurarPasadas() {
+    setRestaurando(true);
+    const r = await restaurarPasadasAction();
+    if (r.error) {
+      setRestaurando(false);
+      mostrarToast({ tipo: "error", mensaje: r.error });
+      return;
+    }
+    window.location.reload();
   }
 
   useEffect(() => {
@@ -277,6 +293,19 @@ export function Feed({
             <h1 className="text-[1.6rem] font-bold leading-tight">Facturas para vos</h1>
             <p className="text-sm text-ink-soft">
               {cola.length === 0 ? "Viste todo por ahora" : `${posicion} de ${total} en tu rango`}
+              {pasadasTotal > 0 && (
+                <>
+                  {" · "}
+                  <button
+                    type="button"
+                    onClick={restaurarPasadas}
+                    disabled={restaurando}
+                    className="font-semibold text-accent hover:underline disabled:opacity-60"
+                  >
+                    {restaurando ? "Recuperando…" : `Ver ${pasadasTotal === 1 ? "la que pasaste" : `las ${pasadasTotal} que pasaste`}`}
+                  </button>
+                </>
+              )}
             </p>
           </div>
           <Link
@@ -368,9 +397,19 @@ export function Feed({
             </h2>
             <p className="text-ink-soft max-w-[40ch]">
               Te avisamos apenas entre una factura que encaje con tus preferencias.
-              {pasadas > 0 && ` Tenés ${pasadas} que pasaste antes.`}
+
             </p>
             <div className="flex gap-2.5 flex-wrap justify-center mt-2">
+              {pasadasTotal > 0 && (
+                <button
+                  type="button"
+                  onClick={restaurarPasadas}
+                  disabled={restaurando}
+                  className="min-h-11 px-5 rounded-full bg-ink text-white font-semibold disabled:opacity-60"
+                >
+                  {restaurando ? "Recuperando…" : `Volver a ver ${pasadasTotal === 1 ? "la que pasaste" : `las ${pasadasTotal} que pasaste`}`}
+                </button>
+              )}
               <Link href="/fondeador/preferencias" className="min-h-11 px-5 rounded-full border border-line-strong bg-surface font-semibold flex items-center">
                 Ampliar mi rango
               </Link>
