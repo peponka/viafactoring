@@ -44,6 +44,16 @@ type Bloque = {
   citations?: { url?: string; title?: string }[];
 };
 
+// Motivo legible que devuelve la API (en inglés), para diagnosticar.
+function motivo(detalle: string) {
+  try {
+    const m = (JSON.parse(detalle) as { error?: { message?: string } }).error?.message;
+    return m ? `: ${m.slice(0, 200)}` : "";
+  } catch {
+    return "";
+  }
+}
+
 function describir(e: Empresa, rol: string) {
   const partes = [e.nombre?.trim(), e.ruc ? `RUC ${e.ruc}` : null].filter(Boolean);
   return partes.length ? `${rol}: ${partes.join(", ")}` : `${rol}: (sin datos)`;
@@ -118,7 +128,7 @@ export async function investigarEmpresas(datos: {
           estado: "error",
           error: noHabilitada
             ? "La búsqueda web está desactivada en la cuenta de la API de Claude."
-            : `El servicio de IA respondió con error ${res.status}.`,
+            : `El servicio de IA respondió con error ${res.status}${motivo(detalle)}.`,
           modelo,
         };
       }
