@@ -102,6 +102,8 @@ export async function investigarEmpresas(datos: {
         }),
       });
       if (!res.ok) {
+        const detalle = await res.text().catch(() => "");
+        console.error("[investigar] Claude API", res.status, modelo, detalle.slice(0, 800));
         return { estado: "error", error: `El servicio de IA respondió con error ${res.status}.`, modelo };
       }
       const json = (await res.json()) as { content: Bloque[]; stop_reason: string };
