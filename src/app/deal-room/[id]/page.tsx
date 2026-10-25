@@ -41,6 +41,14 @@ export default async function DealRoomPage({ params }: PageProps<"/deal-room/[id
   ]);
   const ficha = (fichaData as Ficha | null) ?? null;
 
+  // USD por unidad de la moneda de la factura: para mostrarle al fondeador,
+  // mientras escribe su oferta, cuánto sería la comisión de cierre.
+  let usdPorUnidad: number | null = d.invoice.moneda === "USD" ? 1 : null;
+  if (usdPorUnidad === null && d.rol === "fondeador") {
+    const { data: usdMillon } = await supabase.rpc("monto_en_usd", { p_monto: 1_000_000, p_moneda: d.invoice.moneda });
+    usdPorUnidad = usdMillon != null ? Number(usdMillon) / 1_000_000 : null;
+  }
+
   const documentos = (docs ?? []).filter((doc) => !doc.reveal_id || doc.reveal_id === id);
   const inv = d.invoice;
   const volver = d.rol === "operador" ? "/operador/deal-rooms" : d.rol === "admin" ? "/admin/matches" : "/fondeador/deal-rooms";
@@ -82,6 +90,7 @@ export default async function DealRoomPage({ params }: PageProps<"/deal-room/[id
           mensajes={mensajes ?? []}
           documentos={documentos}
           franja={franjaDeTurno(d)}
+          usdPorUnidad={usdPorUnidad}
         />
         <div className="order-first lg:order-none flex flex-col gap-4">
           {ficha && d.rol !== "operador" && (

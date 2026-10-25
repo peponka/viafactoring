@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { marcarInteresAction, pasarFacturaAction, deshacerPasoAction, restaurarPasadasAction } from "./actions";
 import { formatFecha, formatMonto } from "@/lib/format";
-import { CATEGORIA_LABEL, DEUDOR_TIPO_LABEL, rangoTexto } from "@/lib/categorias";
+import { CATEGORIA_LABEL, comisionCierreUsd, DEUDOR_TIPO_LABEL, rangoTexto } from "@/lib/categorias";
 import type { CategoriaFondeador, DeudorTipo, Riesgo } from "@/lib/database.types";
 
 export type FacturaFeed = {
@@ -147,10 +147,18 @@ function Tarjeta({ f }: { f: FacturaFeed }) {
             <path d="M8 11V7a4 4 0 0 1 8 0v4" />
           </svg>
         </span>
-        <div>
-          <p className="text-sm font-semibold">Deudor, investigación con IA y factura</p>
-          <p className="hidden sm:block text-[13px] text-ink-soft leading-snug">Se ven al tocar «Me interesa», sin costo. El contacto directo se libera al cerrar el trato.</p>
+        <div className="min-w-0">
+          <p className="text-sm font-semibold">Deudor e investigación con IA</p>
+          <p className="hidden sm:block text-[13px] text-ink-soft leading-snug">
+            Se ven al tocar «Me interesa», sin costo. La factura y el contacto se liberan al cerrar el trato.
+          </p>
           <p className="sm:hidden text-[13px] text-ink-soft leading-snug">Se ven al tocar «Me interesa», sin costo.</p>
+          {f.montoUsd != null && (
+            <p className="text-[13px] mt-1.5">
+              <span className="text-ink-soft">Comisión solo si cerrás: </span>
+              <span className="font-semibold num">hasta {formatMonto(comisionCierreUsd(f.montoUsd), "USD")}</span>
+            </p>
+          )}
         </div>
       </div>
 

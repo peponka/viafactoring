@@ -1,6 +1,7 @@
 "use client";
 
 import { MontoInput } from "@/components/monto-input";
+import { comisionCierreUsd } from "@/lib/categorias";
 import { useActionState, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -127,10 +128,12 @@ function FormOferta({
   d,
   contraofertaDe,
   onCerrar,
+  usdPorUnidad,
 }: {
   d: DealRoomDetail;
   contraofertaDe: DealRoomOferta | null;
   onCerrar: () => void;
+  usdPorUnidad: number | null;
 }) {
   const router = useRouter();
   const [state, action, pending] = useActionState<Resultado, FormData>(ofertarAction, { error: null });
@@ -172,6 +175,19 @@ function FormOferta({
           Descuento {formatPct(calc.descuento)}
           {calc.anual != null ? ` · ~${formatPct(calc.anual)} anual a ${calc.dias} días` : ""}
         </p>
+      )}
+      {d.rol === "fondeador" && usdPorUnidad != null && Number(monto) > 0 && (
+        <div className="rounded-2xl bg-surface-2 px-3.5 py-3 text-sm flex items-start gap-2.5">
+          <span aria-hidden="true">💳</span>
+          <p>
+            Si la PyME acepta, pagás{" "}
+            <span className="font-semibold num">
+              {formatMonto(comisionCierreUsd(Number(monto) * usdPorUnidad), "USD")}
+            </span>{" "}
+            de comisión a ViaFactoring y recién ahí se comparten la factura y el contacto. Si no acepta, no
+            pagás nada.
+          </p>
+        </div>
       )}
       <div className="grid grid-cols-2 gap-3">
         <Field label="Con recurso">
@@ -358,11 +374,13 @@ export function Sala({
   mensajes,
   documentos,
   franja,
+  usdPorUnidad,
 }: {
   d: DealRoomDetail;
   mensajes: Message[];
   documentos: DocumentRow[];
   franja: Franja | null;
+  usdPorUnidad: number | null;
 }) {
   const router = useRouter();
   const rol: Rol = d.rol;
@@ -550,7 +568,7 @@ export function Sala({
         )}
 
         {formOferta && !soloLectura && (
-          <FormOferta d={d} contraofertaDe={formOferta.contra} onCerrar={() => setFormOferta(null)} />
+          <FormOferta d={d} contraofertaDe={formOferta.contra} onCerrar={() => setFormOferta(null)} usdPorUnidad={usdPorUnidad} />
         )}
 
         {!soloLectura && (
