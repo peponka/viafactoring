@@ -78,33 +78,49 @@ export async function investigarEmpresas(datos: {
   try {
     // La API puede pausar un turno largo de búsqueda (pause_turn): se reenvía
     // tal cual hasta 3 veces.
+    // Configuraciones de la herramienta de búsqueda, de la más completa a la
+    // mínima. Si la API rechaza una (400: país no soportado, campo exigido
+    // según el modelo, etc.), se prueba la siguiente.
+    const herramientas = [
+      { type: "web_search_20250305", name: "web_search", max_uses: 6, user_location: { type: "approximate", timezone: "America/Asuncion" } },
+      { type: "web_search_20250305", name: "web_search", max_uses: 6, allowed_callers: ["direct"] },
+      { type: "web_search_20250305", name: "web_search", max_uses: 6 },
+    ];
+    let herramienta = 0;
+
     for (let vuelta = 0; vuelta < 3; vuelta++) {
-      const res = await fetch(API, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          "x-api-key": apiKey,
-          "anthropic-version": "2023-06-01",
-        },
-        body: JSON.stringify({
-          model: modelo,
-          max_tokens: 3000,
-          system: SISTEMA,
-          messages: mensajes,
-          tools: [
-            {
-              type: "web_search_20250305",
-              name: "web_search",
-              max_uses: 6,
-              user_location: { type: "approximate", country: "PY", timezone: "America/Asuncion" },
-            },
-          ],
-        }),
-      });
-      if (!res.ok) {
+      let res: Response;
+      for (;;) {
+        res = await fetch(API, {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            "x-api-key": apiKey,
+            "anthropic-version": "2023-06-01",
+          },
+          body: JSON.stringify({
+            model: modelo,
+            max_tokens: 3000,
+            system: SISTEMA,
+            messages: mensajes,
+            tools: [herramientas[herramienta]],
+          }),
+        });
+        if (res.ok) break;
         const detalle = await res.text().catch(() => "");
-        console.error("[investigar] Claude API", res.status, modelo, detalle.slice(0, 800));
-        return { estado: "error", error: `El servicio de IA respondió con error ${res.status}.`, modelo };
+        console.error("[investigar] Claude API", res.status, modelo, herramienta, detalle.slice(0, 800));
+        if (res.status === 400 && vuelta === 0 && herramienta < herramientas.length - 1) {
+          herramienta++;
+          continue;
+        }
+        const noHabilitada = /web search is not enabled/i.test(detalle);
+        return {
+          estado: "error",
+          error: noHabilitada
+            ? "La búsqueda web está desactivada en la cuenta de la API de Claude."
+            : `El servicio de IA respondió con error ${res.status}.`,
+          modelo,
+        };
       }
       const json = (await res.json()) as { content: Bloque[]; stop_reason: string };
 
