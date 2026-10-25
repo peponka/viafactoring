@@ -16,6 +16,7 @@ const TIPO_LABEL: Record<string, string> = {
   sin_tipo_cambio: "Sin tipo de cambio vigente",
   reclamo: "Problema reportado por un usuario",
   error_tecnico: "Error técnico",
+  posible_cierre_externo: "Posible cierre por fuera (cobrar comisión)",
 };
 
 export default async function ExcepcionesPage({ searchParams }: PageProps<"/admin/excepciones">) {

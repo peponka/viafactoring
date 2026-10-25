@@ -365,7 +365,8 @@ export type TipoExcepcion =
   | "pago_duplicado"
   | "sin_tipo_cambio"
   | "reclamo"
-  | "error_tecnico";
+  | "error_tecnico"
+  | "posible_cierre_externo";
 
 export type ExceptionRow = {
   id: string;
@@ -549,6 +550,8 @@ export type DealRoomDetail = {
     empresa: string | null;
     email?: string | null;
     telefono?: string | null;
+    /** true mientras no se pagó la comisión: el nombre es una etiqueta genérica */
+    oculto?: boolean;
   };
   ofertas: DealRoomOferta[];
   comision: {
@@ -690,6 +693,10 @@ export type Database = {
       ficha_verificacion: {
         Args: { p_reveal_id: string };
         Returns: FichaVerificacion;
+      };
+      retirar_factura: {
+        Args: { p_invoice_id: string; p_motivo: string; p_reveal_id: string | null };
+        Returns: null;
       };
       reservar_investigacion: {
         Args: { p_reveal_id: string };

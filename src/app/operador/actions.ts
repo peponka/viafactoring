@@ -94,13 +94,23 @@ export async function crearFacturaAction(
   redirect("/operador");
 }
 
-export async function retirarFacturaAction(invoiceId: string) {
+export type MotivoRetiro = "cerro_con_fondeador" | "cobro_el_deudor" | "otra_via" | "ya_no_necesito" | "otro";
+
+export async function retirarFacturaAction(
+  invoiceId: string,
+  motivo: MotivoRetiro,
+  revealId: string | null,
+): Promise<{ error: string | null }> {
   const { supabase } = await requireOperador();
-  await supabase
-    .from("invoices")
-    .update({ estado: "retirada" })
-    .eq("id", invoiceId);
+  const { error } = await supabase.rpc("retirar_factura", {
+    p_invoice_id: invoiceId,
+    p_motivo: motivo,
+    p_reveal_id: revealId,
+  });
+  if (error) return { error: error.message || "No pudimos retirar la factura." };
   revalidatePath("/operador");
+  revalidatePath(`/operador/facturas/${invoiceId}`);
+  return { error: null };
 }
 
 // El cierre de una factura ocurre al aceptar una oferta en su Deal Room

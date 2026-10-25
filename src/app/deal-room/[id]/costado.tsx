@@ -45,11 +45,25 @@ export function Costado({ d, documentos }: { d: DealRoomDetail; documentos: Docu
         {d.contraparte.empresa && d.contraparte.nombre && (
           <p className="text-sm text-ink-soft">{d.contraparte.nombre}</p>
         )}
+        {d.contraparte.oculto && (
+          <p className="text-xs text-ink-soft mt-1">El nombre se muestra al cerrar el trato.</p>
+        )}
       </Bloque>
 
       <Bloque titulo="Documentos">
+        {d.rol === "fondeador" && !contacto && inv.documento_url && (
+          <p className="text-sm text-ink-soft mb-2 flex gap-2">
+            <span aria-hidden="true">🔒</span>
+            <span>
+              El PDF de la factura se habilita al pagar la comisión. Mientras tanto, la ficha de
+              verificación confirma el código de control y el RUC.
+            </span>
+          </p>
+        )}
         {documentos.length === 0 ? (
+          d.rol === "fondeador" && !contacto && inv.documento_url ? null : (
           <p className="text-sm text-ink-soft">Todavía no hay documentos.</p>
+          )
         ) : (
           <ul className="flex flex-col gap-1.5">
             {documentos.map((doc) => (

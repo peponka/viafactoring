@@ -232,9 +232,21 @@ export async function investigarAction(
   const ficha = await leerFicha();
   if (!ficha) return { ficha: null, error: "No pudimos leer la factura." };
 
+  // El fondeador ve la ficha sin el nombre de la PyME hasta pagar la
+  // comisión; la búsqueda sí lo necesita, así que se lee del lado del servidor.
+  let emisorNombre = ficha.emisor_nombre;
+  if (!emisorNombre && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    const admin = createServiceRoleClient();
+    const { data: inv } = await admin.from("invoices").select("operador_id").eq("id", ficha.invoice_id).single<{ operador_id: string }>();
+    if (inv) {
+      const { data: op } = await admin.from("profiles").select("nombre, empresa").eq("id", inv.operador_id).single<{ nombre: string; empresa: string | null }>();
+      emisorNombre = op?.empresa?.trim() || op?.nombre || null;
+    }
+  }
+
   const { investigarEmpresas } = await import("@/lib/ia/investigar");
   const resultado = await investigarEmpresas({
-    pyme: { nombre: ficha.emisor_nombre, ruc: ficha.emisor_ruc },
+    pyme: { nombre: emisorNombre, ruc: ficha.emisor_ruc },
     deudor: { nombre: ficha.deudor_nombre, ruc: ficha.deudor_ruc },
     deudorEsEstado: ficha.deudor_tipo === "estado",
   });
@@ -249,7 +261,9 @@ export async function investigarAction(
       .update({ investigacion: resultado, investigacion_at: new Date().toISOString() })
       .eq("id", ficha.invoice_id);
   }
-  return { ficha: { ...ficha, investigacion: resultado, investigacion_at: new Date().toISOString() }, error: null };
+  // Se vuelve a leer la ficha desde la base: así el fondeador la recibe con
+  // el nombre de la PyME tapado, igual que en cada visita.
+  return { ficha: (await leerFicha()) ?? { ...ficha, investigacion: null }, error: null };
 }
 
 export async function reintentarInvestigacionAction(revealId: string) {

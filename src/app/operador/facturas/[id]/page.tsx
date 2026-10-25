@@ -61,7 +61,11 @@ export default async function FacturaDetallePage({
       delRoom.find((o) => o.estado === "aceptada") ?? delRoom.find((o) => o.estado === "pendiente");
     return {
       room: r,
-      fondeador: d?.contraparte.empresa || d?.contraparte.nombre || "Fondeador",
+      // Hasta que se paga la comisión el fondeador aparece sin nombre; se
+      // numeran para distinguirlos.
+      fondeador: d?.contraparte.oculto
+        ? `${d.contraparte.nombre} (#${(rooms?.length ?? 0) - i})`
+        : d?.contraparte.empresa || d?.contraparte.nombre || "Fondeador",
       vigente,
       calc: vigente
         ? descuentoImplicito(factura.monto, vigente.monto_ofrecido, factura.fecha_vencimiento, factura.plazo_dias)
@@ -234,7 +238,7 @@ export default async function FacturaDetallePage({
             La factura se cierra aceptando una oferta en su Deal Room. Si ya no querés ofrecerla,
             podés retirarla.
           </p>
-          <RetirarButton invoiceId={factura.id} />
+          <RetirarButton invoiceId={factura.id} negociaciones={filas.map((f) => ({ id: f.room.id, label: f.fondeador }))} />
         </div>
       )}
     </div>
