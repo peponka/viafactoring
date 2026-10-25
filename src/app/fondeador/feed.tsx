@@ -33,13 +33,18 @@ export type FacturaFeed = {
 
 function chipsVerificacion(v: FacturaFeed["verif"]) {
   const chips: { texto: string; tono: "ok" | "alerta" | "neutro" }[] = [];
-  if (!v.cdc_presente) return [{ texto: "Sin código de control", tono: "neutro" as const }];
+  // El monto se compara con lo que la IA leyó del documento, haya CDC o no.
+  if (v.monto_coincide === false) chips.push({ texto: "Monto distinto al de la factura", tono: "alerta" });
+  if (!v.cdc_presente) {
+    chips.push({ texto: "Sin código de control", tono: "neutro" });
+    if (v.monto_coincide === true) chips.push({ texto: "Monto coincide", tono: "ok" });
+    return chips;
+  }
   chips.push(v.cdc_dv_ok ? { texto: "CDC válido", tono: "ok" } : { texto: "CDC inválido", tono: "alerta" });
   if (v.ruc_coincide === true) chips.push({ texto: "RUC coincide", tono: "ok" });
   if (v.ruc_coincide === false) chips.push({ texto: "RUC no coincide", tono: "alerta" });
   if (v.numero_coincide === false) chips.push({ texto: "Número no coincide", tono: "alerta" });
   chips.push(v.duplicada ? { texto: "Ya cargada antes", tono: "alerta" } : { texto: "Sin duplicados", tono: "ok" });
-  if (v.monto_coincide === false) chips.push({ texto: "Monto distinto al de la factura", tono: "alerta" });
   if (v.monto_coincide === true) chips.push({ texto: "Monto coincide", tono: "ok" });
   return chips;
 }
@@ -367,7 +372,7 @@ export function Feed({
               El riesgo lo declara la empresa que publica. ViaFactoring conecta partes: no evalúa ni recomienda facturas.
             </p>
 
-            <div className="fixed md:sticky inset-x-0 bottom-[74px] md:bottom-0 z-30 pt-8 pb-3 md:pt-10 md:pb-5 md:-mt-8 bg-gradient-to-t from-background via-background/95 to-transparent flex items-center justify-center gap-8 pointer-events-none [&>*]:pointer-events-auto">
+            <div className="fixed md:sticky inset-x-0 bottom-[74px] md:bottom-0 z-30 pt-8 pb-3 md:pt-6 md:pb-4 bg-gradient-to-t from-background via-background/95 to-transparent flex items-center justify-center gap-8 pointer-events-none [&>*]:pointer-events-auto">
               <div className="flex flex-col items-center gap-1.5">
                 <button
                   type="button"
