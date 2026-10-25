@@ -35,6 +35,7 @@ export default function NuevaFacturaPage() {
   // avisar si la PyME lo cambia: el fondeador ve esa diferencia.
   const [lectura, setLectura] = useState<string | null>(null);
   const [montoLeido, setMontoLeido] = useState<number | null>(null);
+  const [avisoDeudor, setAvisoDeudor] = useState<string | null>(null);
   const [plazo, setPlazo] = useState("");
   const [moneda, setMoneda] = useState("USD");
   const [rubro, setRubro] = useState("");
@@ -100,6 +101,12 @@ export default function NuevaFacturaPage() {
 
     const d = result.data;
     setLectura(result.lectura ?? null);
+    setAvisoDeudor(result.avisoDeudor ?? null);
+    if (result.avisoDeudor) {
+      setDeudorNombre("");
+      setDeudorRuc("");
+      setDeudorContacto("");
+    }
     const leido = d.monto ? Number(String(d.monto).replace(/[^0-9.]/g, "")) : NaN;
     setMontoLeido(Number.isFinite(leido) && leido > 0 ? leido : null);
     if (d.cdc) setCdc(normalizarCdc(d.cdc));
@@ -218,8 +225,22 @@ export default function NuevaFacturaPage() {
 
           <section className="bg-surface border border-line rounded-3xl p-5 flex flex-col gap-4">
             <Field label="Deudor (quién te debe)">
-              <Input type="text" name="deudor_nombre" required value={deudorNombre} onChange={(e) => setDeudorNombre(e.target.value)} />
+              <Input
+                type="text"
+                name="deudor_nombre"
+                required
+                value={deudorNombre}
+                onChange={(e) => {
+                  setDeudorNombre(e.target.value);
+                  if (avisoDeudor) setAvisoDeudor(null);
+                }}
+                placeholder="Tu cliente: la empresa o persona que te tiene que pagar"
+                className={avisoDeudor ? "!border-warn" : ""}
+              />
             </Field>
+            {avisoDeudor && (
+              <p className="text-sm text-warn bg-warn-soft rounded-xl px-3.5 py-2.5 -mt-2">{avisoDeudor}</p>
+            )}
             <div role="radiogroup" aria-label="Tipo de deudor" className="grid grid-cols-2 gap-1.5 bg-surface-3 rounded-2xl p-1.5">
               {(["privado", "estado"] as const).map((t) => (
                 <button
