@@ -327,7 +327,7 @@ export function Feed({
               El riesgo lo declara la empresa que publica. ViaFactoring conecta partes: no evalúa ni recomienda facturas.
             </p>
 
-            <div className="fixed md:sticky inset-x-0 bottom-[74px] md:bottom-0 z-30 pt-8 pb-3 md:pt-10 md:pb-5 md:-mt-8 bg-gradient-to-t from-background via-background/95 to-transparent flex items-center justify-center gap-8 pointer-events-none md:pointer-events-auto [&>*]:pointer-events-auto">
+            <div className="fixed md:sticky inset-x-0 bottom-[74px] md:bottom-0 z-30 pt-8 pb-3 md:pt-10 md:pb-5 md:-mt-8 bg-gradient-to-t from-background via-background/95 to-transparent flex items-center justify-center gap-8 pointer-events-none [&>*]:pointer-events-auto">
               <div className="flex flex-col items-center gap-1.5">
                 <button
                   type="button"
