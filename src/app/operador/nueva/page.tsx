@@ -1,5 +1,6 @@
 "use client";
 
+import { MontoInput } from "@/components/monto-input";
 import { useActionState, useEffect, useState } from "react";
 import { crearFacturaAction, previsualizarAlcanceAction, type FormState } from "../actions";
 import { extraerDatosFacturaAction } from "../ocr";
@@ -244,16 +245,14 @@ export default function NuevaFacturaPage() {
           <section className="bg-surface border border-line rounded-3xl p-5 flex flex-col gap-4">
             <div className="grid grid-cols-[minmax(0,1fr)_110px] gap-3">
               <Field label="Monto">
-                <Input
-                  type="number"
+                <MontoInput
                   name="monto"
-                  min="0"
-                  step="0.01"
+                  decimales={moneda === "USD" ? 2 : 0}
                   required
                   value={monto}
-                  onChange={(e) => setMonto(e.target.value)}
+                  onChange={setMonto}
                   className={bajoMinimo ? "!border-critical" : ""}
-                  aria-invalid={bajoMinimo || undefined}
+                  invalido={bajoMinimo}
                 />
               </Field>
               <Field label="Moneda">

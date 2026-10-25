@@ -1,5 +1,6 @@
 "use client";
 
+import { MontoInput } from "@/components/monto-input";
 import { useActionState, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -156,16 +157,14 @@ function FormOferta({
       <input type="hidden" name="invoice_id" value={d.invoice.id} />
       {contraofertaDe && <input type="hidden" name="offer_id" value={contraofertaDe.id} />}
       <Field label={`Anticipo en ${d.invoice.moneda}`}>
-        <Input
-          type="number"
+        <MontoInput
           name="monto_ofrecido"
-          min={1}
-          max={d.invoice.monto}
-          step="1"
+          decimales={d.invoice.moneda === "USD" ? 2 : 0}
           required
           autoFocus
           value={monto}
-          onChange={(e) => setMonto(e.target.value)}
+          onChange={setMonto}
+          placeholder={d.invoice.moneda === "PYG" ? "28.500.000" : "9.500"}
         />
       </Field>
       {calc && Number(monto) > 0 && (
