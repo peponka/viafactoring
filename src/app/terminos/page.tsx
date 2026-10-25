@@ -106,6 +106,15 @@ export default function TerminosPage() {
                 partes se comprometen a no usar la información obtenida en
                 la plataforma para cerrar la operación por fuera de ella.
               </p>
+              <p className="mt-2">
+                Antes de ese pago no se pueden compartir teléfonos, WhatsApp,
+                emails, redes sociales, links ni otros datos para contactarse
+                por fuera. ViaFactoring oculta automáticamente esos datos en
+                los mensajes y en las ofertas, y puede suspender o dar de
+                baja la cuenta de quien insista en compartirlos. Si las
+                partes cierran por fuera una operación que se originó en la
+                plataforma, la comisión de cierre se debe igual.
+              </p>
             </section>
 
             <section>

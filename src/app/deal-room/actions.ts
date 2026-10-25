@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { pareceContacto, pista } from "@/lib/ia/moderar";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
 import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
@@ -38,15 +39,44 @@ export async function enviarMensajeAction(
   replyTo: string | null = null,
 ): Promise<Resultado> {
   const { supabase } = await sesion();
-  const { error } = await supabase.rpc("send_message", {
+
+  // Barrera anti-contacto, capa IA (la de patrones está en la base). Solo
+  // antes de la comisión y solo si el mensaje tiene alguna pista.
+  let enviar = cuerpo;
+  let marcaIa: { razon: string } | null = null;
+  if (pista(cuerpo)) {
+    const { data: nivel } = await supabase.rpc("nivel_deal_room", { p_reveal_id: revealId });
+    if (typeof nivel === "number" && nivel < 4) {
+      const r = await pareceContacto(cuerpo);
+      if (r?.contacto) {
+        enviar = MENSAJE_OCULTO_IA;
+        marcaIa = { razon: r.razon };
+      }
+    }
+  }
+
+  const { data: msg, error } = await supabase.rpc("send_message", {
     p_reveal_id: revealId,
-    p_cuerpo: cuerpo,
+    p_cuerpo: enviar,
     p_tipo: tipo,
     p_reply_to: replyTo,
   });
+
+  if (!error && marcaIa && msg && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    const admin = createServiceRoleClient();
+    await admin.rpc("registrar_intento_ia", {
+      p_message_id: (msg as { id: string }).id,
+      p_original: cuerpo,
+      p_razon: marcaIa.razon,
+    });
+  }
+
   refrescar(revealId);
   return { error: error?.message ?? null };
 }
+
+const MENSAJE_OCULTO_IA =
+  "🔒 Mensaje oculto: parecía un intento de compartir datos de contacto o de seguir la conversación por fuera. El contacto se comparte automáticamente al cerrar el trato.";
 
 export async function marcarLeidosAction(revealId: string) {
   const { supabase } = await sesion();

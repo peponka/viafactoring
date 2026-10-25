@@ -330,6 +330,11 @@ export type MessageMeta = {
   payment_request_id?: string;
   autor_rol?: RolDealRoom;
   lado?: "envio" | "recepcion";
+  /** Barrera anti-contacto: se taparon datos de contacto del mensaje. */
+  contacto_oculto?: boolean;
+  /** Barrera anti-contacto: invitación a seguir por fuera, sin datos. */
+  aviso_contacto?: boolean;
+  razon_ia?: string;
 };
 
 export type Notification = {
@@ -366,7 +371,8 @@ export type TipoExcepcion =
   | "sin_tipo_cambio"
   | "reclamo"
   | "error_tecnico"
-  | "posible_cierre_externo";
+  | "posible_cierre_externo"
+  | "intento_contacto";
 
 export type ExceptionRow = {
   id: string;
@@ -693,6 +699,10 @@ export type Database = {
       ficha_verificacion: {
         Args: { p_reveal_id: string };
         Returns: FichaVerificacion;
+      };
+      registrar_intento_ia: {
+        Args: { p_message_id: string; p_original: string; p_razon: string };
+        Returns: null;
       };
       retirar_factura: {
         Args: { p_invoice_id: string; p_motivo: string; p_reveal_id: string | null };

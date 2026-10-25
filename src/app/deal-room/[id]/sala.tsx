@@ -412,6 +412,11 @@ export function Sala({
         { event: "INSERT", schema: "public", table: "messages", filter: `reveal_id=eq.${d.reveal_id}` },
         () => router.refresh(),
       )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "messages", filter: `reveal_id=eq.${d.reveal_id}` },
+        () => router.refresh(),
+      )
       .subscribe();
     return () => {
       supabase.removeChannel(canal);
@@ -543,6 +548,16 @@ export function Sala({
           ) : (
             <p className="whitespace-pre-wrap break-words">{m.cuerpo}</p>
           )}
+          {m.meta?.contacto_oculto && !m.cuerpo.startsWith("🔒") && (
+            <p className={`text-[.72rem] mt-1.5 ${mio ? "opacity-85" : "text-ink-soft"}`}>
+              🔒 Ocultamos datos de contacto. Se comparten al cerrar el trato.
+            </p>
+          )}
+          {m.meta?.aviso_contacto && (
+            <p className={`text-[.72rem] mt-1.5 ${mio ? "opacity-85" : "text-ink-soft"}`}>
+              Recordá: la conversación sigue acá hasta cerrar el trato.
+            </p>
+          )}
           <p className="num text-[.7rem] opacity-70 mt-1 text-right">{formatFechaHora(m.created_at)}</p>
         </div>
       </div>
@@ -592,9 +607,10 @@ export function Sala({
                 Enviar
               </Button>
             </div>
-            {avisoContacto.length > 0 && (
+            {avisoContacto.length > 0 && d.nivel < 4 && (
               <p className="text-xs text-warn bg-warn-soft rounded-lg px-3 py-2">
-                Parece que estás compartiendo datos de contacto. El contacto se muestra solo cuando se cierra el acuerdo.
+                🔒 Los datos de contacto de este mensaje se van a ocultar. Se comparten solos cuando se cierra el
+                trato, y seguir por fuera puede dar de baja la cuenta.
               </p>
             )}
             <ErrorText>{error}</ErrorText>
