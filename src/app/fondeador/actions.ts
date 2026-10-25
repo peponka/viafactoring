@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
+import { despacharAvisos } from "@/lib/notificaciones/despachar";
 import { createClient } from "@/lib/supabase/server";
 
 // Legacy (modelo de créditos). reveal_invoice ahora devuelve la info por niveles.
@@ -162,5 +164,6 @@ export async function marcarInteresAction(
     return { error: mensajeDeError(error?.message, "No pudimos abrir la negociación. Probá de nuevo.") };
   }
   revalidatePath("/fondeador/deal-rooms");
+  after(() => despacharAvisos());
   return { error: null, dealRoomId: data };
 }

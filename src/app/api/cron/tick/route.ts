@@ -1,6 +1,7 @@
 import { createServiceRoleClient } from "@/lib/supabase/server";
 import { conciliarOrdenes } from "@/lib/pagos/servicio";
 import { enviarEmailsPendientes } from "@/lib/notificaciones/email";
+import { enviarPushPendientes } from "@/lib/notificaciones/push";
 import { actualizarTipoCambio } from "@/lib/tipo-cambio";
 
 // Proceso programado: cotización del día, vencimientos y recordatorios,
@@ -17,10 +18,10 @@ export async function GET(request: Request) {
   const tipoCambio = await actualizarTipoCambio();
   const { data: vencimientos, error } = await admin.rpc("vencer_y_recordar");
   const conciliadas = await conciliarOrdenes();
-  const emails = await enviarEmailsPendientes(100);
+  const [emails, push] = await Promise.all([enviarEmailsPendientes(100), enviarPushPendientes(100)]);
 
   return Response.json(
-    { tipoCambio, vencimientos, error: error?.message ?? null, conciliadas, emails },
+    { tipoCambio, vencimientos, error: error?.message ?? null, conciliadas, emails, push },
     { headers: { "Cache-Control": "no-store" } },
   );
 }

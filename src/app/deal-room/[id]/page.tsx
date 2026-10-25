@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ActivarPush } from "@/components/activar-push";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatMonto } from "@/lib/format";
@@ -40,6 +41,13 @@ export default async function DealRoomPage({ params }: PageProps<"/deal-room/[id
     supabase.rpc("ficha_verificacion", { p_reveal_id: id }),
   ]);
   const ficha = (fichaData as Ficha | null) ?? null;
+
+  // Devolución de la comisión: null = puede pedirla; texto = por qué no.
+  let devolucion: string | null | undefined;
+  if (d.rol === "fondeador" && d.nivel >= 4) {
+    const { data: bloqueo } = await supabase.rpc("devolucion_bloqueo", { p_reveal_id: id });
+    devolucion = (bloqueo as string | null) ?? null;
+  }
 
   // USD por unidad de la moneda de la factura: para mostrarle al fondeador,
   // mientras escribe su oferta, cuánto sería la comisión de cierre.
@@ -84,6 +92,12 @@ export default async function DealRoomPage({ params }: PageProps<"/deal-room/[id
         {d.rol !== "admin" && <Menu revealId={id} puedeRetirarse={negociable} />}
       </div>
 
+      {d.rol !== "admin" && (
+        <div className="mb-4">
+          <ActivarPush />
+        </div>
+      )}
+
       <div className="grid lg:grid-cols-[minmax(0,1fr)_340px] gap-5 items-start">
         <Sala
           d={d}
@@ -91,6 +105,7 @@ export default async function DealRoomPage({ params }: PageProps<"/deal-room/[id
           documentos={documentos}
           franja={franjaDeTurno(d)}
           usdPorUnidad={usdPorUnidad}
+          devolucion={devolucion}
         />
         <div className="order-first lg:order-none flex flex-col gap-4">
           {ficha && d.rol !== "operador" && (

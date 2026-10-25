@@ -325,7 +325,8 @@ export type MessageMeta = {
     | "desembolso"
     | "fin"
     | "cerrada"
-    | "reabierta";
+    | "reabierta"
+    | "devolucion";
   offer_id?: string;
   payment_request_id?: string;
   autor_rol?: RolDealRoom;
@@ -350,8 +351,20 @@ export type Notification = {
   cantidad: number;
   leida_at: string | null;
   email_estado: "pendiente" | "enviado" | "omitido" | "error";
+  push_estado: "pendiente" | "enviado" | "omitido" | "error";
   created_at: string;
   updated_at: string;
+};
+
+export type PushSubscriptionRow = {
+  id: string;
+  user_id: string;
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+  user_agent: string | null;
+  created_at: string;
+  last_used_at: string | null;
 };
 
 export type NotificationPrefs = {
@@ -372,7 +385,8 @@ export type TipoExcepcion =
   | "reclamo"
   | "error_tecnico"
   | "posible_cierre_externo"
-  | "intento_contacto";
+  | "intento_contacto"
+  | "devolucion_comision";
 
 export type ExceptionRow = {
   id: string;
@@ -637,7 +651,12 @@ export type Database = {
       messages: TableDef<Message, never>;
       documents: TableDef<DocumentRow, never>;
       industries: TableDef<Industry, Partial<Industry> & { slug: string; nombre: string }>;
-      notifications: TableDef<Notification, never, Pick<Notification, "leida_at">>;
+      notifications: TableDef<Notification, never, Partial<Pick<Notification, "leida_at" | "push_estado">>>;
+      push_subscriptions: TableDef<
+        PushSubscriptionRow,
+        Pick<PushSubscriptionRow, "user_id" | "endpoint" | "p256dh" | "auth"> & { user_agent?: string | null },
+        Partial<Pick<PushSubscriptionRow, "last_used_at" | "user_id" | "p256dh" | "auth" | "user_agent">>
+      >;
       notification_prefs: TableDef<
         NotificationPrefs,
         Pick<NotificationPrefs, "user_id" | "email">,
@@ -699,6 +718,14 @@ export type Database = {
       ficha_verificacion: {
         Args: { p_reveal_id: string };
         Returns: FichaVerificacion;
+      };
+      devolucion_bloqueo: {
+        Args: { p_reveal_id: string };
+        Returns: string | null;
+      };
+      solicitar_devolucion: {
+        Args: { p_reveal_id: string };
+        Returns: null;
       };
       registrar_intento_ia: {
         Args: { p_message_id: string; p_original: string; p_razon: string };
@@ -931,6 +958,17 @@ export type Database = {
       admin_marcar_devuelto: {
         Args: { p_exception_id: string; p_motivo: string };
         Returns: undefined;
+      };
+      notificaciones_para_push: {
+        Args: { p_limite?: number };
+        Returns: {
+          id: string;
+          user_id: string;
+          titulo: string;
+          cuerpo: string | null;
+          url: string;
+          suscripciones: { id: string; endpoint: string; p256dh: string; auth: string }[];
+        }[];
       };
       notificaciones_para_email: {
         Args: { p_limite?: number };

@@ -115,6 +115,13 @@ export default function TerminosPage() {
                 partes cierran por fuera una operación que se originó en la
                 plataforma, la comisión de cierre se debe igual.
               </p>
+              <p className="mt-2">
+                Si después de pagada la comisión la PyME no responde en 48
+                horas (ni por mensaje ni confirmando la transferencia), el
+                fondeador puede pedir la devolución desde la negociación.
+                ViaFactoring revisa el caso y, si corresponde, devuelve la
+                comisión por el mismo medio de pago.
+              </p>
             </section>
 
             <section>

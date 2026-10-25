@@ -1,4 +1,5 @@
 import { sectorLabel } from "@/lib/format";
+import { ActivarPush } from "@/components/activar-push";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getFondeadorPerfil, getUserAndProfile } from "@/lib/session";
@@ -57,6 +58,9 @@ export default async function FondeadorFeedPage() {
   return (
     <div>
       <TeTocaAVos rooms={rooms} />
+      <div className="mb-5">
+        <ActivarPush />
+      </div>
       <Feed
         facturas={facturas}
         pasadas={encajan.filter((t) => t.ya_pasada).length}

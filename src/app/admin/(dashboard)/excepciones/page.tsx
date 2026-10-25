@@ -17,6 +17,8 @@ const TIPO_LABEL: Record<string, string> = {
   reclamo: "Problema reportado por un usuario",
   error_tecnico: "Error técnico",
   posible_cierre_externo: "Posible cierre por fuera (cobrar comisión)",
+  intento_contacto: "Insiste en compartir datos de contacto",
+  devolucion_comision: "Pedido de devolución de comisión (la PyME no respondió)",
 };
 
 export default async function ExcepcionesPage({ searchParams }: PageProps<"/admin/excepciones">) {

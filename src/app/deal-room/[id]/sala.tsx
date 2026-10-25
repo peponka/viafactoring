@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { detectarContacto } from "@/lib/contacto";
 import { descuentoImplicito, formatFecha, formatFechaHora, formatMonto, formatPct } from "@/lib/format";
-import { Badge, Button, ErrorText, Field, Input, Select, Textarea } from "@/components/ui";
+import { Badge, Button, ErrorText, Field, Input, Textarea } from "@/components/ui";
 import type { Franja } from "@/lib/turno";
 import type { DealRoomDetail, DealRoomOferta, DocumentRow, Message } from "@/lib/database.types";
 import {
@@ -17,6 +17,7 @@ import {
   ofertarAction,
   pagarComisionAction,
   responderOfertaAction,
+  solicitarDevolucionAction,
   subirDocumentoAction,
   type Resultado,
 } from "../actions";
@@ -69,7 +70,7 @@ function TarjetaOferta({ o, d }: { o: DealRoomOferta; d: DealRoomDetail }) {
         </p>
         <div className="text-xs text-ink-soft grid grid-cols-2 gap-x-3 gap-y-0.5 mt-2">
           <span>Con recurso: {siNo(o.con_recurso)}</span>
-          <span>Notifica al deudor: {siNo(o.notifica_deudor)}</span>
+          <span>Se avisa al deudor: {siNo(o.notifica_deudor)}</span>
           <span className="col-span-2">
             Pago del anticipo: {o.fecha_pago_prevista ? formatFecha(o.fecha_pago_prevista) : "a definir"}
           </span>
@@ -122,7 +123,102 @@ function Pildora({ texto, fecha }: { texto: string; fecha: string }) {
   );
 }
 
+// ---------------------------------------------------------------- devolución
+
+function BloqueDevolucion({ revealId, bloqueo }: { revealId: string; bloqueo: string | null }) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+
+  if (bloqueo === "La PyME ya respondió") return null;
+  if (bloqueo === "Ya pediste la devolución") {
+    return (
+      <p className="text-xs text-ink-soft mt-3 border-t border-line pt-3">
+        ↩️ Pediste la devolución de la comisión. ViaFactoring la está revisando.
+      </p>
+    );
+  }
+  if (bloqueo) {
+    return (
+      <p className="text-xs text-ink-soft mt-3 border-t border-line pt-3">
+        Si la PyME no responde en 48 horas, podés pedir la devolución de la comisión.
+      </p>
+    );
+  }
+  return (
+    <div className="mt-3 border-t border-line pt-3 flex flex-col gap-2">
+      <p className="text-sm">¿La PyME no respondió en 48 horas? Podés pedir la devolución de la comisión.</p>
+      <ErrorText>{error}</ErrorText>
+      <button
+        type="button"
+        disabled={pending}
+        onClick={() =>
+          startTransition(async () => {
+            setError(null);
+            const r = await solicitarDevolucionAction(revealId);
+            if (r.error) setError(r.error);
+            else router.refresh();
+          })
+        }
+        className="w-fit min-h-10 px-3.5 rounded-full border border-line-strong text-sm font-semibold disabled:opacity-60"
+      >
+        {pending ? "Enviando…" : "Pedir devolución"}
+      </button>
+    </div>
+  );
+}
+
 // ---------------------------------------------------------------- oferta
+
+function hoyIso() {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Asuncion" }).format(new Date());
+}
+
+// Condición de la oferta, obligatoria y explicada en palabras simples.
+function Condicion({
+  name,
+  titulo,
+  defecto,
+  si,
+  no,
+}: {
+  name: string;
+  titulo: string;
+  defecto: string;
+  si: string;
+  no: string;
+}) {
+  return (
+    <fieldset className="flex flex-col gap-1.5">
+      <legend className="text-sm font-medium mb-1.5">{titulo}</legend>
+      <div className="grid sm:grid-cols-2 gap-2">
+        {(
+          [
+            ["si", "Sí", si],
+            ["no", "No", no],
+          ] as const
+        ).map(([valor, etiqueta, texto]) => (
+          <label
+            key={valor}
+            className="flex items-start gap-2.5 rounded-2xl border border-line px-3.5 py-3 cursor-pointer text-sm has-[:checked]:border-accent has-[:checked]:bg-accent-soft"
+          >
+            <input
+              type="radio"
+              name={name}
+              value={valor}
+              required
+              defaultChecked={defecto === valor}
+              className="mt-0.5 accent-[var(--accent)]"
+            />
+            <span>
+              <span className="font-semibold">{etiqueta}.</span> <span className="text-ink-soft">{texto}</span>
+            </span>
+          </label>
+        ))}
+      </div>
+    </fieldset>
+  );
+}
 
 function FormOferta({
   d,
@@ -189,24 +285,29 @@ function FormOferta({
           </p>
         </div>
       )}
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="Con recurso">
-          <Select name="con_recurso" defaultValue={def(contraofertaDe?.con_recurso)}>
-            <option value="">A definir</option>
-            <option value="si">Sí</option>
-            <option value="no">No</option>
-          </Select>
-        </Field>
-        <Field label="Notifica al deudor">
-          <Select name="notifica_deudor" defaultValue={def(contraofertaDe?.notifica_deudor)}>
-            <option value="">A definir</option>
-            <option value="si">Sí</option>
-            <option value="no">No</option>
-          </Select>
-        </Field>
-      </div>
-      <Field label="Fecha de pago del anticipo">
-        <Input type="date" name="fecha_pago_prevista" defaultValue={contraofertaDe?.fecha_pago_prevista ?? ""} />
+      <Condicion
+        name="con_recurso"
+        titulo="¿Con recurso?"
+        defecto={def(contraofertaDe?.con_recurso)}
+        si="Si el deudor no paga, la PyME le devuelve el anticipo al fondeador."
+        no="Si el deudor no paga, el riesgo es del fondeador."
+      />
+      <Condicion
+        name="notifica_deudor"
+        titulo="¿Se le avisa al deudor?"
+        defecto={def(contraofertaDe?.notifica_deudor)}
+        si="El deudor sabe de la cesión y al vencimiento le paga directo al fondeador."
+        no="El deudor no se entera: le paga a la PyME y ella le transfiere al fondeador."
+      />
+      <Field label="¿Cuándo se paga el anticipo?">
+        <Input
+          type="date"
+          name="fecha_pago_prevista"
+          required
+          min={hoyIso()}
+          max={d.invoice.fecha_vencimiento ?? undefined}
+          defaultValue={contraofertaDe?.fecha_pago_prevista ?? ""}
+        />
       </Field>
       <Field label="Mensaje (opcional)">
         <Textarea name="mensaje" rows={2} maxLength={1000} />
@@ -375,12 +476,15 @@ export function Sala({
   documentos,
   franja,
   usdPorUnidad,
+  devolucion,
 }: {
   d: DealRoomDetail;
   mensajes: Message[];
   documentos: DocumentRow[];
   franja: Franja | null;
   usdPorUnidad: number | null;
+  /** null: el fondeador puede pedir la devolución; texto: por qué todavía no; undefined: no aplica */
+  devolucion?: string | null;
 }) {
   const router = useRouter();
   const rol: Rol = d.rol;
@@ -396,6 +500,7 @@ export function Sala({
   const avisoContacto = useMemo(() => detectarContacto(texto), [texto]);
   const docsPorId = useMemo(() => new Map(documentos.map((x) => [x.id, x])), [documentos]);
   const ofertasPorId = useMemo(() => new Map(d.ofertas.map((o) => [o.id, o])), [d.ofertas]);
+  const ofertaAceptada = d.ofertas.find((o) => o.estado === "aceptada") ?? null;
 
   const negociable = d.estado === "open" || d.estado === "negotiating";
   const puedeOfertar =
@@ -508,6 +613,32 @@ export function Sala({
                 <span className="text-ink-soft mt-1">
                   El anticipo se transfiere directo entre ustedes, fuera de ViaFactoring.
                 </span>
+                <div className="flex gap-2 flex-wrap mt-3">
+                  <a
+                    href={`/api/contrato/${d.reveal_id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center min-h-10 px-3.5 rounded-full bg-ink text-white text-sm font-semibold"
+                  >
+                    📄 Contrato de cesión
+                  </a>
+                  {ofertaAceptada?.notifica_deudor && (
+                    <a
+                      href={`/api/contrato/${d.reveal_id}?doc=aviso`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center min-h-10 px-3.5 rounded-full border border-line-strong text-sm font-semibold"
+                    >
+                      ✉️ Aviso al deudor
+                    </a>
+                  )}
+                </div>
+                <span className="text-xs text-ink-soft mt-1.5">
+                  Modelos prellenados con los datos de esta operación. Revisalos antes de firmar.
+                </span>
+                {rol === "fondeador" && devolucion !== undefined && (
+                  <BloqueDevolucion revealId={d.reveal_id} bloqueo={devolucion} />
+                )}
               </div>
             ) : null}
           </TarjetaSistema>
@@ -536,7 +667,14 @@ export function Sala({
           }`}
         >
           {!mio && <p className="text-xs font-semibold opacity-80 mb-0.5">{nombreRol(m.autor_rol, false)}</p>}
-          {doc ? (
+          {m.document_id && !doc ? (
+            <p className="flex items-start gap-2">
+              <span aria-hidden="true">🔒</span>
+              <span>
+                Compartió un documento con datos de contacto. Se habilita al cerrar el trato.
+              </span>
+            </p>
+          ) : doc ? (
             <a
               href={`/api/documentos/${doc.id}`}
               target="_blank"
@@ -619,7 +757,7 @@ export function Sala({
                 <input type="hidden" name="reveal_id" value={d.reveal_id} />
                 <input type="hidden" name="tipo" value="otro" />
                 <label className="inline-flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg border border-line cursor-pointer hover:border-accent">
-                  📎 {subiendo ? "Subiendo…" : "Adjuntar documento"}
+                  📎 {subiendo ? "Revisando y subiendo…" : "Adjuntar documento"}
                   <input
                     type="file"
                     name="archivo"
@@ -643,6 +781,9 @@ export function Sala({
               )}
             </div>
             {subida.error && <ErrorText>{subida.error}</ErrorText>}
+            {subida.aviso && (
+              <p className="text-xs text-warn bg-warn-soft rounded-lg px-3 py-2">🔒 {subida.aviso}</p>
+            )}
           </>
         )}
       </div>

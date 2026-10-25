@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ActivarPush } from "@/components/activar-push";
 import { createClient } from "@/lib/supabase/server";
 import { getUserAndProfile } from "@/lib/session";
 import { Badge, EmptyState, LinkButton, PageHeader } from "@/components/ui";
@@ -43,6 +44,9 @@ export default async function OperadorPage() {
 
   return (
     <div>
+      <div className="mb-5">
+        <ActivarPush />
+      </div>
       <PageHeader
         title="Mis facturas"
         subtitle={

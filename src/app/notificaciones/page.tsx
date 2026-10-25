@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { ActivarPush } from "@/components/activar-push";
 import { Card } from "@/components/ui";
 import { formatFechaHora } from "@/lib/format";
 import type { Notification, NotificationPrefs } from "@/lib/database.types";
@@ -51,9 +52,12 @@ export default async function NotificacionesPage() {
       <Card className="mt-8 !p-5">
         <p className="font-semibold text-sm mb-2">Cómo te avisamos</p>
         <p className="text-sm text-ink-soft mb-3">
-          Siempre ves los avisos acá. Además podés recibirlos por email.
+          Siempre ves los avisos acá. Además podés recibirlos al instante en este dispositivo y por email.
         </p>
-        <PreferenciaEmail inicial={prefs?.email ?? true} />
+        <div className="flex flex-col gap-3">
+          <ActivarPush variante="fila" />
+          <PreferenciaEmail inicial={prefs?.email ?? true} />
+        </div>
       </Card>
     </div>
   );

@@ -2,11 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import { pareceContacto, pista } from "@/lib/ia/moderar";
+import { documentoTieneContacto } from "@/lib/ia/revisar-documento";
+import { detectarContacto } from "@/lib/contacto";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
 import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
 import { iniciarPago, type ResultadoInicio } from "@/lib/pagos/servicio";
-import { enviarEmailsPendientes } from "@/lib/notificaciones/email";
+import { despacharAvisos } from "@/lib/notificaciones/despachar";
 
 // Todas las acciones del Deal Room llaman a funciones de la base que
 // verifican pertenencia con auth.uid(). Nada de lo que llega del navegador
@@ -27,10 +29,10 @@ function refrescar(revealId: string) {
   revalidatePath("/operador");
   // Los avisos importantes (ofertas, aceptación, desembolso) salen enseguida;
   // los mensajes de chat esperan unos minutos para agruparse.
-  after(() => enviarEmailsPendientes());
+  after(() => despacharAvisos());
 }
 
-export type Resultado = { error: string | null; ok?: boolean };
+export type Resultado = { error: string | null; ok?: boolean; aviso?: string };
 
 export async function enviarMensajeAction(
   revealId: string,
@@ -113,6 +115,9 @@ export async function ofertarAction(_prev: Resultado, formData: FormData): Promi
 
   if (!Number.isFinite(monto) || monto <= 0) {
     return { error: "El anticipo tiene que ser un número mayor a 0." };
+  }
+  if (conRecurso === null || notificaDeudor === null || !fecha) {
+    return { error: "Completá si es con recurso, si se le avisa al deudor y cuándo se paga el anticipo." };
   }
 
   const { error } = offerId
@@ -199,7 +204,28 @@ export async function subirDocumentoAction(_prev: Resultado, formData: FormData)
     return { error: "No sos parte de este Deal Room." };
   }
 
-  const nombreSeguro = archivo.name.replace(/[^\w.\-]+/g, "_").slice(-120) || "documento";
+  // Barrera anti-contacto: antes de la comisión, si el documento (o su
+  // nombre) trae datos de contacto, se guarda igual pero la otra parte lo ve
+  // recién al cerrar el trato. Si la revisión falla, por las dudas también.
+  let nivelMinimo = 2;
+  let nombre = archivo.name;
+  let aviso: string | undefined;
+  const { data: nivel } = await supabase.rpc("nivel_deal_room", { p_reveal_id: revealId });
+  if (typeof nivel === "number" && nivel < 4) {
+    if (detectarContacto(nombre).some((p) => ["telefono", "email", "url", "usuario"].includes(p))) {
+      const ext = nombre.match(/\.[a-z0-9]{2,4}$/i)?.[0] ?? "";
+      nombre = `documento-${tipo}${ext}`;
+    }
+    const revision = await documentoTieneContacto(archivo);
+    if (!revision || revision.contacto) {
+      nivelMinimo = 4;
+      aviso = revision
+        ? `Lo subimos, pero tiene datos de contacto (${revision.que || "teléfono, email o redes"}): la otra parte lo va a ver al cerrar el trato. Si querés que lo vea ahora, tapá esos datos y subilo de nuevo.`
+        : "Lo subimos, pero no pudimos revisarlo: la otra parte lo va a ver al cerrar el trato.";
+    }
+  }
+
+  const nombreSeguro = nombre.replace(/[^\w.\-]+/g, "_").slice(-120) || "documento";
   const ruta = `deal-rooms/${revealId}/${crypto.randomUUID()}-${nombreSeguro}`;
 
   const admin = createServiceRoleClient();
@@ -211,10 +237,10 @@ export async function subirDocumentoAction(_prev: Resultado, formData: FormData)
   const { error } = await supabase.rpc("registrar_documento_deal_room", {
     p_reveal_id: revealId,
     p_storage_path: ruta,
-    p_nombre: archivo.name,
+    p_nombre: nombre,
     p_mime: archivo.type,
     p_tipo: tipo,
-    p_nivel_minimo: 2,
+    p_nivel_minimo: nivelMinimo,
   });
 
   if (error) {
@@ -223,7 +249,15 @@ export async function subirDocumentoAction(_prev: Resultado, formData: FormData)
   }
 
   refrescar(revealId);
-  return { error: null, ok: true };
+  return { error: null, ok: true, aviso };
+}
+
+// Devolución de la comisión si la PyME no respondió en 48 h tras el pago.
+export async function solicitarDevolucionAction(revealId: string): Promise<Resultado> {
+  const { supabase } = await sesion();
+  const { error } = await supabase.rpc("solicitar_devolucion", { p_reveal_id: revealId });
+  refrescar(revealId);
+  return { error: error?.message ?? null, ok: !error };
 }
 
 // Pago de la comisión desde el Deal Room. El monto lo calcula la base.
