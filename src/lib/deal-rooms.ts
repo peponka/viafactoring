@@ -1,6 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
-import { formatMonto } from "@/lib/format";
+import { formatMonto, sectorLabel } from "@/lib/format";
 import type {
   DealRoomDetail,
   EstadoDealRoom,
@@ -102,7 +102,7 @@ export async function getMisDealRooms(rol: "fondeador" | "operador"): Promise<Ro
           {
             titulo: t ? formatMonto(t.monto, t.moneda) : "Operación",
             subtitulo: t
-              ? [t.industria_nombre ?? t.rubro, t.plazo_dias ? `${t.plazo_dias} días` : null]
+              ? [sectorLabel(t.industria_nombre, t.rubro), t.plazo_dias ? `${t.plazo_dias} días` : null]
                   .filter(Boolean)
                   .join(" · ")
               : "",

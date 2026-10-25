@@ -42,6 +42,17 @@ function Linea({ estado, children }: { estado: Estado; children: React.ReactNode
 function controles(f: Ficha) {
   const v = f.verificacion ?? {};
   const items: { estado: Estado; texto: string }[] = [];
+  // Monto publicado vs. el que la IA leyó del documento (aplica con o sin CDC).
+  if (v.monto_coincide === false) {
+    items.push({
+      estado: "alerta",
+      texto: `El monto no coincide con el de la factura: en el documento dice ${
+        v.monto_leido != null ? `${v.moneda_leida ?? ""} ${Number(v.monto_leido).toLocaleString("es-PY")}`.trim() : "otro monto"
+      }.`,
+    });
+  } else if (v.monto_coincide === true) {
+    items.push({ estado: "ok", texto: "El monto coincide con el que dice la factura" });
+  }
   if (!v.cdc_presente) {
     items.push({ estado: "info", texto: "La pyme no cargó el código de control (CDC) de la factura electrónica." });
     return items;

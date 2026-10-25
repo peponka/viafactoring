@@ -88,6 +88,8 @@ export type Invoice = {
   ubicacion: string | null;
   deudor_tipo: DeudorTipo;
   deudor_ruc: string | null;
+  monto_leido?: number | null;
+  moneda_leida?: string | null;
   cdc: string | null;
   emisor_ruc: string | null;
   verificacion: Verificacion;
@@ -105,6 +107,9 @@ export type Verificacion = {
   fecha_emision?: string | null;
   vencimiento_coherente?: boolean | null;
   duplicada?: boolean;
+  monto_coincide?: boolean | null;
+  monto_leido?: number | null;
+  moneda_leida?: string | null;
   calculado_at?: string;
 };
 

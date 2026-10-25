@@ -31,6 +31,10 @@ export default function NuevaFacturaPage() {
   const [deudorContacto, setDeudorContacto] = useState("");
   const [deudorTipo, setDeudorTipo] = useState<"privado" | "estado">("privado");
   const [monto, setMonto] = useState("");
+  // Lo que leyó la IA del PDF (firmado por el servidor) y su monto, para
+  // avisar si la PyME lo cambia: el fondeador ve esa diferencia.
+  const [lectura, setLectura] = useState<string | null>(null);
+  const [montoLeido, setMontoLeido] = useState<number | null>(null);
   const [plazo, setPlazo] = useState("");
   const [moneda, setMoneda] = useState("USD");
   const [rubro, setRubro] = useState("");
@@ -95,6 +99,9 @@ export default function NuevaFacturaPage() {
     }
 
     const d = result.data;
+    setLectura(result.lectura ?? null);
+    const leido = d.monto ? Number(String(d.monto).replace(/[^0-9.]/g, "")) : NaN;
+    setMontoLeido(Number.isFinite(leido) && leido > 0 ? leido : null);
     if (d.cdc) setCdc(normalizarCdc(d.cdc));
     if (d.emisor_ruc) setEmisorRuc(d.emisor_ruc);
     if (d.deudor_ruc) setDeudorRuc(d.deudor_ruc);
@@ -121,6 +128,7 @@ export default function NuevaFacturaPage() {
         </p>
 
         <form action={formAction} className="flex flex-col gap-4" encType="multipart/form-data">
+          {lectura && <input type="hidden" name="lectura" value={lectura} />}
           <section className="bg-surface border border-line rounded-3xl p-5 flex flex-col gap-3">
             <label
               className={`rounded-2xl border-2 border-dashed transition px-4 py-6 flex flex-col items-center gap-2 cursor-pointer text-center ${
@@ -273,11 +281,19 @@ export default function NuevaFacturaPage() {
                 )}
               </p>
             )}
+            {montoLeido != null && Number(monto) > 0 && Math.abs(Number(monto) - montoLeido) > Math.max(1, montoLeido * 0.005) && (
+              <p className="text-sm text-warn bg-warn-soft rounded-xl px-3.5 py-2.5">
+                En el documento la IA leyó <strong className="num">{montoLeido.toLocaleString("es-PY")}</strong>. Si publicás
+                otro monto, los fondeadores van a ver el aviso «El monto no coincide con el de la factura».
+              </p>
+            )}
             <div className="grid sm:grid-cols-2 gap-4">
-              <Field label="Vencimiento">
+              <Field label="Vencimiento de la factura">
                 <Input
                   type="date"
                   name="fecha_vencimiento"
+                  required
+                  min={new Intl.DateTimeFormat("en-CA", { timeZone: "America/Asuncion" }).format(new Date())}
                   value={fechaVencimiento}
                   onChange={(e) => {
                     setFechaVencimiento(e.target.value);

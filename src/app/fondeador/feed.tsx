@@ -26,6 +26,7 @@ export type FacturaFeed = {
     ruc_coincide?: boolean | null;
     numero_coincide?: boolean | null;
     duplicada?: boolean | null;
+    monto_coincide?: boolean | null;
   };
   datosSector: [string, string][];
 };
@@ -38,6 +39,8 @@ function chipsVerificacion(v: FacturaFeed["verif"]) {
   if (v.ruc_coincide === false) chips.push({ texto: "RUC no coincide", tono: "alerta" });
   if (v.numero_coincide === false) chips.push({ texto: "Número no coincide", tono: "alerta" });
   chips.push(v.duplicada ? { texto: "Ya cargada antes", tono: "alerta" } : { texto: "Sin duplicados", tono: "ok" });
+  if (v.monto_coincide === false) chips.push({ texto: "Monto distinto al de la factura", tono: "alerta" });
+  if (v.monto_coincide === true) chips.push({ texto: "Monto coincide", tono: "ok" });
   return chips;
 }
 

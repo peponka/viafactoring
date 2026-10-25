@@ -1,5 +1,7 @@
 "use server";
 
+import { firmarLectura } from "@/lib/lectura-firmada";
+
 // Lee una foto o PDF de una factura con IA (Claude, vision) y devuelve los
 // campos que pudo identificar, para precargar el formulario de carga.
 //
@@ -24,7 +26,7 @@ export type ExtraccionFactura = {
 };
 
 export type ExtraccionResult =
-  | { data: ExtraccionFactura; error?: undefined }
+  | { data: ExtraccionFactura; lectura?: string | null; error?: undefined }
   | { data?: undefined; error: string };
 
 const PROMPT = `Esta imagen o documento es una factura o comprobante de cobro. Extraé los datos que veas con confianza y devolvé ÚNICAMENTE un objeto JSON (sin texto antes ni después, sin bloques de código) con estas claves. Si un dato no aparece o no estás seguro, dejalo como "" — nunca inventes valores:
@@ -110,7 +112,9 @@ export async function extraerDatosFacturaAction(
     }
 
     const parsed = JSON.parse(match[0]) as ExtraccionFactura;
-    return { data: parsed };
+    // Firma del monto leído: al publicar se compara con el monto final.
+    const lectura = parsed.monto ? firmarLectura(parsed.monto, parsed.moneda || "") : null;
+    return { data: parsed, lectura };
   } catch {
     return { error: "Error al leer el documento. Probá de nuevo." };
   }

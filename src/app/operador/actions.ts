@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
+import { leerLectura } from "@/lib/lectura-firmada";
 import type { Riesgo } from "@/lib/database.types";
 
 export type FormState = { error: string | null };
@@ -41,6 +42,8 @@ export async function crearFacturaAction(
   if (!Number.isFinite(plazo_dias) || plazo_dias < 0)
     return { error: "El plazo en días no es válido." };
   if (!rubro.trim()) return { error: "Elegí o escribí el rubro." };
+  const vencimiento = String(formData.get("fecha_vencimiento") || "");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(vencimiento)) return { error: "Completá la fecha de vencimiento de la factura." };
 
   const { data: invoice, error } = await supabase
     .from("invoices")
@@ -53,7 +56,7 @@ export async function crearFacturaAction(
       monto,
       moneda: String(formData.get("moneda") || "USD"),
       plazo_dias,
-      fecha_vencimiento: String(formData.get("fecha_vencimiento") || "") || null,
+      fecha_vencimiento: vencimiento,
       riesgo: (String(formData.get("riesgo") || "medio")) as Riesgo,
       descripcion: String(formData.get("descripcion") || "") || null,
       operador_contacto: String(formData.get("operador_contacto") || "") || null,
@@ -69,10 +72,23 @@ export async function crearFacturaAction(
     if (error?.code === "23505" || error?.message?.includes("invoices_cdc_activo_uidx")) {
       return { error: "Esta factura ya está publicada en ViaFactoring (mismo código de control)." };
     }
+    if (error?.message?.startsWith("VENCIMIENTO")) {
+      return { error: error.message.replace(/^VENCIMIENTO:\s*/, "").replace(/^./, (c) => c.toUpperCase()) + "." };
+    }
     if (error?.message?.startsWith("MONTO_MINIMO")) {
       return { error: error.message.replace(/^MONTO_MINIMO:\s*/, "").replace(/^el/, "El") + "." };
     }
     return { error: error?.message || "No se pudo guardar la factura." };
+  }
+
+  // Monto que leyó la IA (firmado en el servidor): se guarda con la service
+  // role para que la verificación lo compare con el monto publicado.
+  const lectura = leerLectura(String(formData.get("lectura") || ""));
+  if (lectura && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    await createServiceRoleClient()
+      .from("invoices")
+      .update({ monto_leido: lectura.monto, moneda_leida: lectura.moneda })
+      .eq("id", invoice.id);
   }
 
   const documento = formData.get("documento");
