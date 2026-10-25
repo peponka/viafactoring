@@ -452,10 +452,12 @@ export function Sala({
         return (
           <TarjetaSistema
             icono="💳"
-            titulo="Falta un último paso: la comisión de cierre"
+            titulo={pagada ? "Comisión de cierre pagada" : "Falta un último paso: la comisión de cierre"}
             texto={
               pagada
-                ? "✓ Pagada."
+                ? rol === "fondeador"
+                  ? `✓ Pagaste ${d.comision?.monto_cobro != null && d.comision?.moneda_cobro ? formatMonto(d.comision.monto_cobro, d.comision.moneda_cobro) : "la comisión"}. Gracias.`
+                  : "✓ El fondeador pagó la comisión de ViaFactoring."
                 : rol === "fondeador"
                   ? "Pagá la comisión de ViaFactoring para ver el contacto de la PyME y coordinar la transferencia."
                   : "El fondeador tiene que pagar la comisión de ViaFactoring. Después se muestra el contacto."

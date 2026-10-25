@@ -1,8 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
-import { Badge, Card } from "@/components/ui";
+import { Badge, Card, PageHeader } from "@/components/ui";
 import {
   ESTADO_FACTURA_LABEL,
-  rubroLabel,
+  sectorLabel,
   formatFecha,
   formatMonto,
 } from "@/lib/format";
@@ -32,15 +32,14 @@ export default async function AdminOperadoresPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold mb-1">Operadores</h1>
-      <p className="text-ink-soft text-sm mb-6">
-        {operadores?.length ?? 0} operador(es) registrado(s) · datos de
-        contacto y todas sus facturas, en un solo lugar.
-      </p>
+      <PageHeader
+        title="Pymes"
+        subtitle={`${operadores?.length ?? 0} registradas · contacto y todas sus facturas en un solo lugar.`}
+      />
       {!operadores || operadores.length === 0 ? (
         <Card>
           <p className="text-ink-soft text-sm">
-            Todavía no hay operadores registrados.
+            Todavía no hay pymes registradas.
           </p>
         </Card>
       ) : (
@@ -63,9 +62,9 @@ export default async function AdminOperadoresPage() {
                     </p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="font-serif text-2xl">{suyas.length}</p>
-                    <p className="text-xs text-ink-soft uppercase tracking-wide">
-                      factura(s) · {disponibles} disponible(s)
+                    <p className="num text-2xl font-bold">{suyas.length}</p>
+                    <p className="text-xs text-ink-soft">
+                      {suyas.length === 1 ? "factura" : "facturas"} · {disponibles} publicada{disponibles === 1 ? "" : "s"}
                     </p>
                   </div>
                 </div>
@@ -84,7 +83,7 @@ export default async function AdminOperadoresPage() {
                           >
                             {ESTADO_FACTURA_LABEL[f.estado]}
                           </Badge>
-                          <Badge>{rubroLabel(f.rubro)}</Badge>
+                          <Badge>{sectorLabel(null, f.rubro)}</Badge>
                           <span>{f.deudor_nombre}</span>
                         </div>
                         <span className="text-ink-soft">

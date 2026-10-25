@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { Badge, Card } from "@/components/ui";
+import { Badge, Card, PageHeader } from "@/components/ui";
 import { formatFechaHora, formatMonto, TIPO_PAGO_LABEL } from "@/lib/format";
 import type { PaymentRequest, Profile } from "@/lib/database.types";
 
@@ -34,10 +34,10 @@ export default async function AdminPagosPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold mb-2">Pagos</h1>
-      <p className="text-sm text-ink-soft mb-6">
-        Registro de solo lectura. Los pagos se confirman automáticamente con el aviso verificado de la pasarela.
-      </p>
+      <PageHeader
+        title="Pagos"
+        subtitle="Solo lectura. Se confirman solos con el aviso verificado de la pasarela."
+      />
       {!pagos || pagos.length === 0 ? (
         <Card>
           <p className="text-ink-soft text-sm">Todavía no hay pagos.</p>

@@ -14,18 +14,17 @@ export default async function AdminLayout({
     <div className="flex-1 flex flex-col">
       <TopNav
         nombre={profile.nombre}
+        logoHref="/admin"
         links={[
-          { href: "/admin", label: "Resumen" },
-          { href: "/admin/excepciones", label: "Excepciones" },
-          { href: "/admin/pagos", label: "Pagos" },
-          { href: "/admin/operadores", label: "Operadores" },
           { href: "/admin/fondeadores", label: "Fondeadores" },
+          { href: "/admin/operadores", label: "Pymes" },
           { href: "/admin/facturas", label: "Facturas" },
-          { href: "/admin/packs", label: "Packs" },
-          { href: "/admin/matches", label: "Deal Rooms" },
+          { href: "/admin/matches", label: "Negociaciones" },
+          { href: "/admin/pagos", label: "Pagos" },
+          { href: "/admin/excepciones", label: "Excepciones" },
         ]}
       />
-      <main className="wrap max-w-6xl mx-auto px-6 py-10 flex-1 w-full">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 md:py-10 flex-1 w-full">
         {children}
       </main>
     </div>

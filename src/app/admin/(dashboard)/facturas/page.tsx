@@ -1,8 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
-import { Badge, Card } from "@/components/ui";
+import { Badge, Card, PageHeader } from "@/components/ui";
 import {
   ESTADO_FACTURA_LABEL,
-  rubroLabel,
+  sectorLabel,
   formatFecha,
   formatMonto,
 } from "@/lib/format";
@@ -30,7 +30,7 @@ export default async function AdminFacturasPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold mb-6">Todas las facturas</h1>
+      <PageHeader title="Facturas" subtitle={`${facturas?.length ?? 0} cargadas en total.`} />
       {!facturas || facturas.length === 0 ? (
         <Card>
           <p className="text-ink-soft text-sm">Sin facturas cargadas todavía.</p>
@@ -41,15 +41,14 @@ export default async function AdminFacturasPage() {
             <Card key={f.id} className="flex items-center justify-between gap-4 flex-wrap">
               <div>
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
-                  <Badge>{rubroLabel(f.rubro)}</Badge>
+                  <Badge>{sectorLabel(null, f.rubro)}</Badge>
                   <Badge tone={f.estado === "disponible" ? "good" : "neutral"}>
                     {ESTADO_FACTURA_LABEL[f.estado]}
                   </Badge>
                 </div>
-                <p className="font-medium">{f.deudor_nombre}</p>
+                <p className="num text-lg font-bold">{formatMonto(f.monto, f.moneda)}</p>
                 <p className="text-sm text-ink-soft">
-                  {nombreDe(f.operador_id)} · {formatMonto(f.monto, f.moneda)} ·
-                  cargada {formatFecha(f.created_at)}
+                  {nombreDe(f.operador_id)} → {f.deudor_nombre} · cargada {formatFecha(f.created_at)}
                 </p>
               </div>
               {f.estado === "disponible" && <CerrarButton invoiceId={f.id} />}

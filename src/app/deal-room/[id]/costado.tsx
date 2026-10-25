@@ -1,4 +1,4 @@
-import { formatFecha, formatMonto } from "@/lib/format";
+import { formatFecha, formatMonto, sectorLabel } from "@/lib/format";
 import type { DealRoomDetail, DocumentRow } from "@/lib/database.types";
 
 // El costado: la factura, con quién negociás, los documentos y, recién
@@ -33,7 +33,7 @@ export function Costado({ d, documentos }: { d: DealRoomDetail; documentos: Docu
         <Dato k="Monto" v={<span className="num">{formatMonto(inv.monto, inv.moneda)}</span>} />
         <Dato k="Deudor" v={inv.deudor_nombre} />
         <Dato k="Vencimiento" v={inv.fecha_vencimiento ? formatFecha(inv.fecha_vencimiento) : `${inv.plazo_dias} días`} />
-        <Dato k="Sector" v={d.industria ?? inv.rubro} />
+        <Dato k="Sector" v={sectorLabel(d.industria, inv.rubro)} />
         {datosSector.map(([k, v]) => (
           <Dato key={k} k={k.replaceAll("_", " ")} v={String(v)} />
         ))}

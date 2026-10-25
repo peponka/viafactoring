@@ -66,7 +66,7 @@ export default async function ExcepcionesPage({ searchParams }: PageProps<"/admi
   return (
     <div>
       <div className="flex items-center justify-between gap-4 flex-wrap mb-2">
-        <h1 className="text-2xl font-semibold">Excepciones</h1>
+        <h1 className="text-[1.75rem] md:text-3xl font-bold leading-tight">Excepciones</h1>
         <Link href={verCerradas ? "/admin/excepciones" : "/admin/excepciones?ver=todas"} className="text-sm underline text-ink-soft">
           {verCerradas ? "Ver solo abiertas" : "Ver también las cerradas"}
         </Link>

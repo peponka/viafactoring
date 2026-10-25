@@ -1,3 +1,4 @@
+import { sectorLabel } from "@/lib/format";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getFondeadorPerfil, getUserAndProfile } from "@/lib/session";
@@ -38,7 +39,7 @@ export default async function FondeadorFeedPage() {
     .filter((t) => !t.ya_pasada)
     .map((t) => ({
       id: t.id,
-      industria: t.industria_nombre ?? t.rubro,
+      industria: sectorLabel(t.industria_nombre, t.rubro),
       deudorTipo: t.deudor_tipo,
       monto: t.monto,
       moneda: t.moneda,

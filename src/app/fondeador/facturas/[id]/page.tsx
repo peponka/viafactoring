@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getUserAndProfile } from "@/lib/session";
 import { Badge, Card } from "@/components/ui";
-import { formatFecha, formatMonto, RIESGO_LABEL, rubroLabel } from "@/lib/format";
+import { formatFecha, formatMonto, RIESGO_LABEL, sectorLabel } from "@/lib/format";
 import type { InvoiceTeaser } from "@/lib/database.types";
 import { InteresButton } from "./interes-button";
 
@@ -44,12 +44,12 @@ export default async function FacturaFondeadorPage({
   return (
     <div className="max-w-2xl">
       <div className="flex items-center gap-2 mb-4 flex-wrap">
-        <Badge>{teaser.industria_nombre ?? rubroLabel(teaser.rubro)}</Badge>
+        <Badge>{sectorLabel(teaser.industria_nombre, teaser.rubro)}</Badge>
         <Badge tone={riesgoTone(teaser.riesgo)}>{RIESGO_LABEL[teaser.riesgo]}</Badge>
       </div>
 
       <h1 className="text-[1.75rem] font-bold mb-1">
-        Operación {(teaser.industria_nombre ?? rubroLabel(teaser.rubro)).toLowerCase()}
+        Operación {(sectorLabel(teaser.industria_nombre, teaser.rubro)).toLowerCase()}
       </h1>
       {teaser.descripcion && <p className="text-ink-soft mb-6">{teaser.descripcion}</p>}
 

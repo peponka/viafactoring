@@ -39,6 +39,14 @@ export function rubroLabel(rubro: string) {
   return RUBRO_LABEL[rubro] ?? rubro;
 }
 
+// Sector para mostrar: la industria si es específica; si cae en "Otros",
+// el rubro que escribió la pyme (ej. "Comercio").
+export function sectorLabel(industria: string | null | undefined, rubro: string | null | undefined) {
+  const r = rubro?.trim() ? rubroLabel(rubro.trim()) : "";
+  if (industria && industria.toLowerCase() !== "otros") return industria;
+  return r ? r.charAt(0).toUpperCase() + r.slice(1) : industria || "Otros";
+}
+
 export const ESTADO_FACTURA_LABEL: Record<string, string> = {
   disponible: "Disponible",
   cerrada: "Cerrada",

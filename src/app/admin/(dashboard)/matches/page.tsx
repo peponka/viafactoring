@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
-import { Badge, Card } from "@/components/ui";
+import { Badge, Card, PageHeader } from "@/components/ui";
 import Link from "next/link";
-import { ESTADO_DEAL_ROOM_LABEL, estadoDealRoomTone, formatFecha } from "@/lib/format";
+import { ESTADO_DEAL_ROOM_LABEL, estadoDealRoomTone, formatFecha, formatMonto } from "@/lib/format";
 import type { Invoice, Profile, Reveal } from "@/lib/database.types";
 
 export default async function AdminMatchesPage() {
@@ -29,11 +29,11 @@ export default async function AdminMatchesPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold mb-6">Deal Rooms</h1>
+      <PageHeader title="Negociaciones" subtitle="Cada vez que un fondeador marca «Me interesa» se abre una." />
       {!reveals || reveals.length === 0 ? (
         <Card>
           <p className="text-ink-soft text-sm">
-            Todavía nadie desbloqueó ninguna factura.
+            Todavía nadie marcó interés en una factura.
           </p>
         </Card>
       ) : (
@@ -44,12 +44,12 @@ export default async function AdminMatchesPage() {
             return (
               <Card key={r.id} className="flex items-center justify-between gap-4 flex-wrap">
                 <div>
-                  <p className="font-medium">
-                    {fondeador?.nombre ?? r.fondeador_id} →{" "}
-                    {invoice?.deudor_nombre ?? r.invoice_id}
+                  <p className="num text-lg font-bold">
+                    {invoice ? formatMonto(invoice.monto, invoice.moneda) : "Factura"}
                   </p>
                   <p className="text-sm text-ink-soft">
-                    revelado {formatFecha(r.revealed_at)}
+                    {fondeador?.empresa || fondeador?.nombre || "Fondeador"} · deudor {invoice?.deudor_nombre ?? "—"} · abierta{" "}
+                    {formatFecha(r.revealed_at)}
                     {r.bitacora ? ` · ${r.bitacora}` : ""}
                   </p>
                 </div>

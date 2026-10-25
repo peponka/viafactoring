@@ -8,8 +8,10 @@ export function TopNav({
   nombre,
   links,
   rightSlot,
+  logoHref = "/",
 }: {
   nombre: string;
+  logoHref?: string;
   links: NavLink[];
   rightSlot?: React.ReactNode;
 }) {
@@ -19,7 +21,7 @@ export function TopNav({
       <header className="sticky top-0 z-40 bg-background/90 backdrop-blur border-b border-line">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-6 min-w-0">
-            <Link href="/" aria-label="ViaFactoring, inicio">
+            <Link href={logoHref} aria-label="ViaFactoring, inicio">
               <Logo />
             </Link>
             <DesktopNavLinks links={links} />
