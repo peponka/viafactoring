@@ -98,7 +98,7 @@ const OPCIONES: {
     value: "fondo",
     titulo: "Fondo o casa de bolsa",
     sub: "Fondo de inversión o casa de bolsa",
-    requisitos: "RUC + Superintendencia de Valores",
+    requisitos: "RUC + registro de valores",
     documentos: "Constancia de RUC y registro ante la Superintendencia de Valores del BCP.",
     icono: GRAFICO,
   },
@@ -156,7 +156,7 @@ export function VerificacionForm({
 
   return (
     <div className="flex flex-col gap-5">
-      <div role="radiogroup" aria-label="Categoría de fondeador" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div role="radiogroup" aria-label="Categoría de fondeador" className="flex flex-col gap-2">
         {OPCIONES.map((o) => {
           const activa = categoria === o.value;
           const r = RANGO_CATEGORIA[o.value];
@@ -167,37 +167,33 @@ export function VerificacionForm({
               role="radio"
               aria-checked={activa}
               onClick={() => setCategoria(o.value)}
-              className={`text-left rounded-3xl p-5 border-2 bg-surface transition flex flex-col gap-4 ${
+              className={`text-left rounded-2xl px-4 py-3.5 border-2 bg-surface transition grid grid-cols-[2.75rem_1fr_auto] sm:grid-cols-[2.75rem_1fr_11rem_auto] items-center gap-x-4 gap-y-1 ${
                 activa ? "border-accent shadow-[0_8px_24px_rgb(11_110_79_/_0.12)]" : "border-line hover:border-line-strong"
               }`}
             >
-              <div className="flex items-center gap-3">
-                <span className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 ${activa ? "bg-accent-soft text-accent" : "bg-slate-soft text-slate-ink"}`}>
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    {o.icono}
-                  </svg>
+              <span className={`w-11 h-11 rounded-xl flex items-center justify-center ${activa ? "bg-accent-soft text-accent" : "bg-slate-soft text-slate-ink"}`}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  {o.icono}
+                </svg>
+              </span>
+              <span className="min-w-0">
+                <span className="block font-bold">{o.titulo}</span>
+                <span className="block text-sm text-ink-soft">{o.sub}</span>
+                <span className="sm:hidden block text-sm mt-1">
+                  <span className="font-semibold num">{rangoTexto(r.min, r.max)}</span>
+                  <span className="text-ink-soft"> · {o.requisitos}</span>
                 </span>
-                <span className="flex-1">
-                  <span className="block font-bold">{o.titulo}</span>
-                  <span className="block text-sm text-ink-soft">{o.sub}</span>
-                </span>
-                <span
-                  aria-hidden="true"
-                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${activa ? "border-accent" : "border-line-strong"}`}
-                >
-                  {activa && <span className="w-2.5 h-2.5 rounded-full bg-accent" />}
-                </span>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <span className="bg-surface-2 rounded-xl px-3 py-2">
-                  <span className="block text-[11px] text-ink-soft">Facturas</span>
-                  <span className="block text-sm font-semibold">{rangoTexto(r.min, r.max)}</span>
-                </span>
-                <span className="bg-surface-2 rounded-xl px-3 py-2">
-                  <span className="block text-[11px] text-ink-soft">Necesitás</span>
-                  <span className="block text-sm font-semibold">{o.requisitos}</span>
-                </span>
-              </div>
+              </span>
+              <span className="hidden sm:block text-sm">
+                <span className="block font-semibold num">{rangoTexto(r.min, r.max)}</span>
+                <span className="block text-ink-soft">{o.requisitos}</span>
+              </span>
+              <span
+                aria-hidden="true"
+                className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${activa ? "border-accent" : "border-line-strong"}`}
+              >
+                {activa && <span className="w-2.5 h-2.5 rounded-full bg-accent" />}
+              </span>
             </button>
           );
         })}
