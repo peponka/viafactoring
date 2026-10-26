@@ -110,3 +110,22 @@ h3 {
     transform: none;
   }
 }
+
+/* Landing: la línea de tiempo del hero se dibuja una sola vez al cargar. */
+@media (prefers-reduced-motion: no-preference) {
+  .vf-linea {
+    transform-origin: left center;
+    animation: vf-linea 1.6s cubic-bezier(0.65, 0, 0.35, 1) 0.35s both;
+  }
+  .vf-aparece {
+    animation: anim-in 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .vf-d1 { animation-delay: 0.2s; }
+  .vf-d2 { animation-delay: 1.1s; }
+  .vf-d3 { animation-delay: 1.9s; }
+}
+
+@keyframes vf-linea {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}

@@ -14,59 +14,42 @@ function Check({ className = "" }: { className?: string }) {
   );
 }
 
-/** Mockup del feed del fondeador, dibujado con HTML para el hero. */
-function HeroMock() {
+/**
+ * El factoring en un dibujo: la misma factura, dos momentos. Hoy cobra la
+ * pyme (con un descuento) y al vencimiento cobra quien adelantó el dinero.
+ */
+function LineaDeTiempo() {
   return (
-    <div className="relative mx-auto w-full max-w-[360px]" aria-hidden="true">
-      <div className="absolute inset-x-6 top-5 -bottom-4 rounded-[28px] bg-surface-3" />
-      <div className="absolute inset-x-3 top-2.5 -bottom-2 rounded-[28px] bg-[#f0eee7] border border-line" />
-      <div className="relative bg-surface border border-line rounded-[28px] shadow-[var(--shadow-lift)] p-5 flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <div className="flex gap-1.5">
-            <span className="text-[11px] font-semibold bg-slate-soft text-slate-ink px-2.5 py-1 rounded-full">Transporte</span>
-            <span className="text-[11px] font-semibold bg-slate-soft text-slate-ink px-2.5 py-1 rounded-full">Empresa privada</span>
-          </div>
-          <span className="text-[11px] text-ink-soft">hace 2 h</span>
+    <figure className="relative" aria-label="Ejemplo: una factura de 30 millones a 60 días. Hoy cobrás 28,5 millones; al vencimiento el fondeador cobra los 30 millones.">
+      <div className="grid grid-cols-2 gap-3 sm:gap-6 items-end">
+        <div className="vf-aparece vf-d2 rounded-2xl bg-[#9fd8c0] text-[#06291e] p-4 sm:p-5 shadow-[0_18px_40px_rgb(0_0_0_/_0.25)]">
+          <p className="text-sm font-semibold">Vos cobrás hoy</p>
+          <p className="num text-[1.45rem] sm:text-[2.2rem] font-bold leading-tight mt-1">Gs 28.500.000</p>
         </div>
-        <div>
-          <p className="text-xs text-ink-soft">Monto de la factura</p>
-          <p className="num text-[2rem] font-semibold leading-tight">USD 18.400</p>
-        </div>
-        <div className="grid grid-cols-2 gap-2">
-          <div className="bg-surface-2 rounded-xl px-3 py-2.5">
-            <p className="text-[11px] text-ink-soft">Plazo</p>
-            <p className="text-sm font-semibold">79 días</p>
-          </div>
-          <div className="bg-surface-2 rounded-xl px-3 py-2.5">
-            <p className="text-[11px] text-ink-soft">Riesgo</p>
-            <p className="text-sm font-bold text-good">Bajo</p>
-          </div>
-        </div>
-        <div className="rounded-2xl bg-ink text-white p-4 flex flex-col gap-2">
-          <p className="text-[11px] font-bold tracking-[0.12em] text-[#9fd8c0]">FICHA DE VERIFICACIÓN · IA</p>
-          {[
-            "Código de control (CDC) válido",
-            "RUC coincide con quien la sube",
-            "Sin facturas duplicadas",
-          ].map((t) => (
-            <p key={t} className="flex items-center gap-2 text-[13px]">
-              <span className="w-5 h-5 rounded-md bg-accent flex items-center justify-center shrink-0">
-                <Check className="w-3 h-3" />
-              </span>
-              {t}
-            </p>
-          ))}
-        </div>
-        <div className="flex items-center justify-center gap-6 pt-1">
-          <span className="w-13 h-13 rounded-full border border-line bg-surface flex items-center justify-center text-ink-soft">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg>
-          </span>
-          <span className="w-15 h-15 rounded-full bg-accent text-white flex items-center justify-center shadow-[0_8px_20px_rgb(11_110_79_/_0.32)]">
-            <Check className="w-6 h-6" />
-          </span>
+        <div className="vf-aparece vf-d3 rounded-2xl border border-white/25 p-4 sm:p-5 text-right">
+          <p className="text-sm font-semibold text-white/80">El fondeador cobra al vencer</p>
+          <p className="num text-[1.45rem] sm:text-[2.2rem] font-bold leading-tight mt-1 text-white">Gs 30.000.000</p>
         </div>
       </div>
-    </div>
+
+      <div className="relative mt-6 h-6" aria-hidden="true">
+        <div className="absolute inset-x-2 top-1/2 -translate-y-1/2 h-[3px] rounded-full bg-white/15" />
+        <div className="vf-linea absolute inset-x-2 top-1/2 -translate-y-1/2 h-[3px] rounded-full bg-[#9fd8c0]" />
+        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-[#9fd8c0] ring-4 ring-[#9fd8c0]/25" />
+        <span className="absolute right-0 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-[#0a3a2b] border-[3px] border-[#9fd8c0]" />
+      </div>
+
+      <div className="mt-3 flex justify-between text-sm">
+        <span className="font-semibold text-white">Hoy</span>
+        <span className="text-white/60 hidden sm:inline">Tu cliente todavía no pagó</span>
+        <span className="font-semibold text-white">Día 60</span>
+      </div>
+
+      <figcaption className="vf-aparece vf-d3 mt-6 text-[0.95rem] text-white/75 max-w-[56ch]">
+        La diferencia, Gs 1.500.000, es lo que gana quien te adelantó el dinero. Vos no esperás dos meses y no
+        tomás un préstamo.
+      </figcaption>
+    </figure>
   );
 }
 
@@ -102,8 +85,8 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
             <Logo />
           </Link>
           <div className="flex items-center gap-1 sm:gap-2">
-            <a href="#como-funciona" className="hidden md:inline text-sm font-semibold text-ink-soft hover:text-ink px-3 py-2">
-              Cómo funciona
+            <a href="#que-es" className="hidden md:inline text-sm font-semibold text-ink-soft hover:text-ink px-3 py-2">
+              Qué es el factoring
             </a>
             <a href="#preguntas" className="hidden md:inline text-sm font-semibold text-ink-soft hover:text-ink px-3 py-2">
               Preguntas
@@ -118,167 +101,126 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
         </nav>
       </header>
 
-      {/* Hero */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-12 pb-16 md:pt-20 md:pb-24 grid md:grid-cols-[1.1fr_1fr] gap-12 items-center">
-        <div className="anim-in">
-          <span className="inline-flex items-center gap-2 text-xs font-bold text-accent bg-accent-soft px-3 py-1.5 rounded-full">
-            <span className="w-1.5 h-1.5 rounded-full bg-accent" />
-            Factoring de facturas · Paraguay
-          </span>
-          <h1 className="mt-5 text-[2.6rem] leading-[1.05] md:text-[3.6rem] font-bold">
-            Cobrá tu factura hoy, no en 60 días.
-          </h1>
-          <p className="text-ink-soft text-lg mt-5 max-w-[46ch]">
-            Conectamos empresas con facturas por cobrar con financieras,
-            bancos, fondos e inversores que les adelantan ese cobro. Cada
-            factura llega con una ficha de verificación hecha por IA.
-          </p>
-          <div className="flex gap-3 mt-8 flex-wrap">
-            <LinkButton href="/signup">Tengo facturas por cobrar</LinkButton>
-            <LinkButton href="/signup" variant="ghost">
-              Tengo capital para adelantar
-            </LinkButton>
+      {/* Hero: el factoring explicado con un ejemplo */}
+      <section className="bg-[#0a3a2b] text-white overflow-hidden">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-14 pb-16 md:pt-20 md:pb-24 grid lg:grid-cols-[1fr_1.05fr] gap-12 lg:gap-16 items-center">
+          <div className="vf-aparece vf-d1">
+            <h1 className="text-white text-[2.5rem] leading-[1.04] sm:text-[3.2rem] md:text-[3.9rem] font-bold">
+              Cobrá tu factura hoy, no dentro de 60 días.
+            </h1>
+            <p className="text-white/80 text-lg mt-6 max-w-[44ch]">
+              Eso es el factoring: le vendés una factura que todavía no cobraste a alguien que te adelanta el dinero
+              ahora. ViaFactoring te conecta con quienes lo hacen.
+            </p>
+            <div className="flex gap-3 mt-9 flex-wrap">
+              <Link
+                href="/signup"
+                className="min-h-12 px-6 rounded-full bg-[#9fd8c0] text-[#06291e] font-bold flex items-center hover:bg-white transition-colors"
+              >
+                Tengo facturas por cobrar
+              </Link>
+              <Link
+                href="/signup"
+                className="min-h-12 px-6 rounded-full border border-white/35 text-white font-semibold flex items-center hover:bg-white/10 transition-colors"
+              >
+                Tengo capital para adelantar
+              </Link>
+            </div>
+            <p className="mt-6 text-sm text-white/60">Gratis para pymes. ViaFactoring nunca toca el dinero.</p>
           </div>
-          <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-ink-soft">
-            {["Siempre gratis para pymes", "No tocamos el dinero", "Fondeadores verificados"].map((t) => (
-              <li key={t} className="flex items-center gap-2">
-                <Check className="text-accent" />
-                {t}
+          <LineaDeTiempo />
+        </div>
+      </section>
+
+      {/* Qué es, en tres pasos */}
+      <section id="que-es" className="scroll-mt-16 max-w-6xl mx-auto px-4 sm:px-6 py-16 md:py-24">
+        <div className="grid lg:grid-cols-[0.9fr_1.1fr] gap-10 lg:gap-16">
+          <div>
+            <h2 className="text-3xl md:text-[2.6rem] leading-tight font-bold">El factoring, en simple</h2>
+            <p className="text-ink-soft text-lg mt-4 max-w-[42ch]">
+              En Paraguay muchas ventas entre empresas se cobran a 30, 60 o 90 días. Mientras tanto hay que
+              pagar sueldos, proveedores e impuestos. El factoring resuelve esa espera.
+            </p>
+            <div className="mt-8 rounded-2xl bg-surface border border-line p-5 max-w-[46ch]">
+              <p className="font-semibold">No es un préstamo</p>
+              <p className="text-ink-soft mt-1">
+                No pedís plata prestada: vendés algo que ya es tuyo, el derecho a cobrar esa factura. Por eso depende
+                sobre todo de que tu cliente pague, no de tu historial en el banco.
+              </p>
+            </div>
+          </div>
+          <ol className="flex flex-col">
+            {[
+              ["Vendés y facturás", "Le entregás la mercadería o el servicio a tu cliente y le emitís la factura a 60 días."],
+              ["Te adelantan el dinero", "Un fondeador te compra esa factura y te transfiere hoy la mayor parte del monto."],
+              ["Tu cliente paga al vencer", "Cuando vence, tu cliente paga y el fondeador cobra el total. Así gana la diferencia."],
+            ].map(([t, d], i) => (
+              <li key={t} className="grid grid-cols-[3.25rem_1fr] gap-4 py-6 border-b border-line last:border-b-0 first:pt-0">
+                <span className="num text-[2.4rem] leading-none font-bold text-accent">{i + 1}</span>
+                <div>
+                  <p className="text-xl font-semibold font-display">{t}</p>
+                  <p className="text-ink-soft mt-1.5 max-w-[48ch]">{d}</p>
+                </div>
               </li>
             ))}
-          </ul>
+          </ol>
         </div>
-        <HeroMock />
       </section>
 
       {/* Dos lados */}
       <section className="bg-surface border-y border-line">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 grid md:grid-cols-2 gap-5">
-          <div className="rounded-3xl bg-surface-2 p-7 flex flex-col gap-4">
-            <span className="w-12 h-12 rounded-2xl bg-accent-soft text-accent flex items-center justify-center">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" /><path d="M14 3v6h6M9 14h6M9 18h4" /></svg>
-            </span>
-            <h2 className="text-2xl font-bold">Para pymes con facturas por cobrar</h2>
-            <p className="text-ink-soft">
-              Sacás una foto a la factura, la IA lee los datos y la publicás.
-              Recibís ofertas, las comparás explicadas en simple y elegís.
-              Nunca pagás nada.
-            </p>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 md:py-20 grid md:grid-cols-2">
+          <div className="md:pr-12 pb-10 md:pb-0 border-b md:border-b-0 md:border-r border-line">
+            <h2 className="text-2xl md:text-3xl font-bold">Si tenés facturas por cobrar</h2>
+            <ul className="mt-5 flex flex-col gap-3 text-ink-soft">
+              {[
+                "Sacás una foto o subís el PDF: la IA completa los datos.",
+                "Recibís ofertas y ves en claro cuánto cobrás y cuándo.",
+                "Aceptás la que te convenga, o ninguna. Nunca pagás nada.",
+              ].map((t) => (
+                <li key={t} className="flex gap-3">
+                  <Check className="text-accent mt-1 shrink-0" />
+                  <span>{t}</span>
+                </li>
+              ))}
+            </ul>
+            <LinkButton href="/signup" className="mt-8">
+              Publicar mi factura gratis
+            </LinkButton>
           </div>
-          <div className="rounded-3xl bg-ink text-white p-7 flex flex-col gap-4">
-            <span className="w-12 h-12 rounded-2xl bg-white/10 text-[#9fd8c0] flex items-center justify-center">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 21h18M4 10h16M12 3l9 7H3z" /><path d="M6 10v8M10 10v8M14 10v8M18 10v8" /></svg>
-            </span>
-            <h2 className="text-2xl font-bold text-white">Para fondeadores</h2>
-            <p className="text-[#c9d2dd]">
-              Inversores individuales e instituciones financieras. Definís tu
-              rango de montos y plazos, y deslizás solo las facturas que
-              encajan con vos. Pagás una comisión fija únicamente si cerrás.
-            </p>
+          <div className="md:pl-12 pt-10 md:pt-0">
+            <h2 className="text-2xl md:text-3xl font-bold">Si tenés capital para adelantar</h2>
+            <ul className="mt-5 flex flex-col gap-3 text-ink-soft">
+              {[
+                "Elegís montos, plazos y rubros; solo ves las facturas que encajan.",
+                "Cada factura viene con una ficha de verificación hecha por IA.",
+                "Pagás una comisión fija, y solo si cerrás el trato.",
+              ].map((t) => (
+                <li key={t} className="flex gap-3">
+                  <Check className="text-accent mt-1 shrink-0" />
+                  <span>{t}</span>
+                </li>
+              ))}
+            </ul>
+            <LinkButton href="/signup" variant="dark" className="mt-8">
+              Registrarme como fondeador
+            </LinkButton>
           </div>
         </div>
       </section>
 
-      {/* IA */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 py-16 md:py-20 grid md:grid-cols-2 gap-10 items-center">
-        <div>
-          <p className="uppercase tracking-[0.14em] text-[.72rem] font-bold text-accent mb-3">
-            Ficha de verificación con IA
-          </p>
-          <h2 className="text-3xl md:text-4xl font-bold">Hechos verificados, no promesas</h2>
-          <p className="text-ink-soft text-lg mt-4 max-w-[48ch]">
-            Antes de que hagas una oferta, la IA revisa la factura y junta
-            datos públicos de la empresa. Te muestra qué está verificado y
-            qué no. La decisión siempre es tuya.
-          </p>
-        </div>
-        <ul className="grid gap-3">
+      {/* Confianza */}
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 py-16 md:py-20">
+        <h2 className="text-3xl md:text-[2.6rem] leading-tight font-bold max-w-[20ch]">Pensado para que confíen las dos partes</h2>
+        <div className="mt-10 grid md:grid-cols-3 gap-x-10 gap-y-8">
           {[
-            ["Lectura automática", "Extrae deudor, monto, vencimiento y el código de control de la factura electrónica."],
-            ["Controles de coherencia", "Valida el CDC, que el RUC coincida con quien sube la factura y que no esté repetida."],
-            ["Datos públicos de la empresa", "Contratos con el Estado según la DNCP y presencia pública del deudor."],
-            ["Ofertas explicadas en simple", "La pyme ve cuánto recibe, cuándo y qué significa cada oferta, sin letra chica."],
+            ["La IA revisa cada factura", "Valida el código de control, que el RUC y el monto coincidan y que la factura no esté repetida."],
+            ["El dinero va directo", "El fondeador le transfiere a la empresa. ViaFactoring no recibe ni administra fondos."],
+            ["Datos protegidos", "Teléfonos, emails y la factura se comparten recién cuando se cierra el trato."],
           ].map(([t, d]) => (
-            <li key={t} className="bg-surface border border-line rounded-2xl p-5 flex gap-4">
-              <span className="w-8 h-8 rounded-lg bg-accent-soft text-accent flex items-center justify-center shrink-0">
-                <Check />
-              </span>
-              <div>
-                <p className="font-semibold">{t}</p>
-                <p className="text-ink-soft text-sm mt-0.5">{d}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {/* Cómo funciona */}
-      <section id="como-funciona" className="bg-surface border-y border-line scroll-mt-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 md:py-20">
-          <h2 className="text-3xl md:text-4xl font-bold text-center">Cómo funciona</h2>
-          <div className="mt-10 grid md:grid-cols-2 gap-10">
-            {[
-              {
-                t: "Si tenés facturas por cobrar",
-                pasos: [
-                  "Subís la factura. La IA completa los datos por vos.",
-                  "Le llega a los fondeadores cuyo rango encaja con tu factura.",
-                  "Recibís ofertas en un Deal Room y aceptás la que prefieras.",
-                  "El fondeador te transfiere el anticipo directo a tu cuenta.",
-                ],
-              },
-              {
-                t: "Si tenés capital para adelantar",
-                pasos: [
-                  "Te registrás como inversor individual o institución.",
-                  "Definís montos, plazos, riesgo y rubros que te interesan.",
-                  "Deslizás facturas: «Me interesa» te muestra el deudor y la ficha completa.",
-                  "Ofertás. Si la pyme acepta, pagás la comisión y se libera el contacto.",
-                ],
-              },
-            ].map((col) => (
-              <div key={col.t}>
-                <p className="font-display font-semibold text-xl mb-5">{col.t}</p>
-                <ol className="flex flex-col gap-4">
-                  {col.pasos.map((paso, i) => (
-                    <li key={i} className="flex gap-4 items-start">
-                      <span className="num shrink-0 w-9 h-9 rounded-full bg-accent text-accent-ink flex items-center justify-center text-sm font-bold">
-                        {i + 1}
-                      </span>
-                      <span className="text-ink-soft pt-1.5">{paso}</span>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Factoring en criollo + seguridad */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 py-16 md:py-20 grid md:grid-cols-2 gap-10 items-start">
-        <div>
-          <p className="uppercase tracking-[0.14em] text-[.72rem] font-bold text-accent mb-3">
-            Factoring, en criollo
-          </p>
-          <h2 className="text-3xl font-bold mb-4">No es un préstamo</h2>
-          <p className="text-ink-soft">
-            Es vender una factura que todavía no cobraste a alguien dispuesto
-            a adelantarte ese dinero. En vez de esperar 30, 60 o 90 días a que
-            tu cliente te pague, cobrás ahora, y quien te adelantó el dinero
-            cobra cuando la factura vence. No te endeudás: vendés un activo
-            que ya es tuyo.
-          </p>
-        </div>
-        <div className="grid gap-3">
-          {[
-            ["El dinero va directo", "ViaFactoring nunca recibe ni mueve el anticipo: el fondeador se lo transfiere directo a la empresa."],
-            ["Datos por etapas", "Antes del interés solo se ven datos generales. Teléfonos y emails se liberan al cerrar el trato."],
-            ["Documentos con marca de agua", "Cada descarga queda registrada y lleva el nombre de quien la descargó."],
-          ].map(([t, d]) => (
-            <div key={t} className="bg-surface border border-line rounded-2xl p-5">
-              <p className="font-semibold">{t}</p>
-              <p className="text-ink-soft text-sm mt-0.5">{d}</p>
+            <div key={t} className="border-t-2 border-accent pt-5">
+              <p className="text-lg font-semibold font-display">{t}</p>
+              <p className="text-ink-soft mt-2">{d}</p>
             </div>
           ))}
         </div>
@@ -287,66 +229,59 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
       {/* FAQ */}
       <section id="preguntas" className="bg-surface border-y border-line scroll-mt-16">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16 md:py-20">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-10">Preguntas frecuentes</h2>
-          <div className="flex flex-col gap-3">
+          <h2 className="text-3xl md:text-4xl font-bold mb-8">Preguntas frecuentes</h2>
+          <div className="flex flex-col">
             {[
               {
-                q: "¿Cuánto cuesta para una pyme?",
-                a: "Nada. Subir y publicar facturas es siempre gratis.",
+                q: "¿Cuánto me cuesta como pyme?",
+                a: "Nada. Publicar facturas es gratis. El descuento lo acordás con el fondeador y lo ves antes de aceptar.",
+              },
+              {
+                q: "¿Qué facturas puedo publicar?",
+                a: "Facturas por cobrar desde USD 3.000 o su equivalente en guaraníes, a empresas privadas o al Estado.",
               },
               {
                 q: "¿Cuánto paga un fondeador?",
-                a: "Solo una comisión de cierre fija, que depende del monto de la factura y se ve antes de ofertar. Si no cerrás, no pagás.",
+                a: "Una comisión fija según el monto, que ve antes de ofertar. Si la pyme no acepta, no paga nada.",
               },
               {
-                q: "¿Hay un monto mínimo?",
-                a: "Sí: las facturas tienen que ser de al menos USD 3.000 o su equivalente en guaraníes. Además, cada fondeador define su propio rango.",
-              },
-              {
-                q: "¿La IA me dice si conviene una factura?",
-                a: "No. La IA verifica datos y los muestra de forma ordenada. Cada fondeador hace su propio análisis y decide.",
-              },
-              {
-                q: "¿ViaFactoring toca el dinero del anticipo?",
-                a: "No. ViaFactoring es una plataforma tecnológica que conecta partes: no es entidad financiera, no capta ni administra fondos y no es parte del acuerdo.",
-              },
-              {
-                q: "¿Qué pasa si nadie hace una oferta?",
-                a: "Podés retirar la factura cuando quieras. No hay compromiso ni costo.",
+                q: "¿ViaFactoring presta el dinero?",
+                a: "No. Es una plataforma que conecta partes: no es entidad financiera, no capta ni administra fondos y no es parte del acuerdo.",
               },
             ].map((item) => (
-              <details key={item.q} className="group bg-surface-2 rounded-2xl px-5 open:pb-5">
-                <summary className="cursor-pointer list-none min-h-14 flex items-center justify-between gap-4 font-semibold">
+              <details key={item.q} className="group border-b border-line">
+                <summary className="cursor-pointer list-none min-h-16 flex items-center justify-between gap-4 font-semibold text-lg">
                   {item.q}
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="shrink-0 text-ink-soft transition group-open:rotate-45">
                     <path d="M12 5v14M5 12h14" />
                   </svg>
                 </summary>
-                <p className="text-ink-soft">{item.a}</p>
+                <p className="text-ink-soft pb-5 max-w-[60ch]">{item.a}</p>
               </details>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Contacto */}
-      <section id="contacto" className="max-w-6xl mx-auto px-4 sm:px-6 py-16">
-        <div className="rounded-3xl bg-accent text-white p-8 md:p-12 flex flex-col md:flex-row md:items-center justify-between gap-6">
+      {/* Cierre */}
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 py-16 md:py-20">
+        <div className="rounded-[2rem] bg-[#0a3a2b] text-white p-8 md:p-14 grid md:grid-cols-[1.4fr_1fr] gap-8 items-center">
           <div>
-            <h2 className="text-3xl font-bold text-white">Empezá hoy, es gratis registrarse</h2>
-            <p className="text-white/80 mt-2">¿Dudas? Escribinos a {CONTACTO_EMAIL}</p>
+            <h2 className="text-3xl md:text-[2.4rem] leading-tight font-bold text-white">
+              Tu próxima factura puede cobrarse esta semana
+            </h2>
+            <p className="text-white/70 mt-3">¿Dudas? Escribinos a {CONTACTO_EMAIL}</p>
           </div>
-          <div className="flex gap-3 flex-wrap">
-            <Link href="/signup" className="min-h-12 px-6 rounded-full bg-white text-accent font-bold flex items-center hover:bg-white/90">
-              Crear cuenta
+          <div className="flex gap-3 flex-wrap md:justify-end">
+            <Link href="/signup" className="min-h-12 px-6 rounded-full bg-[#9fd8c0] text-[#06291e] font-bold flex items-center hover:bg-white transition-colors">
+              Crear cuenta gratis
             </Link>
-            <a href={`mailto:${CONTACTO_EMAIL}`} className="min-h-12 px-6 rounded-full border border-white/40 text-white font-semibold flex items-center hover:bg-white/10">
+            <a href={`mailto:${CONTACTO_EMAIL}`} className="min-h-12 px-6 rounded-full border border-white/35 text-white font-semibold flex items-center hover:bg-white/10 transition-colors">
               Escribirnos
             </a>
           </div>
         </div>
       </section>
-
       <footer className="border-t border-line py-8">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 text-sm text-ink-soft flex justify-between flex-wrap gap-4">
           <div className="flex flex-col gap-1">
