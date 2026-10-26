@@ -83,8 +83,9 @@ export default function TerminosPage() {
                 4. Fondeadores: categorías, verificación e interés
               </h2>
               <p>
-                Los fondeadores se registran como inversores individuales o
-                instituciones financieras y envían documentación que
+                Los fondeadores se registran en una categoría (inversor
+                individual, empresa o family office, cooperativa, financiera,
+                banco, o fondo de inversión o casa de bolsa) y envían documentación que
                 ViaFactoring revisa antes de habilitar la cuenta. Cada
                 categoría tiene un rango de montos por factura. Marcar
                 interés en una factura no tiene costo: da acceso al deudor,

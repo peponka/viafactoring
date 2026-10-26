@@ -8,11 +8,50 @@ import { Button, ErrorText } from "@/components/ui";
 import { RANGO_CATEGORIA, rangoTexto } from "@/lib/categorias";
 import type { CategoriaFondeador } from "@/lib/database.types";
 
+const PERSONA = (
+  <>
+    <circle cx="12" cy="8" r="4" />
+    <path d="M4 21a8 8 0 0 1 16 0" />
+  </>
+);
+const MALETIN = (
+  <>
+    <rect x="3" y="7" width="18" height="13" rx="2" />
+    <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18" />
+  </>
+);
+const SOCIOS = (
+  <>
+    <circle cx="9" cy="8" r="3.2" />
+    <circle cx="17" cy="9" r="2.6" />
+    <path d="M3 20a6 6 0 0 1 12 0M14.5 15.2A5 5 0 0 1 21 20" />
+  </>
+);
+const MONEDA = (
+  <>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M14.8 9.2c-.5-.8-1.5-1.3-2.8-1.3-1.7 0-2.8.9-2.8 2.1 0 2.9 5.8 1.4 5.8 4.3 0 1.2-1.2 2.1-3 2.1-1.4 0-2.5-.6-3-1.5M12 6.5v1.4M12 16.4v1.4" />
+  </>
+);
+const BANCO = (
+  <>
+    <path d="M3 21h18M4 10h16M12 3l9 7H3z" />
+    <path d="M6 10v8M10 10v8M14 10v8M18 10v8" />
+  </>
+);
+const GRAFICO = (
+  <>
+    <path d="M3 3v18h18" />
+    <path d="m7 15 4-4 3 3 5-6" />
+  </>
+);
+
 const OPCIONES: {
   value: CategoriaFondeador;
   titulo: string;
   sub: string;
   requisitos: string;
+  documentos: string;
   icono: React.ReactNode;
 }[] = [
   {
@@ -20,24 +59,48 @@ const OPCIONES: {
     titulo: "Inversor individual",
     sub: "Persona con capital propio",
     requisitos: "Cédula + RUC",
-    icono: (
-      <>
-        <circle cx="12" cy="8" r="4" />
-        <path d="M4 21a8 8 0 0 1 16 0" />
-      </>
-    ),
+    documentos: "Foto o PDF de tu cédula y constancia de RUC.",
+    icono: PERSONA,
   },
   {
-    value: "institucion",
-    titulo: "Institución financiera",
-    sub: "Banco, financiera, cooperativa o fondo",
-    requisitos: "RUC + registro BCP o Incoop",
-    icono: (
-      <>
-        <path d="M3 21h18M4 10h16M12 3l9 7H3z" />
-        <path d="M6 10v8M10 10v8M14 10v8M18 10v8" />
-      </>
-    ),
+    value: "empresa",
+    titulo: "Empresa o family office",
+    sub: "Empresa que invierte su excedente",
+    requisitos: "RUC + estatuto",
+    documentos: "Constancia de RUC de la empresa, estatuto o acta de constitución y cédula del representante.",
+    icono: MALETIN,
+  },
+  {
+    value: "cooperativa",
+    titulo: "Cooperativa",
+    sub: "Cooperativa de ahorro y crédito",
+    requisitos: "RUC + Incoop",
+    documentos: "Constancia de RUC y registro vigente ante el Incoop.",
+    icono: SOCIOS,
+  },
+  {
+    value: "financiera",
+    titulo: "Financiera",
+    sub: "Entidad financiera o de factoring",
+    requisitos: "RUC + registro BCP",
+    documentos: "Constancia de RUC y autorización o registro ante el BCP.",
+    icono: MONEDA,
+  },
+  {
+    value: "banco",
+    titulo: "Banco",
+    sub: "Banco habilitado en Paraguay",
+    requisitos: "RUC + licencia BCP",
+    documentos: "Constancia de RUC y licencia bancaria del BCP. Puede ser una carta de la gerencia que autoriza al usuario.",
+    icono: BANCO,
+  },
+  {
+    value: "fondo",
+    titulo: "Fondo o casa de bolsa",
+    sub: "Fondo de inversión o casa de bolsa",
+    requisitos: "RUC + Superintendencia de Valores",
+    documentos: "Constancia de RUC y registro ante la Superintendencia de Valores del BCP.",
+    icono: GRAFICO,
   },
 ];
 
@@ -93,7 +156,7 @@ export function VerificacionForm({
 
   return (
     <div className="flex flex-col gap-5">
-      <div role="radiogroup" aria-label="Categoría de fondeador" className="grid gap-3 sm:grid-cols-2">
+      <div role="radiogroup" aria-label="Categoría de fondeador" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {OPCIONES.map((o) => {
           const activa = categoria === o.value;
           const r = RANGO_CATEGORIA[o.value];
@@ -143,9 +206,7 @@ export function VerificacionForm({
       <div className="bg-surface border border-line rounded-3xl p-5 flex flex-col gap-3">
         <p className="font-semibold">Documentación</p>
         <p className="text-sm text-ink-soft -mt-2">
-          {categoria === "individual"
-            ? "Foto o PDF de tu cédula y constancia de RUC."
-            : "Constancia de RUC de la empresa y registro ante el BCP o el Incoop."}
+          {OPCIONES.find((o) => o.value === categoria)?.documentos}
         </p>
         <label className="rounded-2xl border-2 border-dashed border-line-strong hover:border-accent transition px-4 py-6 flex flex-col items-center gap-2 cursor-pointer text-center">
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="text-accent">

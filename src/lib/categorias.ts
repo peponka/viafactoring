@@ -5,14 +5,27 @@ import type { CategoriaFondeador, DeudorTipo, FondeadorPerfil, InvoiceTeaser, Ri
 // validar en el formulario antes de mandar.
 export const RANGO_CATEGORIA: Record<CategoriaFondeador, { min: number; max: number | null }> = {
   individual: { min: 3000, max: 25000 },
-  institucion: { min: 15000, max: null },
+  empresa: { min: 5000, max: 100000 },
+  cooperativa: { min: 10000, max: null },
+  financiera: { min: 15000, max: null },
+  banco: { min: 25000, max: null },
+  fondo: { min: 25000, max: null },
 };
+
+/** Para la PyME se agrupan en inversores (personas y empresas) e instituciones. */
+export function esInversor(c: CategoriaFondeador) {
+  return c === "individual" || c === "empresa";
+}
 
 export const MONTO_MINIMO_USD = 3000;
 
 export const CATEGORIA_LABEL: Record<CategoriaFondeador, string> = {
   individual: "Inversor individual",
-  institucion: "Institución financiera",
+  empresa: "Empresa o family office",
+  cooperativa: "Cooperativa",
+  financiera: "Financiera",
+  banco: "Banco",
+  fondo: "Fondo de inversión o casa de bolsa",
 };
 
 export const DEUDOR_TIPO_LABEL: Record<DeudorTipo, string> = {

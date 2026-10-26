@@ -41,7 +41,7 @@ export default function SignupPage() {
                   {r === "operador" ? "Tengo facturas" : "Tengo capital"}
                 </span>
                 <span className="text-xs text-ink-soft leading-snug">
-                  {r === "operador" ? "Pyme o empresa que quiere cobrar antes" : "Inversor o institución financiera"}
+                  {r === "operador" ? "Pyme o empresa que quiere cobrar antes" : "Inversor, empresa, cooperativa, financiera, banco o fondo"}
                 </span>
               </button>
             ))}

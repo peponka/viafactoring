@@ -1,5 +1,6 @@
 "use server";
 
+import type { CategoriaFondeador } from "@/lib/database.types";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
@@ -90,7 +91,7 @@ function mensajeDeError(message: string | undefined, fallback: string) {
 }
 
 export async function enviarVerificacionAction(
-  categoria: "individual" | "institucion",
+  categoria: CategoriaFondeador,
   documentos: string[],
 ): Promise<{ error: string | null }> {
   const { supabase } = await requireFondeador();

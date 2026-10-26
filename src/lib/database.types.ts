@@ -166,7 +166,7 @@ export type InvoiceTeaser = {
 };
 
 export type DeudorTipo = "privado" | "estado";
-export type CategoriaFondeador = "individual" | "institucion";
+export type CategoriaFondeador = "individual" | "empresa" | "cooperativa" | "financiera" | "banco" | "fondo";
 export type EstadoVerificacion = "incompleta" | "en_revision" | "aprobada" | "rechazada";
 
 export type FondeadorPerfil = {
