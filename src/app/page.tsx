@@ -24,11 +24,15 @@ function LineaDeTiempo() {
       <div className="grid grid-cols-2 gap-3 sm:gap-6 items-end">
         <div className="vf-aparece vf-d2 rounded-2xl bg-[#9fd8c0] text-[#06291e] p-4 sm:p-5 shadow-[0_18px_40px_rgb(0_0_0_/_0.25)]">
           <p className="text-sm font-semibold">Vos cobrás hoy</p>
-          <p className="num text-[1.45rem] sm:text-[2.2rem] font-bold leading-tight mt-1">Gs 28.500.000</p>
+          <p className="num whitespace-nowrap text-[1.3rem] sm:text-[1.75rem] xl:text-[2rem] font-bold leading-tight mt-1">
+            <span className="text-[0.62em] font-semibold mr-1">Gs</span>28.500.000
+          </p>
         </div>
         <div className="vf-aparece vf-d3 rounded-2xl border border-white/25 p-4 sm:p-5 text-right">
           <p className="text-sm font-semibold text-white/80">El fondeador cobra al vencer</p>
-          <p className="num text-[1.45rem] sm:text-[2.2rem] font-bold leading-tight mt-1 text-white">Gs 30.000.000</p>
+          <p className="num whitespace-nowrap text-[1.3rem] sm:text-[1.75rem] xl:text-[2rem] font-bold leading-tight mt-1 text-white">
+            <span className="text-[0.62em] font-semibold mr-1">Gs</span>30.000.000
+          </p>
         </div>
       </div>
 
