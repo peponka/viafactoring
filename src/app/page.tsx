@@ -198,7 +198,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
               {[
                 "Elegís montos, plazos y rubros; solo ves las facturas que encajan.",
                 "Cada factura viene con una ficha de verificación hecha por IA.",
-                "Pagás una comisión según el monto, y solo si la pyme acepta tu oferta.",
+                "Si la pyme acepta, pagás una comisión según el monto y recién ahí se comparten los contactos.",
               ].map((t) => (
                 <li key={t} className="flex gap-3">
                   <Check className="text-accent mt-1 shrink-0" />
