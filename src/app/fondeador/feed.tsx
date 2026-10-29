@@ -163,7 +163,7 @@ function Tarjeta({ f }: { f: FacturaFeed }) {
           <p className="sm:hidden text-[13px] text-ink-soft leading-snug">Se ven al tocar «Me interesa», sin costo.</p>
           {f.montoUsd != null && (
             <p className="text-[13px] mt-1.5">
-              <span className="text-ink-soft">Comisión solo si cerrás: </span>
+              <span className="text-ink-soft">Acceso al contacto, solo si la pyme acepta: </span>
               <span className="font-semibold num">hasta {formatMonto(comisionCierreUsd(f.montoUsd), "USD")}</span>
             </p>
           )}
@@ -171,7 +171,7 @@ function Tarjeta({ f }: { f: FacturaFeed }) {
       </div>
 
       <p className="hidden md:block mt-auto text-[11.5px] text-ink-soft leading-snug">
-        El riesgo lo declara la empresa que publica. ViaFactoring conecta partes: no evalúa ni recomienda facturas.
+        El riesgo lo declara la empresa que publica. ViaFactoring da información: no evalúa ni recomienda facturas.
       </p>
     </div>
   );
@@ -369,7 +369,7 @@ export function Feed({
               </article>
             </div>
             <p className="md:hidden text-[11.5px] text-ink-soft leading-snug px-1">
-              El riesgo lo declara la empresa que publica. ViaFactoring conecta partes: no evalúa ni recomienda facturas.
+              El riesgo lo declara la empresa que publica. ViaFactoring da información: no evalúa ni recomienda facturas.
             </p>
 
             <div className="fixed md:sticky inset-x-0 bottom-[74px] md:bottom-0 z-30 pt-8 pb-3 md:pt-6 md:pb-4 bg-gradient-to-t from-background via-background/95 to-transparent flex items-center justify-center gap-8 pointer-events-none [&>*]:pointer-events-auto">

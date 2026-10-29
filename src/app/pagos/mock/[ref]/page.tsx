@@ -32,7 +32,7 @@ export default async function MockCheckoutPage({ params, searchParams }: PagePro
           Esto simula la pasarela de pago. No se cobra nada. Se desactiva al configurar la pasarela real.
         </p>
         <p className="text-sm text-ink-soft">
-          {orden.tipo === "desbloqueo" ? "Desbloqueo de oportunidad" : "Comisión de cierre"}
+          {orden.tipo === "desbloqueo" ? "Desbloqueo de oportunidad" : "Acceso a los datos de contacto"}
         </p>
         <p className="num text-3xl font-semibold mb-6">{formatMonto(orden.monto_cobro, orden.moneda_cobro)}</p>
         <div className="flex flex-col gap-2">

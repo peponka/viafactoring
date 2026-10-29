@@ -83,7 +83,7 @@ export function RetirarButton({
 
       {pideFondeador && (
         <p className="text-sm text-ink-soft">
-          A vos no te cuesta nada: la comisión de ViaFactoring la paga el fondeador.
+          A vos no te cuesta nada: el acceso a los datos lo paga el fondeador.
         </p>
       )}
 

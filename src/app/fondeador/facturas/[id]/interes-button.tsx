@@ -27,7 +27,7 @@ export function InteresButton({ invoiceId }: { invoiceId: string }) {
         {pending ? "Abriendo la negociación…" : "Me interesa"}
       </Button>
       <p className="text-xs text-ink-soft">
-        Sin costo. Ves el deudor, la ficha de verificación y los documentos. Solo pagás una comisión fija si la pyme acepta tu oferta.
+        Sin costo. Ves el deudor, la ficha de verificación y los documentos. Solo pagás por los datos de contacto si la pyme acepta tu oferta.
       </p>
       <ErrorText>{error}</ErrorText>
     </div>

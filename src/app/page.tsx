@@ -114,7 +114,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
             </h1>
             <p className="text-white/80 text-lg mt-6 max-w-[44ch]">
               Eso es el factoring: le vendés una factura que todavía no cobraste a alguien que te adelanta el dinero
-              ahora. ViaFactoring te conecta con quienes lo hacen.
+              ahora. En ViaFactoring encontrás a quienes lo hacen, con la información verificada que necesitan las dos partes.
             </p>
             <div className="flex gap-3 mt-9 flex-wrap">
               <Link
@@ -198,7 +198,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
               {[
                 "Elegís montos, plazos y rubros; solo ves las facturas que encajan.",
                 "Cada factura viene con una ficha de verificación hecha por IA.",
-                "Si la pyme acepta, pagás una comisión según el monto y recién ahí se comparten los contactos.",
+                "Si la pyme acepta, pagás por acceder a sus datos de contacto; el precio depende del monto.",
               ].map((t) => (
                 <li key={t} className="flex gap-3">
                   <Check className="text-accent mt-1 shrink-0" />
@@ -246,11 +246,11 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
               },
               {
                 q: "¿Cuánto paga un fondeador?",
-                a: "Una comisión que depende del monto de la factura y que ve antes de ofertar. Si la pyme no acepta, no paga nada.",
+                a: "Paga por acceder a los datos de contacto de la pyme cuando ella acepta su oferta. El precio depende del monto y lo ve antes de ofertar. Si la pyme no acepta, no paga nada.",
               },
               {
                 q: "¿ViaFactoring presta el dinero?",
-                a: "No. Es una plataforma que conecta partes: no es entidad financiera, no capta ni administra fondos y no es parte del acuerdo.",
+                a: "No. Es una plataforma de información: muestra facturas verificadas y datos de las empresas. No es entidad financiera, no presta, no capta ni administra fondos y no es parte del acuerdo.",
               },
             ].map((item) => (
               <details key={item.q} className="group border-b border-line">
@@ -291,7 +291,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
           <div className="flex flex-col gap-1">
             <Logo />
             <span className="max-w-[60ch]">
-              Plataforma tecnológica que conecta partes. No es entidad
+              Plataforma de información sobre facturas y empresas. No es entidad
               financiera, no capta ni administra fondos y no brinda
               asesoramiento financiero.
             </span>

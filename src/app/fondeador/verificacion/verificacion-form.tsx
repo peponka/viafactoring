@@ -251,7 +251,7 @@ export function VerificacionForm({
         {subiendo ? "Subiendo documentos…" : pending ? "Enviando…" : "Enviar a revisión"}
       </Button>
       <p className="text-xs text-ink-soft text-center">
-        ViaFactoring es una plataforma tecnológica que conecta partes. No es entidad financiera ni administra fondos.
+        ViaFactoring es una plataforma de información. No es entidad financiera, no presta ni administra fondos.
       </p>
     </div>
   );

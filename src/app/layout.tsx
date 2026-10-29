@@ -18,7 +18,7 @@ const display = Space_Grotesk({
 export const metadata: Metadata = {
   title: "ViaFactoring",
   description:
-    "Conectamos facturas por cobrar con fondeadores en Paraguay. Siempre gratis para pymes.",
+    "Información verificada de facturas por cobrar para pymes y fondeadores en Paraguay. Siempre gratis para pymes."
   applicationName: "ViaFactoring",
   appleWebApp: { capable: true, title: "ViaFactoring", statusBarStyle: "default" },
   formatDetection: { telephone: false },

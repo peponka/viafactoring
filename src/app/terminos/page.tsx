@@ -40,13 +40,16 @@ export default function TerminosPage() {
                 1. Qué es ViaFactoring
               </h2>
               <p>
-                ViaFactoring es una plataforma tecnológica que conecta a
-                quienes tienen facturas pendientes de cobro con fondeadores
-                (financieras, bancos, fondos e inversores) interesados en
-                adelantarles ese cobro. No es una entidad financiera, no capta
-                ni administra fondos de terceros y no brinda asesoramiento
-                financiero. ViaFactoring facilita el contacto y la negociación
-                entre ambas partes a través de un Deal Room por operación.
+                ViaFactoring es una plataforma de información. Publica
+                facturas pendientes de cobro, verificadas con controles
+                automáticos, y datos públicos de las empresas involucradas,
+                para que quienes tienen esas facturas y los fondeadores
+                (inversores, empresas, cooperativas, financieras, bancos y
+                fondos) cuenten con la información que necesitan para decidir
+                por su cuenta. No es una entidad financiera, no presta, no
+                capta ni administra fondos de terceros, no intermedia en la
+                operación y no brinda asesoramiento financiero. Ofrece además
+                un espacio de conversación por factura (Deal Room).
                 No es parte del acuerdo de adelanto que operador y fondeador
                 cierran entre sí, no recibe ni administra el dinero del
                 anticipo —que el fondeador transfiere directamente al
@@ -96,14 +99,15 @@ export default function TerminosPage() {
 
             <section>
               <h2 className="font-serif font-semibold text-ink text-lg mb-2">
-                5. Comisión de cierre y contacto directo
+                5. Acceso a los datos de contacto
               </h2>
               <p>
-                Cuando el operador acepta una oferta, el fondeador paga a
-                ViaFactoring una comisión de cierre fija, cuyo valor depende
-                del monto de la factura y se informa antes de pagarla. Al
-                confirmarse ese pago se habilitan los datos de contacto
-                directo de las partes para formalizar la operación. Las
+                Los datos de contacto de las partes (teléfono, email y la
+                factura completa) son información paga. Cuando el operador
+                acepta una oferta, el fondeador paga a ViaFactoring el cargo
+                por acceso a esos datos, cuyo valor depende del monto de la
+                factura y se informa antes de ofertar. Al confirmarse el pago
+                se habilitan los datos de contacto de ambas partes. Las
                 partes se comprometen a no usar la información obtenida en
                 la plataforma para cerrar la operación por fuera de ella.
               </p>
@@ -114,14 +118,14 @@ export default function TerminosPage() {
                 los mensajes y en las ofertas, y puede suspender o dar de
                 baja la cuenta de quien insista en compartirlos. Si las
                 partes cierran por fuera una operación que se originó en la
-                plataforma, la comisión de cierre se debe igual.
+                plataforma, el cargo por acceso a los datos se debe igual.
               </p>
               <p className="mt-2">
-                Si después de pagada la comisión la PyME no responde en 48
+                Si después de pagado el acceso la PyME no responde en 48
                 horas (ni por mensaje ni confirmando la transferencia), el
                 fondeador puede pedir la devolución desde la negociación.
-                ViaFactoring revisa el caso y, si corresponde, devuelve la
-                comisión por el mismo medio de pago.
+                ViaFactoring revisa el caso y, si corresponde, devuelve el
+                cargo por el mismo medio de pago.
               </p>
             </section>
 

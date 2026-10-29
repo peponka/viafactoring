@@ -70,7 +70,7 @@ export default function PrivacidadPage() {
                 plazo y datos generales de la operación. El nombre del
                 deudor y la documentación se muestran recién cuando marca
                 interés en esa factura. Los teléfonos y emails de las partes se habilitan
-                solo cuando se confirma la comisión de cierre. Los
+                solo cuando se confirma el pago del acceso a los datos de contacto. Los
                 documentos descargados llevan una marca de agua con el
                 nombre de quien los descargó.
               </p>

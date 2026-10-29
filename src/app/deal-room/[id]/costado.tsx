@@ -55,7 +55,7 @@ export function Costado({ d, documentos }: { d: DealRoomDetail; documentos: Docu
           <p className="text-sm text-ink-soft mb-2 flex gap-2">
             <span aria-hidden="true">🔒</span>
             <span>
-              El PDF de la factura se habilita al pagar la comisión. Mientras tanto, la ficha de
+              El PDF de la factura se habilita al pagar el acceso a los datos de contacto. Mientras tanto, la ficha de
               verificación confirma el código de control y el RUC.
             </span>
           </p>
@@ -91,7 +91,7 @@ export function Costado({ d, documentos }: { d: DealRoomDetail; documentos: Docu
             {d.rol !== "operador" && <Dato k="Contacto del deudor" v={inv.deudor_contacto} />}
           </div>
         ) : (
-          <p className="text-sm text-ink-soft">Se muestra cuando se paga la comisión del cierre.</p>
+          <p className="text-sm text-ink-soft">Se muestra cuando se paga el acceso a los datos de contacto.</p>
         )}
       </Bloque>
     </div>

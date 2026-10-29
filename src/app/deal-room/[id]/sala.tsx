@@ -134,20 +134,20 @@ function BloqueDevolucion({ revealId, bloqueo }: { revealId: string; bloqueo: st
   if (bloqueo === "Ya pediste la devolución") {
     return (
       <p className="text-xs text-ink-soft mt-3 border-t border-line pt-3">
-        ↩️ Pediste la devolución de la comisión. ViaFactoring la está revisando.
+        ↩️ Pediste la devolución del acceso a los datos. ViaFactoring la está revisando.
       </p>
     );
   }
   if (bloqueo) {
     return (
       <p className="text-xs text-ink-soft mt-3 border-t border-line pt-3">
-        Si la PyME no responde en 48 horas, podés pedir la devolución de la comisión.
+        Si la PyME no responde en 48 horas, podés pedir la devolución de lo que pagaste.
       </p>
     );
   }
   return (
     <div className="mt-3 border-t border-line pt-3 flex flex-col gap-2">
-      <p className="text-sm">¿La PyME no respondió en 48 horas? Podés pedir la devolución de la comisión.</p>
+      <p className="text-sm">¿La PyME no respondió en 48 horas? Podés pedir la devolución de lo que pagaste.</p>
       <ErrorText>{error}</ErrorText>
       <button
         type="button"
@@ -280,8 +280,7 @@ function FormOferta({
             <span className="font-semibold num">
               {formatMonto(comisionCierreUsd(Number(monto) * usdPorUnidad), "USD")}
             </span>{" "}
-            de comisión a ViaFactoring y recién ahí se comparten la factura y el contacto. Si no acepta, no
-            pagás nada.
+            por acceder a sus datos de contacto y a la factura completa. Si no acepta, no pagás nada.
           </p>
         </div>
       )}
@@ -434,7 +433,7 @@ function FranjaTurno({
       {a?.tipo === "pagar_comision" && (
         <div className="mt-3">
           <Button onClick={pagar} disabled={pending} className="!py-2 !px-4 text-sm">
-            {pending ? "Abriendo el pago…" : a.reintento ? "Intentar de nuevo" : "Pagar comisión"}
+            {pending ? "Abriendo el pago…" : a.reintento ? "Intentar de nuevo" : "Pagar acceso a los datos"}
           </Button>
         </div>
       )}
@@ -580,15 +579,15 @@ export function Sala({
         return (
           <TarjetaSistema
             icono="💳"
-            titulo={pagada ? "Comisión de cierre pagada" : "Falta un último paso: la comisión de cierre"}
+            titulo={pagada ? "Acceso a los datos de contacto pagado" : "Falta un último paso: el acceso a los datos de contacto"}
             texto={
               pagada
                 ? rol === "fondeador"
-                  ? `✓ Pagaste ${d.comision?.monto_cobro != null && d.comision?.moneda_cobro ? formatMonto(d.comision.monto_cobro, d.comision.moneda_cobro) : "la comisión"}. Gracias.`
-                  : "✓ El fondeador pagó la comisión de ViaFactoring."
+                  ? `✓ Pagaste ${d.comision?.monto_cobro != null && d.comision?.moneda_cobro ? formatMonto(d.comision.monto_cobro, d.comision.moneda_cobro) : "el acceso"}. Gracias.`
+                  : "✓ El fondeador pagó el acceso a los datos de contacto."
                 : rol === "fondeador"
-                  ? "Pagá la comisión de ViaFactoring para ver el contacto de la PyME y coordinar la transferencia."
-                  : "El fondeador tiene que pagar la comisión de ViaFactoring. Después se muestra el contacto."
+                  ? "Pagá el acceso a los datos de contacto de la PyME para coordinar la transferencia."
+                  : "El fondeador tiene que pagar el acceso a los datos de contacto. Después se muestran."
             }
             tono={pagada ? "good" : "accent"}
           >
