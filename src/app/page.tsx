@@ -198,7 +198,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
               {[
                 "Elegís montos, plazos y rubros; solo ves las facturas que encajan.",
                 "Cada factura viene con una ficha de verificación hecha por IA.",
-                "Pagás una comisión fija, y solo si cerrás el trato.",
+                "Pagás una comisión según el monto, y solo si la pyme acepta tu oferta.",
               ].map((t) => (
                 <li key={t} className="flex gap-3">
                   <Check className="text-accent mt-1 shrink-0" />
@@ -246,7 +246,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
               },
               {
                 q: "¿Cuánto paga un fondeador?",
-                a: "Una comisión fija según el monto, que ve antes de ofertar. Si la pyme no acepta, no paga nada.",
+                a: "Una comisión que depende del monto de la factura y que ve antes de ofertar. Si la pyme no acepta, no paga nada.",
               },
               {
                 q: "¿ViaFactoring presta el dinero?",
