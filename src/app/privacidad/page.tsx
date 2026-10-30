@@ -26,11 +26,18 @@ export default function PrivacidadPage() {
 
         <div className="py-10">
           <h1 className="text-3xl font-semibold mb-2">Privacidad</h1>
-          <p className="text-ink-soft text-sm mb-10">
-            Última actualización: septiembre de 2026. Este es un texto
-            general para la etapa piloto de la plataforma; no reemplaza el
-            asesoramiento de un abogado.
+          <p className="text-ink-soft text-sm mb-4">
+            Última actualización: octubre de 2026.
           </p>
+          <div className="mb-10 rounded-xl border border-warn/30 bg-warn-soft px-4 py-3 text-sm text-ink">
+            <span className="mr-2 inline-block rounded-full bg-warn px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-white">
+              Beta
+            </span>
+            Esta versión de la política corresponde a la etapa beta de ViaFactoring y todavía
+            está en revisión legal. Puede cambiar antes del lanzamiento
+            definitivo; te vamos a avisar si hay cambios importantes. No
+            reemplaza el asesoramiento de un abogado.
+          </div>
 
           <div className="flex flex-col gap-7 text-sm text-ink-soft">
             <section>

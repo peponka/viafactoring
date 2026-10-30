@@ -145,7 +145,7 @@ export async function contratoCesionPdf(c: DatosCesion): Promise<Uint8Array> {
 
   h.texto("CONTRATO DE CESIÓN DE CRÉDITO", { tam: 15, negrita: true, despues: 4 });
   h.texto(
-    "Modelo orientativo prellenado por ViaFactoring con los datos de la operación acordada en la plataforma. ViaFactoring no es parte de este contrato ni garantiza su contenido: revisalo con tu asesor y completá los espacios en blanco antes de firmar.",
+    "VERSIÓN BETA, en revisión legal. Modelo orientativo prellenado por ViaFactoring con los datos de la operación acordada en la plataforma. ViaFactoring no es parte de este contrato ni garantiza su contenido: revisalo con tu asesor y completá los espacios en blanco antes de firmar.",
     { tam: 8.5, gris: true, despues: 14 },
   );
 
