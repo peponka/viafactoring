@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { Suspense, useActionState, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { signUpAction, type AuthState } from "../actions";
 import { Button, Card, ErrorText, Field, Input } from "@/components/ui";
@@ -8,12 +9,21 @@ import { PasswordInput } from "@/components/password-input";
 
 const initialState: AuthState = { error: null };
 
-export default function SignupPage() {
+function SignupForm() {
   const [state, formAction, pending] = useActionState(
     signUpAction,
     initialState,
   );
-  const [role, setRole] = useState<"operador" | "fondeador">("operador");
+  // Links de entrada como /signup?rol=operador&origen=licitia: preelegimos el
+  // rol y guardamos de dónde vino la persona.
+  const params = useSearchParams();
+  const rolInicial = params.get("rol") === "fondeador" ? "fondeador" : "operador";
+  const origen = (params.get("origen") || params.get("utm_source") || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]/g, "")
+    .slice(0, 40);
+  const [role, setRole] = useState<"operador" | "fondeador">(rolInicial);
+  const deLicitia = origen === "licitia" && role === "operador";
 
   return (
     <main className="max-w-md mx-auto pt-10 pb-16 md:pt-16 flex-1 w-full px-4 sm:px-6">
@@ -21,6 +31,15 @@ export default function SignupPage() {
       <p className="text-ink-soft mb-8">
         Gratis para pymes. Los fondeadores pagan solo si cierran.
       </p>
+      {deLicitia && (
+        <div className="mb-6 rounded-2xl border border-accent/30 bg-accent-soft p-4 text-sm text-ink">
+          <p className="font-semibold">¿Ganaste una licitación?</p>
+          <p className="mt-1 text-ink-soft">
+            Creá tu cuenta gratis y publicá la factura que le emitiste a la entidad. Fondeadores te
+            hacen ofertas para adelantarte el cobro, sin esperar a que pague el Estado.
+          </p>
+        </div>
+      )}
       <Card>
         <form action={formAction} className="flex flex-col gap-4">
           <div role="radiogroup" aria-label="Tipo de cuenta" className="grid grid-cols-2 gap-2.5">
@@ -47,6 +66,7 @@ export default function SignupPage() {
             ))}
           </div>
           <input type="hidden" name="role" value={role} />
+          <input type="hidden" name="origen" value={origen} />
 
           <Field label="Nombre">
             <Input type="text" name="nombre" required autoComplete="name" />
@@ -96,5 +116,14 @@ export default function SignupPage() {
         </Link>
       </p>
     </main>
+  );
+}
+
+export default function SignupPage() {
+  // useSearchParams necesita un límite de Suspense para el prerender.
+  return (
+    <Suspense fallback={null}>
+      <SignupForm />
+    </Suspense>
   );
 }

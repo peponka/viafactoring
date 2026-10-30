@@ -18,6 +18,12 @@ export async function signUpAction(
   const nombre = String(formData.get("nombre") || "").trim();
   const empresa = String(formData.get("empresa") || "").trim();
   const telefonoRaw = String(formData.get("telefono") || "");
+  // De dónde vino (por ejemplo "licitia"): solo letras, números y guiones.
+  const origen =
+    String(formData.get("origen") || "")
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]/g, "")
+      .slice(0, 40) || null;
 
   if (!email || !password || !nombre) {
     return { error: "Completá email, contraseña y nombre." };
@@ -40,7 +46,7 @@ export async function signUpAction(
     email,
     password,
     options: {
-      data: { role, nombre, empresa: empresa || null, telefono },
+      data: { role, nombre, empresa: empresa || null, telefono, origen },
     },
   });
 
